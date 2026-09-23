@@ -1,0 +1,1436 @@
+{
+  "formato": "checklist-modelo",
+  "versao": 1,
+  "modelo": {
+    "id": "reurb-13465",
+    "nome": "REURB — Análise do processo (Lei 13.465/2017)",
+    "descricao": "Roteiro de análise da regularização fundiária urbana, do requerimento ao registro da CRF. Revise as referências legais e acrescente as exigências da lei municipal.",
+    "perguntas": [
+      {
+        "id": "sA",
+        "tipo": "secao",
+        "texto": "Requerimento e instauração",
+        "fundamento": "Lei 13.465/2017, arts. 13, 14, 30 e 32",
+        "ajuda": "",
+        "providencia": "",
+        "opcoes": [],
+        "mostrarSe": [],
+        "filhos": [
+          {
+            "id": "a1",
+            "tipo": "simnao",
+            "texto": "O requerimento foi apresentado por um dos legitimados?",
+            "fundamento": "Lei 13.465/2017, art. 14",
+            "ajuda": "",
+            "providencia": "Confirmar a legitimidade do requerente ou obter requerimento de um legitimado: União, Estados, DF e Municípios; beneficiários, individual ou coletivamente; proprietários, loteadores ou incorporadores; Defensoria Pública; Ministério Público.",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": true
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": [
+              {
+                "id": "a1_1",
+                "tipo": "unica",
+                "texto": "Quem é o requerente?",
+                "fundamento": "art. 14, I a V",
+                "ajuda": "",
+                "providencia": "",
+                "opcoes": [
+                  {
+                    "id": "mun",
+                    "rotulo": "Município",
+                    "pendencia": false
+                  },
+                  {
+                    "id": "est",
+                    "rotulo": "Estado, DF ou União",
+                    "pendencia": false
+                  },
+                  {
+                    "id": "ben",
+                    "rotulo": "Beneficiários (individual ou coletivamente)",
+                    "pendencia": false
+                  },
+                  {
+                    "id": "assoc",
+                    "rotulo": "Associação ou cooperativa de moradores",
+                    "pendencia": false
+                  },
+                  {
+                    "id": "prop",
+                    "rotulo": "Proprietário, loteador ou incorporador",
+                    "pendencia": false
+                  },
+                  {
+                    "id": "dp",
+                    "rotulo": "Defensoria Pública",
+                    "pendencia": false
+                  },
+                  {
+                    "id": "mp",
+                    "rotulo": "Ministério Público",
+                    "pendencia": false
+                  }
+                ],
+                "mostrarSe": [
+                  "sim"
+                ],
+                "filhos": []
+              }
+            ]
+          },
+          {
+            "id": "a2",
+            "tipo": "data",
+            "texto": "Data do requerimento",
+            "fundamento": "art. 30, § 2º",
+            "ajuda": "O Município tem até 180 dias, contados do requerimento, para classificar a modalidade ou indeferir fundamentadamente.",
+            "providencia": "",
+            "opcoes": [],
+            "mostrarSe": [],
+            "filhos": []
+          },
+          {
+            "id": "a3",
+            "tipo": "simnao",
+            "texto": "A Reurb foi instaurada por decisão do Município?",
+            "fundamento": "art. 32",
+            "ajuda": "",
+            "providencia": "Providenciar a decisão municipal de instauração, a partir do requerimento escrito do legitimado.",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": true
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": []
+          },
+          {
+            "id": "a4",
+            "tipo": "unica",
+            "texto": "Modalidade classificada pelo Município",
+            "fundamento": "art. 13; art. 30, I e §§ 2º e 3º",
+            "ajuda": "",
+            "providencia": "Classificar a modalidade em até 180 dias do requerimento ou indeferir fundamentadamente; a inércia fixa automaticamente a modalidade indicada pelo legitimado.",
+            "opcoes": [
+              {
+                "id": "s",
+                "rotulo": "Reurb-S (interesse social)",
+                "pendencia": false
+              },
+              {
+                "id": "e",
+                "rotulo": "Reurb-E (interesse específico)",
+                "pendencia": false
+              },
+              {
+                "id": "mista",
+                "rotulo": "Reurb-S e Reurb-E no mesmo núcleo",
+                "pendencia": false
+              },
+              {
+                "id": "pend",
+                "rotulo": "Ainda não classificada",
+                "pendencia": true
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": [
+              {
+                "id": "a4_1",
+                "tipo": "simnao",
+                "texto": "Há ato do Poder Executivo municipal declarando os ocupantes como população de baixa renda?",
+                "fundamento": "art. 13, I",
+                "ajuda": "O Decreto nº 9.310/2018 permite ao Município fixar a faixa de renda familiar, limitada a cinco salários mínimos. Confira o dispositivo e a norma municipal.",
+                "providencia": "Editar ato do Executivo municipal que declare a baixa renda dos ocupantes.",
+                "opcoes": [
+                  {
+                    "id": "sim",
+                    "rotulo": "Sim",
+                    "pendencia": false
+                  },
+                  {
+                    "id": "nao",
+                    "rotulo": "Não",
+                    "pendencia": true
+                  }
+                ],
+                "mostrarSe": [
+                  "s",
+                  "mista"
+                ],
+                "filhos": []
+              },
+              {
+                "id": "a4_2",
+                "tipo": "simnao",
+                "texto": "O custeio do projeto e das obras foi atribuído aos beneficiários ou requerentes privados?",
+                "fundamento": "art. 33",
+                "ajuda": "",
+                "providencia": "Na Reurb-E, definir a contratação e o custeio pelos potenciais beneficiários ou requerentes privados.",
+                "opcoes": [
+                  {
+                    "id": "sim",
+                    "rotulo": "Sim",
+                    "pendencia": false
+                  },
+                  {
+                    "id": "nao",
+                    "rotulo": "Não",
+                    "pendencia": true
+                  }
+                ],
+                "mostrarSe": [
+                  "e",
+                  "mista"
+                ],
+                "filhos": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "sB",
+        "tipo": "secao",
+        "texto": "Núcleo urbano informal",
+        "fundamento": "Lei 13.465/2017, arts. 9º, 11, 23 e 69",
+        "ajuda": "",
+        "providencia": "",
+        "opcoes": [],
+        "mostrarSe": [],
+        "filhos": [
+          {
+            "id": "b1",
+            "tipo": "simnao",
+            "texto": "A área configura núcleo urbano informal (clandestino, irregular ou sem titulação)?",
+            "fundamento": "art. 11, II",
+            "ajuda": "",
+            "providencia": "Reavaliar o enquadramento: a Reurb se destina a núcleos urbanos informais.",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": true
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": []
+          },
+          {
+            "id": "b2",
+            "tipo": "simnao",
+            "texto": "O núcleo é consolidado (de difícil reversão)?",
+            "fundamento": "art. 11, III",
+            "ajuda": "Considere o tempo da ocupação, a natureza das edificações, a localização das vias de circulação e a presença de equipamentos públicos, entre outras circunstâncias avaliadas pelo Município.",
+            "providencia": "",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": false
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": [
+              {
+                "id": "b2_1",
+                "tipo": "unica",
+                "texto": "Em qual data o núcleo já existia?",
+                "fundamento": "art. 9º, § 2º; art. 23",
+                "ajuda": "",
+                "providencia": "A legitimação fundiária só se aplica a núcleos comprovadamente existentes até 22/12/2016: reunir a prova da data ou definir outro instrumento de titulação.",
+                "opcoes": [
+                  {
+                    "id": "antes",
+                    "rotulo": "Existente até 22/12/2016",
+                    "pendencia": false
+                  },
+                  {
+                    "id": "depois",
+                    "rotulo": "Formado após 22/12/2016",
+                    "pendencia": true
+                  },
+                  {
+                    "id": "semprova",
+                    "rotulo": "Data ainda não comprovada",
+                    "pendencia": true
+                  }
+                ],
+                "mostrarSe": [
+                  "sim"
+                ],
+                "filhos": [
+                  {
+                    "id": "b2_1_1",
+                    "tipo": "multipla",
+                    "texto": "Quais provas da data foram juntadas?",
+                    "fundamento": "",
+                    "ajuda": "",
+                    "providencia": "",
+                    "opcoes": [
+                      {
+                        "id": "img",
+                        "rotulo": "Imagens aéreas ou de satélite",
+                        "pendencia": false
+                      },
+                      {
+                        "id": "iptu",
+                        "rotulo": "Cadastro imobiliário ou lançamento de IPTU",
+                        "pendencia": false
+                      },
+                      {
+                        "id": "contas",
+                        "rotulo": "Contas de água ou energia",
+                        "pendencia": false
+                      },
+                      {
+                        "id": "plantas",
+                        "rotulo": "Levantamentos ou plantas antigas",
+                        "pendencia": false
+                      },
+                      {
+                        "id": "decl",
+                        "rotulo": "Declarações e outros documentos",
+                        "pendencia": false
+                      }
+                    ],
+                    "mostrarSe": [
+                      "antes"
+                    ],
+                    "filhos": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "b3",
+            "tipo": "simnao",
+            "texto": "O parcelamento foi implantado antes de 19/12/1979?",
+            "fundamento": "art. 69",
+            "ajuda": "Glebas parceladas para fins urbanos antes de 19/12/1979, sem registro, podem ser regularizadas pelo registro do parcelamento, desde que implantado e integrado à cidade.",
+            "providencia": "",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": false
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": []
+          },
+          {
+            "id": "b4",
+            "tipo": "multipla",
+            "texto": "Titularidade da área",
+            "fundamento": "art. 31",
+            "ajuda": "",
+            "providencia": "Fazer as buscas no Registro de Imóveis para determinar a titularidade do domínio.",
+            "opcoes": [
+              {
+                "id": "mun",
+                "rotulo": "Pública municipal",
+                "pendencia": false
+              },
+              {
+                "id": "est",
+                "rotulo": "Pública estadual",
+                "pendencia": false
+              },
+              {
+                "id": "fed",
+                "rotulo": "Pública federal",
+                "pendencia": false
+              },
+              {
+                "id": "part",
+                "rotulo": "Particular, proprietário identificado",
+                "pendencia": false
+              },
+              {
+                "id": "partni",
+                "rotulo": "Particular, proprietário não identificado",
+                "pendencia": false
+              },
+              {
+                "id": "naoap",
+                "rotulo": "Ainda não apurada",
+                "pendencia": true
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": []
+          },
+          {
+            "id": "b5",
+            "tipo": "texto",
+            "texto": "Matrículas e transcrições atingidas pelo perímetro",
+            "fundamento": "art. 35, II",
+            "ajuda": "Liste os números e o cartório de cada matrícula ou transcrição.",
+            "providencia": "",
+            "opcoes": [],
+            "mostrarSe": [],
+            "filhos": []
+          },
+          {
+            "id": "b6",
+            "tipo": "texto",
+            "texto": "Número estimado de lotes ou unidades",
+            "fundamento": "",
+            "ajuda": "",
+            "providencia": "",
+            "opcoes": [],
+            "mostrarSe": [],
+            "filhos": []
+          }
+        ]
+      },
+      {
+        "id": "sC",
+        "tipo": "secao",
+        "texto": "Restrições ambientais e áreas de risco",
+        "fundamento": "Lei 13.465/2017, arts. 11, §§ 2º e 3º, e 39",
+        "ajuda": "",
+        "providencia": "",
+        "opcoes": [],
+        "mostrarSe": [],
+        "filhos": [
+          {
+            "id": "c1",
+            "tipo": "simnao",
+            "texto": "Há ocupação em Área de Preservação Permanente (APP)?",
+            "fundamento": "art. 11, § 2º; Lei 12.651/2012, arts. 64 e 65",
+            "ajuda": "",
+            "providencia": "",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": false
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": [
+              {
+                "id": "c1_1",
+                "tipo": "simnao",
+                "texto": "Há estudo técnico que demonstre a melhoria das condições ambientais em relação à ocupação anterior?",
+                "fundamento": "art. 11, § 2º; art. 35, VIII",
+                "ajuda": "",
+                "providencia": "Elaborar o estudo técnico ambiental, inclusive com as compensações cabíveis.",
+                "opcoes": [
+                  {
+                    "id": "sim",
+                    "rotulo": "Sim",
+                    "pendencia": false
+                  },
+                  {
+                    "id": "nao",
+                    "rotulo": "Não",
+                    "pendencia": true
+                  }
+                ],
+                "mostrarSe": [
+                  "sim"
+                ],
+                "filhos": []
+              }
+            ]
+          },
+          {
+            "id": "c2",
+            "tipo": "simnao",
+            "texto": "O núcleo está em unidade de conservação de uso sustentável ou em área de proteção de mananciais?",
+            "fundamento": "art. 11, §§ 2º e 3º",
+            "ajuda": "",
+            "providencia": "",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": false
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": [
+              {
+                "id": "c2_1",
+                "tipo": "simnaona",
+                "texto": "Há anuência do órgão gestor da unidade de conservação?",
+                "fundamento": "art. 11, § 3º",
+                "ajuda": "",
+                "providencia": "Obter a anuência do órgão gestor da unidade de conservação.",
+                "opcoes": [
+                  {
+                    "id": "sim",
+                    "rotulo": "Sim",
+                    "pendencia": false
+                  },
+                  {
+                    "id": "nao",
+                    "rotulo": "Não",
+                    "pendencia": true
+                  },
+                  {
+                    "id": "na",
+                    "rotulo": "Não se aplica",
+                    "pendencia": false
+                  }
+                ],
+                "mostrarSe": [
+                  "sim"
+                ],
+                "filhos": []
+              }
+            ]
+          },
+          {
+            "id": "c3",
+            "tipo": "simnao",
+            "texto": "Existem áreas de risco (geotécnico, de inundação ou outros)?",
+            "fundamento": "art. 39",
+            "ajuda": "",
+            "providencia": "",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": false
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": [
+              {
+                "id": "c3_1",
+                "tipo": "simnao",
+                "texto": "Foram elaborados estudos técnicos de risco?",
+                "fundamento": "art. 35, VII; art. 39",
+                "ajuda": "",
+                "providencia": "Elaborar estudo técnico para examinar a eliminação, correção ou administração dos riscos.",
+                "opcoes": [
+                  {
+                    "id": "sim",
+                    "rotulo": "Sim",
+                    "pendencia": false
+                  },
+                  {
+                    "id": "nao",
+                    "rotulo": "Não",
+                    "pendencia": true
+                  }
+                ],
+                "mostrarSe": [
+                  "sim"
+                ],
+                "filhos": []
+              },
+              {
+                "id": "c3_2",
+                "tipo": "unica",
+                "texto": "Os riscos podem ser eliminados, corrigidos ou administrados?",
+                "fundamento": "art. 39",
+                "ajuda": "",
+                "providencia": "Na Reurb-S, promover a realocação dos ocupantes da parcela em risco que não admite correção.",
+                "opcoes": [
+                  {
+                    "id": "sim",
+                    "rotulo": "Sim, com as medidas indicadas no estudo",
+                    "pendencia": false
+                  },
+                  {
+                    "id": "nao",
+                    "rotulo": "Não, exige realocação dos ocupantes",
+                    "pendencia": true
+                  }
+                ],
+                "mostrarSe": [
+                  "sim"
+                ],
+                "filhos": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "sD",
+        "tipo": "secao",
+        "texto": "Infraestrutura essencial",
+        "fundamento": "Lei 13.465/2017, art. 36, § 1º",
+        "ajuda": "",
+        "providencia": "",
+        "opcoes": [],
+        "mostrarSe": [],
+        "filhos": [
+          {
+            "id": "d1",
+            "tipo": "simnao",
+            "texto": "Existe sistema de abastecimento de água potável (coletivo ou individual)?",
+            "fundamento": "art. 36, § 1º, I",
+            "ajuda": "",
+            "providencia": "Incluir a implantação no cronograma físico de obras e no termo de compromisso (art. 35, IX e X).",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": true
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": []
+          },
+          {
+            "id": "d2",
+            "tipo": "simnao",
+            "texto": "Existe sistema de coleta e tratamento de esgoto (coletivo ou individual)?",
+            "fundamento": "art. 36, § 1º, II",
+            "ajuda": "",
+            "providencia": "Incluir a implantação no cronograma físico de obras e no termo de compromisso (art. 35, IX e X).",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": true
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": []
+          },
+          {
+            "id": "d3",
+            "tipo": "simnao",
+            "texto": "Existe rede de energia elétrica domiciliar?",
+            "fundamento": "art. 36, § 1º, III",
+            "ajuda": "",
+            "providencia": "Incluir a implantação no cronograma físico de obras e no termo de compromisso (art. 35, IX e X).",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": true
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": []
+          },
+          {
+            "id": "d4",
+            "tipo": "simnaona",
+            "texto": "Há soluções de drenagem onde são necessárias?",
+            "fundamento": "art. 36, § 1º, IV",
+            "ajuda": "",
+            "providencia": "Incluir a implantação no cronograma físico de obras e no termo de compromisso (art. 35, IX e X).",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": true
+              },
+              {
+                "id": "na",
+                "rotulo": "Não se aplica",
+                "pendencia": false
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": []
+          },
+          {
+            "id": "d5",
+            "tipo": "simnaona",
+            "texto": "Calçadas já existem no núcleo habitacional?",
+            "fundamento": "art. 36, VII e § 1º, V; norma municipal",
+            "ajuda": "A lei federal não inclui calçadas no rol mínimo de infraestrutura essencial: a exigência vem da norma municipal (outros equipamentos definidos pelo Município) e das medidas de mobilidade e acessibilidade do projeto urbanístico.",
+            "providencia": "Prever a execução das calçadas no projeto urbanístico e no cronograma de obras, se exigidas pela norma municipal.",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": true
+              },
+              {
+                "id": "na",
+                "rotulo": "Não se aplica",
+                "pendencia": false
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": []
+          },
+          {
+            "id": "d6",
+            "tipo": "simnao",
+            "texto": "O sistema viário e as vias de circulação estão definidos no projeto?",
+            "fundamento": "art. 36, I",
+            "ajuda": "",
+            "providencia": "Indicar no projeto urbanístico o sistema viário existente ou projetado.",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": true
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": []
+          },
+          {
+            "id": "d7",
+            "tipo": "simnao",
+            "texto": "O Município definiu outros equipamentos de infraestrutura essencial em norma local?",
+            "fundamento": "art. 36, § 1º, V",
+            "ajuda": "",
+            "providencia": "",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": false
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": [
+              {
+                "id": "d7_1",
+                "tipo": "texto",
+                "texto": "Quais equipamentos e em qual norma?",
+                "fundamento": "",
+                "ajuda": "",
+                "providencia": "",
+                "opcoes": [],
+                "mostrarSe": [
+                  "sim"
+                ],
+                "filhos": []
+              }
+            ]
+          },
+          {
+            "id": "d8",
+            "tipo": "simnaona",
+            "texto": "Os responsáveis pela implantação da infraestrutura foram definidos?",
+            "fundamento": "art. 33; art. 37 (Reurb-S); art. 38 (Reurb-E)",
+            "ajuda": "",
+            "providencia": "Definir os responsáveis pelas obras e serviços: o poder público na Reurb-S; os beneficiários ou requerentes na Reurb-E.",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": true
+              },
+              {
+                "id": "na",
+                "rotulo": "Não se aplica",
+                "pendencia": false
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": []
+          }
+        ]
+      },
+      {
+        "id": "sE",
+        "tipo": "secao",
+        "texto": "Projeto de regularização fundiária",
+        "fundamento": "Lei 13.465/2017, arts. 35 e 36",
+        "ajuda": "",
+        "providencia": "",
+        "opcoes": [],
+        "mostrarSe": [],
+        "filhos": [
+          {
+            "id": "e1",
+            "tipo": "simnao",
+            "texto": "Há levantamento planialtimétrico e cadastral georreferenciado, com ART ou RRT?",
+            "fundamento": "art. 35, I",
+            "ajuda": "",
+            "providencia": "Providenciar o levantamento subscrito por profissional habilitado, com ART ou RRT.",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": true
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": []
+          },
+          {
+            "id": "e2",
+            "tipo": "simnao",
+            "texto": "Há planta do perímetro com as matrículas ou transcrições atingidas?",
+            "fundamento": "art. 35, II",
+            "ajuda": "",
+            "providencia": "Elaborar a planta do perímetro indicando as matrículas ou transcrições atingidas, quando possível.",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": true
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": []
+          },
+          {
+            "id": "e3",
+            "tipo": "simnao",
+            "texto": "Há estudo preliminar das desconformidades e da situação jurídica, urbanística e ambiental?",
+            "fundamento": "art. 35, III",
+            "ajuda": "",
+            "providencia": "Elaborar o estudo preliminar das desconformidades.",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": true
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": []
+          },
+          {
+            "id": "e4",
+            "tipo": "simnao",
+            "texto": "O projeto urbanístico indica áreas ocupadas, sistema viário, unidades, logradouros e áreas públicas?",
+            "fundamento": "art. 35, IV; art. 36",
+            "ajuda": "",
+            "providencia": "Completar o projeto urbanístico com os elementos mínimos do art. 36.",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": true
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": []
+          },
+          {
+            "id": "e5",
+            "tipo": "simnao",
+            "texto": "Há memoriais descritivos?",
+            "fundamento": "art. 35, V",
+            "ajuda": "",
+            "providencia": "Elaborar os memoriais descritivos da gleba e das unidades.",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": true
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": []
+          },
+          {
+            "id": "e6",
+            "tipo": "simnaona",
+            "texto": "Há proposta de soluções para questões ambientais, urbanísticas e de reassentamento?",
+            "fundamento": "art. 35, VI",
+            "ajuda": "",
+            "providencia": "Apresentar a proposta de soluções ambientais, urbanísticas e de reassentamento.",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": true
+              },
+              {
+                "id": "na",
+                "rotulo": "Não se aplica",
+                "pendencia": false
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": []
+          },
+          {
+            "id": "e7",
+            "tipo": "simnaona",
+            "texto": "Há cronograma físico de serviços e obras de infraestrutura essencial?",
+            "fundamento": "art. 35, IX",
+            "ajuda": "",
+            "providencia": "Elaborar o cronograma físico de serviços e obras.",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": true
+              },
+              {
+                "id": "na",
+                "rotulo": "Não se aplica",
+                "pendencia": false
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": []
+          },
+          {
+            "id": "e8",
+            "tipo": "simnaona",
+            "texto": "O termo de compromisso foi assinado pelos responsáveis pelo cronograma?",
+            "fundamento": "art. 35, X",
+            "ajuda": "",
+            "providencia": "Colher a assinatura do termo de compromisso pelos responsáveis, públicos ou privados.",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": true
+              },
+              {
+                "id": "na",
+                "rotulo": "Não se aplica",
+                "pendencia": false
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": []
+          }
+        ]
+      },
+      {
+        "id": "sF",
+        "tipo": "secao",
+        "texto": "Notificações e conflitos",
+        "fundamento": "Lei 13.465/2017, arts. 19 a 22, 31 e 34",
+        "ajuda": "",
+        "providencia": "",
+        "opcoes": [],
+        "mostrarSe": [],
+        "filhos": [
+          {
+            "id": "f1",
+            "tipo": "simnao",
+            "texto": "Titulares de domínio, responsáveis pela implantação, confinantes e terceiros interessados foram notificados?",
+            "fundamento": "art. 31, § 1º",
+            "ajuda": "",
+            "providencia": "Notificar para impugnação no prazo de 30 dias; os não encontrados, por edital.",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": true
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": [
+              {
+                "id": "f1_1",
+                "tipo": "simnao",
+                "texto": "Houve impugnação no prazo de 30 dias?",
+                "fundamento": "art. 31",
+                "ajuda": "A ausência de manifestação dos notificados é interpretada como concordância com a Reurb.",
+                "providencia": "",
+                "opcoes": [
+                  {
+                    "id": "sim",
+                    "rotulo": "Sim",
+                    "pendencia": false
+                  },
+                  {
+                    "id": "nao",
+                    "rotulo": "Não",
+                    "pendencia": false
+                  }
+                ],
+                "mostrarSe": [
+                  "sim"
+                ],
+                "filhos": [
+                  {
+                    "id": "f1_1_1",
+                    "tipo": "simnao",
+                    "texto": "A impugnação foi superada (acordo, câmara de resolução de conflitos ou decisão)?",
+                    "fundamento": "arts. 31 e 34",
+                    "ajuda": "",
+                    "providencia": "Buscar a composição extrajudicial do conflito antes de prosseguir.",
+                    "opcoes": [
+                      {
+                        "id": "sim",
+                        "rotulo": "Sim",
+                        "pendencia": false
+                      },
+                      {
+                        "id": "nao",
+                        "rotulo": "Não",
+                        "pendencia": true
+                      }
+                    ],
+                    "mostrarSe": [
+                      "sim"
+                    ],
+                    "filhos": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "f2",
+            "tipo": "simnao",
+            "texto": "Foi utilizada a demarcação urbanística?",
+            "fundamento": "arts. 19 a 22",
+            "ajuda": "",
+            "providencia": "",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": false
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": [
+              {
+                "id": "f2_1",
+                "tipo": "simnaona",
+                "texto": "O auto de demarcação urbanística foi averbado nas matrículas alcançadas?",
+                "fundamento": "arts. 19 a 22",
+                "ajuda": "",
+                "providencia": "Encaminhar o auto de demarcação ao Registro de Imóveis para averbação.",
+                "opcoes": [
+                  {
+                    "id": "sim",
+                    "rotulo": "Sim",
+                    "pendencia": false
+                  },
+                  {
+                    "id": "nao",
+                    "rotulo": "Não",
+                    "pendencia": true
+                  },
+                  {
+                    "id": "na",
+                    "rotulo": "Não se aplica",
+                    "pendencia": false
+                  }
+                ],
+                "mostrarSe": [
+                  "sim"
+                ],
+                "filhos": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "sG",
+        "tipo": "secao",
+        "texto": "Titulação, decisão e CRF",
+        "fundamento": "Lei 13.465/2017, arts. 15, 23, 40 e 41",
+        "ajuda": "",
+        "providencia": "",
+        "opcoes": [],
+        "mostrarSe": [],
+        "filhos": [
+          {
+            "id": "g1",
+            "tipo": "multipla",
+            "texto": "Instrumentos de titulação previstos",
+            "fundamento": "art. 15",
+            "ajuda": "",
+            "providencia": "",
+            "opcoes": [
+              {
+                "id": "lf",
+                "rotulo": "Legitimação fundiária",
+                "pendencia": false
+              },
+              {
+                "id": "lp",
+                "rotulo": "Legitimação de posse",
+                "pendencia": false
+              },
+              {
+                "id": "cdru",
+                "rotulo": "Concessão de direito real de uso",
+                "pendencia": false
+              },
+              {
+                "id": "cuem",
+                "rotulo": "Concessão de uso especial para fins de moradia",
+                "pendencia": false
+              },
+              {
+                "id": "doa",
+                "rotulo": "Doação ou compra e venda",
+                "pendencia": false
+              },
+              {
+                "id": "usu",
+                "rotulo": "Usucapião",
+                "pendencia": false
+              },
+              {
+                "id": "outro",
+                "rotulo": "Outro",
+                "pendencia": false
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": [
+              {
+                "id": "g1_1",
+                "tipo": "simnao",
+                "texto": "Os beneficiários atendem aos requisitos da legitimação fundiária na Reurb-S?",
+                "fundamento": "art. 23, § 1º",
+                "ajuda": "O beneficiário não pode ser concessionário, foreiro ou proprietário de imóvel urbano ou rural, nem ter sido contemplado com legitimação de posse ou fundiária de imóvel urbano com a mesma finalidade.",
+                "providencia": "Excluir da legitimação fundiária os ocupantes que não atendem aos requisitos ou adotar outro instrumento.",
+                "opcoes": [
+                  {
+                    "id": "sim",
+                    "rotulo": "Sim",
+                    "pendencia": false
+                  },
+                  {
+                    "id": "nao",
+                    "rotulo": "Não",
+                    "pendencia": true
+                  }
+                ],
+                "mostrarSe": [
+                  "lf"
+                ],
+                "filhos": []
+              }
+            ]
+          },
+          {
+            "id": "g2",
+            "tipo": "simnao",
+            "texto": "A autoridade competente decidiu o processo, aprovando o projeto e identificando os ocupantes e seus direitos reais?",
+            "fundamento": "art. 40",
+            "ajuda": "",
+            "providencia": "Obter a decisão formal da autoridade competente, com publicidade.",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": true
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": []
+          },
+          {
+            "id": "g3",
+            "tipo": "simnao",
+            "texto": "A CRF foi expedida com os requisitos mínimos?",
+            "fundamento": "art. 41",
+            "ajuda": "Nome do núcleo, localização, modalidade, responsabilidades pelas obras e serviços do cronograma, indicação numérica das unidades e listagem dos ocupantes.",
+            "providencia": "Complementar a CRF com os requisitos mínimos do art. 41.",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": true
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": [
+              {
+                "id": "g3_1",
+                "tipo": "simnao",
+                "texto": "A listagem dos ocupantes traz estado civil, profissão, CPF, RG e filiação?",
+                "fundamento": "art. 41, VI",
+                "ajuda": "",
+                "providencia": "Completar a qualificação dos ocupantes na listagem da CRF.",
+                "opcoes": [
+                  {
+                    "id": "sim",
+                    "rotulo": "Sim",
+                    "pendencia": false
+                  },
+                  {
+                    "id": "nao",
+                    "rotulo": "Não",
+                    "pendencia": true
+                  }
+                ],
+                "mostrarSe": [
+                  "sim"
+                ],
+                "filhos": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "sH",
+        "tipo": "secao",
+        "texto": "Registro",
+        "fundamento": "Lei 13.465/2017, arts. 13, § 1º, 42 e 44",
+        "ajuda": "",
+        "providencia": "",
+        "opcoes": [],
+        "mostrarSe": [],
+        "filhos": [
+          {
+            "id": "h1",
+            "tipo": "simnaona",
+            "texto": "Na Reurb-S, o requerimento ao Registro de Imóveis invoca a isenção de custas e emolumentos?",
+            "fundamento": "art. 13, § 1º",
+            "ajuda": "",
+            "providencia": "Indicar expressamente a isenção de custas e emolumentos da Reurb-S.",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": true
+              },
+              {
+                "id": "na",
+                "rotulo": "Não se aplica",
+                "pendencia": false
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": []
+          },
+          {
+            "id": "h2",
+            "tipo": "simnao",
+            "texto": "A CRF e o projeto aprovado foram protocolados no Registro de Imóveis competente?",
+            "fundamento": "arts. 42 e 44",
+            "ajuda": "Recebida a CRF, o oficial prenota, autua e emite nota de exigência ou pratica os atos em 15 dias; o procedimento registral deve terminar em 60 dias, prorrogáveis por igual período.",
+            "providencia": "",
+            "opcoes": [
+              {
+                "id": "sim",
+                "rotulo": "Sim",
+                "pendencia": false
+              },
+              {
+                "id": "nao",
+                "rotulo": "Não",
+                "pendencia": false
+              }
+            ],
+            "mostrarSe": [],
+            "filhos": [
+              {
+                "id": "h2_1",
+                "tipo": "simnao",
+                "texto": "Houve nota de exigência do Registro de Imóveis?",
+                "fundamento": "",
+                "ajuda": "",
+                "providencia": "",
+                "opcoes": [
+                  {
+                    "id": "sim",
+                    "rotulo": "Sim",
+                    "pendencia": false
+                  },
+                  {
+                    "id": "nao",
+                    "rotulo": "Não",
+                    "pendencia": false
+                  }
+                ],
+                "mostrarSe": [
+                  "sim"
+                ],
+                "filhos": [
+                  {
+                    "id": "h2_1_1",
+                    "tipo": "simnao",
+                    "texto": "As exigências foram cumpridas?",
+                    "fundamento": "",
+                    "ajuda": "",
+                    "providencia": "Cumprir as exigências da nota devolutiva ou suscitar dúvida.",
+                    "opcoes": [
+                      {
+                        "id": "sim",
+                        "rotulo": "Sim",
+                        "pendencia": false
+                      },
+                      {
+                        "id": "nao",
+                        "rotulo": "Não",
+                        "pendencia": true
+                      }
+                    ],
+                    "mostrarSe": [
+                      "sim"
+                    ],
+                    "filhos": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "h3",
+            "tipo": "texto",
+            "texto": "Observações gerais",
+            "fundamento": "",
+            "ajuda": "",
+            "providencia": "",
+            "opcoes": [],
+            "mostrarSe": [],
+            "filhos": []
+          }
+        ]
+      }
+    ]
+  }
+}

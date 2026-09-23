@@ -1,0 +1,1545 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Checklist REURB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+:root{
+  --chao:#F2F4F1;--sup:#FFFFFF;--sup2:#F7F9F7;
+  --tinta:#16221E;--tinta2:#4B5853;--tinta3:#76827D;
+  --linha:#D3DBD6;--linha2:#E4E9E5;
+  --acento:#1D5A73;--acento-forte:#154559;--acento-suave:#E1EDF1;--acento-texto:#154559;--sobre-acento:#FFFFFF;
+  --ok:#2E7549;--ok-suave:#E2F1E6;
+  --pend:#B42318;--pend-suave:#FBE9E6;--sobre-pend:#FFFFFF;
+  --aviso:#8F5500;--aviso-suave:#FCF0D8;
+  --veu:rgba(12,20,17,.45);
+  --sombra:0 1px 2px rgba(22,34,30,.06),0 4px 14px rgba(22,34,30,.06);
+  --f-ui:"Public Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --f-serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --chao:#0F1513;--sup:#161E1B;--sup2:#1B2522;
+    --tinta:#E2E9E5;--tinta2:#A8B5AF;--tinta3:#7C8984;
+    --linha:#2C3833;--linha2:#232E2A;
+    --acento:#7FB9D1;--acento-forte:#A3CFE1;--acento-suave:#1A323C;--acento-texto:#A9D4E6;--sobre-acento:#0C1417;
+    --ok:#6CC08A;--ok-suave:#16301F;
+    --pend:#F28B7F;--pend-suave:#3A1B18;--sobre-pend:#1C0C0A;
+    --aviso:#E5B35B;--aviso-suave:#33270F;
+    --veu:rgba(0,0,0,.6);
+    --sombra:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --chao:#0F1513;--sup:#161E1B;--sup2:#1B2522;
+  --tinta:#E2E9E5;--tinta2:#A8B5AF;--tinta3:#7C8984;
+  --linha:#2C3833;--linha2:#232E2A;
+  --acento:#7FB9D1;--acento-forte:#A3CFE1;--acento-suave:#1A323C;--acento-texto:#A9D4E6;--sobre-acento:#0C1417;
+  --ok:#6CC08A;--ok-suave:#16301F;
+  --pend:#F28B7F;--pend-suave:#3A1B18;--sobre-pend:#1C0C0A;
+  --aviso:#E5B35B;--aviso-suave:#33270F;
+  --veu:rgba(0,0,0,.6);
+  --sombra:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{height:100%}
+body{min-height:100%;margin:0;background:var(--chao);color:var(--tinta);font:14px/1.5 var(--f-ui);-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+button:disabled{cursor:default;opacity:.45}
+:focus-visible{outline:2px solid var(--acento);outline-offset:2px}
+h1,h2,h3{text-wrap:balance}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+
+/* topo */
+.topo{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--sup);border-bottom:1px solid var(--linha)}
+.topo-in{max-width:1440px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;flex-wrap:wrap;gap:10px 20px}
+.marca{display:flex;align-items:center;gap:10px;font:600 19px/1.1 var(--f-serif);letter-spacing:-.01em;margin:0}
+.marca svg{width:28px;height:28px;color:var(--acento);flex:none}
+.marca small{display:block;font:500 11px/1.3 var(--f-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--tinta3);margin-top:2px}
+.abas{display:flex;gap:3px;background:var(--sup2);border:1px solid var(--linha2);border-radius:10px;padding:3px}
+.aba{border:0;background:transparent;padding:6px 14px;border-radius:7px;font-weight:600;color:var(--tinta2)}
+.aba:hover{color:var(--tinta)}
+.aba[aria-current="page"]{background:var(--sup);color:var(--tinta);box-shadow:var(--sombra)}
+.topo-dir{margin-left:auto;display:flex;align-items:center;gap:12px}
+.salvo{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--tinta3);white-space:nowrap}
+.salvo::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ok);flex:none}
+.salvo[data-estado="salvando"]::before{background:var(--aviso)}
+.salvo[data-estado="aviso"]::before{background:var(--pend)}
+.salvo[data-estado="carregando"]::before{background:var(--tinta3)}
+.menu{position:relative}
+.menu>summary{list-style:none}
+.menu>summary::-webkit-details-marker{display:none}
+.menu-pop{position:absolute;right:0;top:calc(100% + 6px);background:var(--sup);border:1px solid var(--linha);border-radius:10px;box-shadow:var(--sombra);padding:6px;display:grid;min-width:250px;z-index:30}
+.menu-pop button{border:0;background:transparent;text-align:left;padding:9px 10px;border-radius:7px;display:flex;gap:10px;align-items:center}
+.menu-pop button:hover{background:var(--sup2)}
+.menu-pop p{margin:4px 10px 6px;font-size:12px;color:var(--tinta3);max-width:32ch}
+
+/* estrutura */
+.corpo{max-width:1440px;margin:0 auto;display:grid;grid-template-columns:320px minmax(0,1fr)}
+.lateral{border-right:1px solid var(--linha);padding:20px 16px 32px;position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--topo-h,58px));align-self:start;height:calc(100vh - var(--topo-h,58px));overflow:auto;display:flex;flex-direction:column;gap:12px}
+.lat-cab{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.lat-tit{font:600 13px/1 var(--f-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--tinta2);margin:0}
+.lat-cont{font:500 12px var(--f-mono);color:var(--tinta3)}
+.lat-acoes{display:flex;flex-wrap:wrap;gap:6px}
+.detalhe{padding:24px clamp(16px,3vw,40px) 72px;min-width:0}
+.so-movel{display:none!important}
+@media (max-width:860px){
+  .corpo{grid-template-columns:minmax(0,1fr)}
+  .lateral{position:static;height:auto;border-right:0;padding-inline:16px}
+  body.ver-detalhe .lateral{display:none}
+  body:not(.ver-detalhe) .detalhe{display:none}
+  .so-movel{display:inline-flex!important}
+  .detalhe{padding-inline:16px}
+}
+
+/* botões e campos */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--linha);background:var(--sup);color:var(--tinta);padding:7px 12px;border-radius:8px;font-weight:600;font-size:13px;line-height:1.2;white-space:nowrap;min-height:34px}
+.btn:hover:not(:disabled){border-color:var(--tinta3)}
+.btn svg{width:16px;height:16px;flex:none}
+.btn-prim{background:var(--acento);border-color:var(--acento);color:var(--sobre-acento)}
+.btn-prim:hover:not(:disabled){background:var(--acento-forte);border-color:var(--acento-forte)}
+.btn-fant{border-color:transparent;background:transparent;color:var(--tinta2)}
+.btn-fant:hover:not(:disabled){background:var(--sup2);border-color:transparent;color:var(--tinta)}
+.btn-perigo{color:var(--pend)}
+.btn-ico{padding:0;width:32px;min-height:32px;height:32px}
+.btn[data-armado]{background:var(--pend);border-color:var(--pend);color:var(--sobre-pend);width:auto;padding:0 10px}
+.btn-sm{min-height:28px;padding:4px 9px;font-size:12.5px}
+.campo{display:grid;gap:5px;min-width:0}
+.rot{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--tinta3)}
+.inp{width:100%;border:1px solid var(--linha);background:var(--sup);border-radius:7px;padding:8px 10px;font-size:14px;line-height:1.4;min-width:0}
+.inp:hover{border-color:var(--tinta3)}
+.inp:focus{border-color:var(--acento);outline:none;box-shadow:0 0 0 3px var(--acento-suave)}
+textarea.inp{resize:vertical;min-height:38px;display:block}
+select.inp{padding-right:28px}
+.dica{margin:0;font-size:13px;color:var(--tinta3)}
+.busca{position:relative}
+.busca svg{position:absolute;left:10px;top:50%;width:15px;height:15px;transform:translateY(-50%);color:var(--tinta3);pointer-events:none}
+.busca .inp{padding-left:32px}
+
+/* lista lateral */
+.itens{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.item{width:100%;text-align:left;border:1px solid transparent;background:transparent;border-radius:9px;padding:10px 12px;display:grid;gap:4px}
+.item:hover{background:var(--sup2)}
+.item[aria-current="true"]{background:var(--sup);border-color:var(--linha);box-shadow:var(--sombra)}
+.item-tit{font-weight:600;line-height:1.3;overflow-wrap:anywhere}
+.item-sub{font-size:12.5px;color:var(--tinta2);overflow-wrap:anywhere}
+.item-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--tinta3);font-variant-numeric:tabular-nums}
+.barra{height:4px;border-radius:2px;background:var(--linha2);overflow:hidden;flex:1 1 60px;max-width:110px}
+.barra>i{display:block;height:100%;background:var(--acento);border-radius:2px}
+.barra-g{height:6px;max-width:none;border-radius:3px}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--sup2);color:var(--tinta2);border:1px solid var(--linha2);white-space:nowrap}
+.chip-pend{background:var(--pend-suave);color:var(--pend);border-color:transparent}
+.chip-ok{background:var(--ok-suave);color:var(--ok);border-color:transparent}
+.chip-ex{background:var(--aviso-suave);color:var(--aviso);border-color:transparent}
+.lat-vazio{padding:12px;border:1px dashed var(--linha);border-radius:9px;color:var(--tinta3);font-size:13px}
+
+/* cabeçalho do detalhe */
+.cab{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:14px 24px;margin-bottom:18px}
+.cab-txt{min-width:0;flex:1 1 360px;display:grid;gap:4px;justify-items:start}
+.sobre{font:500 11.5px/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--acento-texto)}
+.titulo{font:600 27px/1.2 var(--f-serif);letter-spacing:-.01em;margin:2px 0 0;overflow-wrap:anywhere}
+.subt{color:var(--tinta2);margin:0}
+.acoes{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.nota{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-radius:9px;background:var(--aviso-suave);color:var(--tinta);font-size:13.5px;margin-bottom:16px}
+.nota svg{width:16px;height:16px;color:var(--aviso);flex:none;margin-top:2px}
+.nota-acao{margin-left:auto}
+.nota-info{background:var(--acento-suave)}
+.nota-info svg{color:var(--acento)}
+
+/* análise */
+.ident{min-width:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;padding:16px;background:var(--sup);border:1px solid var(--linha);border-radius:10px;margin:0 0 22px}
+.ident legend{float:left;grid-column:1/-1;width:100%;padding:0;margin-bottom:2px;font:600 15px/1.3 var(--f-serif)}
+.an-grade{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:28px;align-items:start}
+.resumo{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--topo-h,58px) + 16px);display:grid;gap:12px;background:var(--sup);border:1px solid var(--linha);border-radius:10px;padding:16px;max-height:calc(100vh - var(--topo-h,58px) - 32px);overflow:auto}
+.res-prog{display:flex;align-items:baseline;gap:8px}
+.res-num{font:600 26px/1 var(--f-mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.res-rot{color:var(--tinta2)}
+.res-cont{display:flex;gap:6px;flex-wrap:wrap}
+.res-tit{margin:6px 0 0;font:600 11px/1 var(--f-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--tinta3)}
+.res-lista{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.res-item{width:100%;display:grid;grid-template-columns:auto 1fr;gap:8px;text-align:left;border:0;background:transparent;border-radius:7px;padding:7px 8px;font-size:13px;line-height:1.35}
+.res-item:hover{background:var(--pend-suave)}
+.res-item .q-num{color:var(--pend)}
+@media (max-width:1180px){.an-grade{grid-template-columns:minmax(0,1fr)}.resumo{position:static;max-height:none;order:-1}}
+.filtro-q{display:inline-flex;gap:3px;background:var(--sup2);border:1px solid var(--linha2);border-radius:9px;padding:3px;margin-bottom:14px;flex-wrap:wrap}
+.filtro-q button{border:0;background:transparent;border-radius:6px;padding:5px 12px;font-size:13px;font-weight:600;color:var(--tinta2)}
+.filtro-q button[aria-pressed="true"]{background:var(--sup);color:var(--tinta);box-shadow:var(--sombra)}
+
+/* questionário */
+.quest{display:grid;gap:10px}
+.q-sec{display:grid;gap:10px;margin-top:22px}
+.q-sec:first-child{margin-top:0}
+.q-sec-cab{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px;padding-bottom:7px;border-bottom:1px solid var(--linha)}
+.q-sec-tit{font:600 19px/1.3 var(--f-serif);margin:0}
+.q-sec-ref{font:12px/1.4 var(--f-mono);color:var(--tinta3)}
+.q{background:var(--sup);border:1px solid var(--linha2);border-radius:10px;padding:14px 16px;display:grid;gap:10px;scroll-margin-top:calc(var(--topo-h,58px) + 24px);transition:border-color .2s,box-shadow .2s}
+.q .q{background:var(--sup2);padding:12px 14px}
+.q.pendente{border-color:color-mix(in srgb,var(--pend) 50%,var(--linha2))}
+.q.destaque{box-shadow:0 0 0 3px var(--acento-suave);border-color:var(--acento)}
+.q-cab{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:10px;align-items:start}
+.q-estado{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--tinta3);margin-top:6px}
+.q.respondida>.q-cab .q-estado{background:var(--ok);border-color:var(--ok)}
+.q.pendente>.q-cab .q-estado{background:var(--pend);border-color:var(--pend)}
+.q-num{font:500 13px/1.65 var(--f-mono);color:var(--acento-texto);font-variant-numeric:tabular-nums;min-width:2ch;white-space:nowrap}
+.q-txt{margin:0;font-weight:500;font-size:15px;line-height:1.45;text-wrap:pretty;overflow-wrap:anywhere}
+.carimbo{font:600 10.5px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--pend);border:1.5px solid currentColor;border-radius:3px;padding:4px 6px;transform:rotate(-3deg);white-space:nowrap;margin-top:2px}
+.q-corpo{display:grid;gap:10px;padding-left:calc(20px + 2ch + 10px)}
+.q-fund{margin:0;font:italic 14px/1.4 var(--f-serif);color:var(--tinta2)}
+.q-fund::before{content:"§\00a0";font-style:normal;color:var(--tinta3)}
+.q-ops{display:flex;flex-wrap:wrap;gap:6px}
+.op{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--linha);background:var(--sup);border-radius:7px;padding:6px 12px;font-weight:500;min-height:34px;text-align:left;line-height:1.3}
+.op:hover{border-color:var(--acento)}
+.op::before{content:"";width:12px;height:12px;border:1.5px solid currentColor;border-radius:50%;flex:none;opacity:.55}
+.op[data-multi]::before{border-radius:3px}
+.op[aria-pressed="true"]{background:var(--acento);border-color:var(--acento);color:var(--sobre-acento)}
+.op[aria-pressed="true"]::before{background:currentColor;opacity:1;box-shadow:inset 0 0 0 2px var(--acento)}
+.op.op-pend[aria-pressed="true"]{background:var(--pend);border-color:var(--pend);color:var(--sobre-pend)}
+.op.op-pend[aria-pressed="true"]::before{box-shadow:inset 0 0 0 2px var(--pend)}
+.q-extra{display:flex;gap:4px;flex-wrap:wrap;margin-left:-8px}
+.q-extra .btn{min-height:28px;padding:3px 8px;font-size:12.5px;font-weight:500}
+.q-extra .btn[aria-expanded="true"]{color:var(--acento-texto)}
+.q-ajuda{margin:0;padding:10px 12px;background:var(--acento-suave);border-radius:8px;font-size:13.5px;max-width:75ch}
+.q-prov{margin:0;padding:10px 12px;background:var(--pend-suave);border-radius:8px;font-size:13.5px;max-width:75ch}
+.q-prov strong{color:var(--pend);font-weight:600}
+.q-filhos{display:grid;gap:8px;padding-left:14px;border-left:2px dotted var(--linha);margin-left:4px}
+.q.compacto>.q-corpo{display:none}
+.q.compacto>.q-cab{opacity:.62}
+@media (max-width:640px){.q-corpo{padding-left:0}.q{padding:12px}.q .q{padding:10px 12px}.q-filhos{padding-left:10px;margin-left:0}}
+
+/* editor de modelo */
+.ed-nome{width:100%;font:600 26px/1.25 var(--f-serif);letter-spacing:-.01em;border:1px solid transparent;background:transparent;border-radius:8px;padding:4px 8px;margin-left:-9px}
+.ed-nome:hover{border-color:var(--linha)}
+.ed-nome:focus{border-color:var(--acento);background:var(--sup);outline:none;box-shadow:0 0 0 3px var(--acento-suave)}
+.ed-topo{display:grid;gap:10px;margin-bottom:18px}
+.ed-meta{font:12.5px var(--f-mono);color:var(--tinta3);margin:0}
+.ed-arvore{display:grid;gap:10px}
+.ed-no{background:var(--sup);border:1px solid var(--linha2);border-radius:10px;padding:12px 14px;display:grid;gap:10px;min-width:0}
+.ed-no .ed-no{background:var(--sup2)}
+.ed-secao{background:transparent;border:1px dashed var(--linha);padding:14px}
+.ed-secao>.ed-linha .inp{font:600 17px/1.3 var(--f-serif)}
+.ed-linha{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap}
+.ed-num{font:500 13px/36px var(--f-mono);color:var(--acento-texto);min-width:3.2ch}
+.ed-sec-rot{font:600 11px/36px var(--f-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--tinta3)}
+.ed-texto{flex:1 1 260px}
+.ed-tipo{flex:0 1 210px}
+.ed-acoes{display:flex;gap:2px;margin-left:auto}
+.ed-cond,.ed-flags{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--tinta2)}
+.ed-cond>span:first-child,.ed-flags>span:first-child{margin-right:2px}
+.tog{border:1px solid var(--linha);background:var(--sup);border-radius:999px;padding:3px 10px;font-size:12.5px;font-weight:500;min-height:26px}
+.tog:hover{border-color:var(--acento)}
+.tog[aria-pressed="true"]{background:var(--acento-suave);border-color:var(--acento);color:var(--acento-texto)}
+.tog.tog-pend[aria-pressed="true"]{background:var(--pend-suave);border-color:var(--pend);color:var(--pend)}
+.ed-ops{display:grid;gap:6px}
+.ed-op{display:flex;gap:6px;align-items:center}
+.ed-op .inp{flex:1 1 auto}
+.ed-det>summary{cursor:pointer;font-size:13px;color:var(--tinta2);display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;padding:2px 0}
+.ed-det>summary:hover{color:var(--tinta)}
+.ed-det>summary em{font:italic 13.5px var(--f-serif);color:var(--tinta3)}
+.ed-campos{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:10px}
+.ed-campos .largo{grid-column:1/-1}
+.ed-filhos{display:grid;gap:8px;padding-left:14px;border-left:2px dotted var(--linha)}
+.ed-add{display:flex;gap:8px;flex-wrap:wrap}
+.ed-fim{margin-top:14px}
+
+/* vazio, modal, aviso */
+.vazio{max-width:600px;margin:6vh 0;display:grid;gap:14px;justify-items:start}
+.vazio h2{font:600 24px/1.25 var(--f-serif);margin:0}
+.vazio p{margin:0;color:var(--tinta2);max-width:60ch}
+.form-nova{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;max-width:760px;background:var(--sup);border:1px solid var(--linha);border-radius:10px;padding:20px}
+.form-nova .largo{grid-column:1/-1}
+.modal{position:fixed;inset:0;z-index:40;background:var(--veu);display:flex;justify-content:center;align-items:flex-start;padding:calc(20px + env(safe-area-inset-top,0px)) 16px calc(20px + env(safe-area-inset-bottom,0px));overflow:auto}
+.modal-painel{background:var(--chao);border-radius:12px;width:100%;max-width:880px;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden}
+.modal-cab{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 20px;background:var(--sup);border-bottom:1px solid var(--linha)}
+.modal-cab h2{margin:2px 0 0;font:600 20px/1.25 var(--f-serif)}
+.modal-corpo{padding:20px;display:grid;gap:14px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--tinta);color:var(--chao);padding:10px 16px;border-radius:9px;font-weight:500;z-index:60;box-shadow:var(--sombra);max-width:calc(100% - 32px);width:max-content}
+.carregando{color:var(--tinta3);padding:40px 0}
+</style>
+</head>
+<body>
+<header class="topo" id="topo">
+  <div class="topo-in">
+    <p class="marca">
+      <svg viewBox="0 0 28 28" aria-hidden="true"><rect x="2.5" y="2.5" width="23" height="23" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M2.5 11h23M11 2.5V11M18.5 2.5V11M9.5 11v14.5M2.5 18.5h7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M13.6 18.2l2.3 2.3 4.4-4.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Checklist REURB<small>Regularização fundiária urbana</small></span>
+    </p>
+    <nav class="abas" aria-label="Seções">
+      <button type="button" class="aba" id="aba-analises" data-aba="analises" aria-current="page">Análises</button>
+      <button type="button" class="aba" id="aba-modelos" data-aba="modelos">Modelos de checklist</button>
+    </nav>
+    <div class="topo-dir">
+      <span class="salvo" id="salvo" data-estado="carregando">Carregando…</span>
+      <details class="menu" id="menu-backup">
+        <summary class="btn btn-fant" aria-label="Backup e importação">Backup</summary>
+        <div class="menu-pop">
+          <button type="button" id="bk-exportar"></button>
+          <button type="button" id="bk-importar"></button>
+          <p>O backup reúne todos os modelos e análises num arquivo JSON, para guardar ou levar para outro computador.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+</header>
+<main class="corpo">
+  <aside class="lateral" aria-label="Lista">
+    <div class="lat-cab"><h2 class="lat-tit" id="lat-tit">Análises</h2><span class="lat-cont" id="lat-cont"></span></div>
+    <div class="lat-acoes" id="lat-acoes"></div>
+    <label class="busca"><span class="rot" hidden>Filtrar</span>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 16l4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input class="inp" id="filtro" type="search" placeholder="Filtrar" autocomplete="off">
+    </label>
+    <ul class="itens" id="itens"></ul>
+  </aside>
+  <section class="detalhe" id="detalhe" aria-live="polite"><p class="carregando">Carregando dados…</p></section>
+</main>
+<input type="file" id="arquivo" accept=".json,application/json" hidden>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script type="application/json" id="biblioteca">{"formato":"checklist-biblioteca","versao":1,"modelos":[{"id":"reurb-13465","nome":"REURB — Análise do processo (Lei 13.465/2017)","descricao":"Roteiro de análise da regularização fundiária urbana, do requerimento ao registro da CRF. Revise as referências legais e acrescente as exigências da lei municipal.","perguntas":[{"id":"sA","tipo":"secao","texto":"Requerimento e instauração","fundamento":"Lei 13.465/2017, arts. 13, 14, 30 e 32","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[{"id":"a1","tipo":"simnao","texto":"O requerimento foi apresentado por um dos legitimados?","fundamento":"Lei 13.465/2017, art. 14","ajuda":"","providencia":"Confirmar a legitimidade do requerente ou obter requerimento de um legitimado: União, Estados, DF e Municípios; beneficiários, individual ou coletivamente; proprietários, loteadores ou incorporadores; Defensoria Pública; Ministério Público.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[{"id":"a1_1","tipo":"unica","texto":"Quem é o requerente?","fundamento":"art. 14, I a V","ajuda":"","providencia":"","opcoes":[{"id":"mun","rotulo":"Município","pendencia":false},{"id":"est","rotulo":"Estado, DF ou União","pendencia":false},{"id":"ben","rotulo":"Beneficiários (individual ou coletivamente)","pendencia":false},{"id":"assoc","rotulo":"Associação ou cooperativa de moradores","pendencia":false},{"id":"prop","rotulo":"Proprietário, loteador ou incorporador","pendencia":false},{"id":"dp","rotulo":"Defensoria Pública","pendencia":false},{"id":"mp","rotulo":"Ministério Público","pendencia":false}],"mostrarSe":["sim"],"filhos":[]}]},{"id":"a2","tipo":"data","texto":"Data do requerimento","fundamento":"art. 30, § 2º","ajuda":"O Município tem até 180 dias, contados do requerimento, para classificar a modalidade ou indeferir fundamentadamente.","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[]},{"id":"a3","tipo":"simnao","texto":"A Reurb foi instaurada por decisão do Município?","fundamento":"art. 32","ajuda":"","providencia":"Providenciar a decisão municipal de instauração, a partir do requerimento escrito do legitimado.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"a4","tipo":"unica","texto":"Modalidade classificada pelo Município","fundamento":"art. 13; art. 30, I e §§ 2º e 3º","ajuda":"","providencia":"Classificar a modalidade em até 180 dias do requerimento ou indeferir fundamentadamente; a inércia fixa automaticamente a modalidade indicada pelo legitimado.","opcoes":[{"id":"s","rotulo":"Reurb-S (interesse social)","pendencia":false},{"id":"e","rotulo":"Reurb-E (interesse específico)","pendencia":false},{"id":"mista","rotulo":"Reurb-S e Reurb-E no mesmo núcleo","pendencia":false},{"id":"pend","rotulo":"Ainda não classificada","pendencia":true}],"mostrarSe":[],"filhos":[{"id":"a4_1","tipo":"simnao","texto":"Há ato do Poder Executivo municipal declarando os ocupantes como população de baixa renda?","fundamento":"art. 13, I","ajuda":"O Decreto nº 9.310/2018 permite ao Município fixar a faixa de renda familiar, limitada a cinco salários mínimos. Confira o dispositivo e a norma municipal.","providencia":"Editar ato do Executivo municipal que declare a baixa renda dos ocupantes.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":["s","mista"],"filhos":[]},{"id":"a4_2","tipo":"simnao","texto":"O custeio do projeto e das obras foi atribuído aos beneficiários ou requerentes privados?","fundamento":"art. 33","ajuda":"","providencia":"Na Reurb-E, definir a contratação e o custeio pelos potenciais beneficiários ou requerentes privados.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":["e","mista"],"filhos":[]}]}]},{"id":"sB","tipo":"secao","texto":"Núcleo urbano informal","fundamento":"Lei 13.465/2017, arts. 9º, 11, 23 e 69","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[{"id":"b1","tipo":"simnao","texto":"A área configura núcleo urbano informal (clandestino, irregular ou sem titulação)?","fundamento":"art. 11, II","ajuda":"","providencia":"Reavaliar o enquadramento: a Reurb se destina a núcleos urbanos informais.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"b2","tipo":"simnao","texto":"O núcleo é consolidado (de difícil reversão)?","fundamento":"art. 11, III","ajuda":"Considere o tempo da ocupação, a natureza das edificações, a localização das vias de circulação e a presença de equipamentos públicos, entre outras circunstâncias avaliadas pelo Município.","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":[],"filhos":[{"id":"b2_1","tipo":"unica","texto":"Em qual data o núcleo já existia?","fundamento":"art. 9º, § 2º; art. 23","ajuda":"","providencia":"A legitimação fundiária só se aplica a núcleos comprovadamente existentes até 22/12/2016: reunir a prova da data ou definir outro instrumento de titulação.","opcoes":[{"id":"antes","rotulo":"Existente até 22/12/2016","pendencia":false},{"id":"depois","rotulo":"Formado após 22/12/2016","pendencia":true},{"id":"semprova","rotulo":"Data ainda não comprovada","pendencia":true}],"mostrarSe":["sim"],"filhos":[{"id":"b2_1_1","tipo":"multipla","texto":"Quais provas da data foram juntadas?","fundamento":"","ajuda":"","providencia":"","opcoes":[{"id":"img","rotulo":"Imagens aéreas ou de satélite","pendencia":false},{"id":"iptu","rotulo":"Cadastro imobiliário ou lançamento de IPTU","pendencia":false},{"id":"contas","rotulo":"Contas de água ou energia","pendencia":false},{"id":"plantas","rotulo":"Levantamentos ou plantas antigas","pendencia":false},{"id":"decl","rotulo":"Declarações e outros documentos","pendencia":false}],"mostrarSe":["antes"],"filhos":[]}]}]},{"id":"b3","tipo":"simnao","texto":"O parcelamento foi implantado antes de 19/12/1979?","fundamento":"art. 69","ajuda":"Glebas parceladas para fins urbanos antes de 19/12/1979, sem registro, podem ser regularizadas pelo registro do parcelamento, desde que implantado e integrado à cidade.","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":[],"filhos":[]},{"id":"b4","tipo":"multipla","texto":"Titularidade da área","fundamento":"art. 31","ajuda":"","providencia":"Fazer as buscas no Registro de Imóveis para determinar a titularidade do domínio.","opcoes":[{"id":"mun","rotulo":"Pública municipal","pendencia":false},{"id":"est","rotulo":"Pública estadual","pendencia":false},{"id":"fed","rotulo":"Pública federal","pendencia":false},{"id":"part","rotulo":"Particular, proprietário identificado","pendencia":false},{"id":"partni","rotulo":"Particular, proprietário não identificado","pendencia":false},{"id":"naoap","rotulo":"Ainda não apurada","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"b5","tipo":"texto","texto":"Matrículas e transcrições atingidas pelo perímetro","fundamento":"art. 35, II","ajuda":"Liste os números e o cartório de cada matrícula ou transcrição.","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[]},{"id":"b6","tipo":"texto","texto":"Número estimado de lotes ou unidades","fundamento":"","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[]}]},{"id":"sC","tipo":"secao","texto":"Restrições ambientais e áreas de risco","fundamento":"Lei 13.465/2017, arts. 11, §§ 2º e 3º, e 39","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[{"id":"c1","tipo":"simnao","texto":"Há ocupação em Área de Preservação Permanente (APP)?","fundamento":"art. 11, § 2º; Lei 12.651/2012, arts. 64 e 65","ajuda":"","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":[],"filhos":[{"id":"c1_1","tipo":"simnao","texto":"Há estudo técnico que demonstre a melhoria das condições ambientais em relação à ocupação anterior?","fundamento":"art. 11, § 2º; art. 35, VIII","ajuda":"","providencia":"Elaborar o estudo técnico ambiental, inclusive com as compensações cabíveis.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":["sim"],"filhos":[]}]},{"id":"c2","tipo":"simnao","texto":"O núcleo está em unidade de conservação de uso sustentável ou em área de proteção de mananciais?","fundamento":"art. 11, §§ 2º e 3º","ajuda":"","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":[],"filhos":[{"id":"c2_1","tipo":"simnaona","texto":"Há anuência do órgão gestor da unidade de conservação?","fundamento":"art. 11, § 3º","ajuda":"","providencia":"Obter a anuência do órgão gestor da unidade de conservação.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true},{"id":"na","rotulo":"Não se aplica","pendencia":false}],"mostrarSe":["sim"],"filhos":[]}]},{"id":"c3","tipo":"simnao","texto":"Existem áreas de risco (geotécnico, de inundação ou outros)?","fundamento":"art. 39","ajuda":"","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":[],"filhos":[{"id":"c3_1","tipo":"simnao","texto":"Foram elaborados estudos técnicos de risco?","fundamento":"art. 35, VII; art. 39","ajuda":"","providencia":"Elaborar estudo técnico para examinar a eliminação, correção ou administração dos riscos.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":["sim"],"filhos":[]},{"id":"c3_2","tipo":"unica","texto":"Os riscos podem ser eliminados, corrigidos ou administrados?","fundamento":"art. 39","ajuda":"","providencia":"Na Reurb-S, promover a realocação dos ocupantes da parcela em risco que não admite correção.","opcoes":[{"id":"sim","rotulo":"Sim, com as medidas indicadas no estudo","pendencia":false},{"id":"nao","rotulo":"Não, exige realocação dos ocupantes","pendencia":true}],"mostrarSe":["sim"],"filhos":[]}]}]},{"id":"sD","tipo":"secao","texto":"Infraestrutura essencial","fundamento":"Lei 13.465/2017, art. 36, § 1º","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[{"id":"d1","tipo":"simnao","texto":"Existe sistema de abastecimento de água potável (coletivo ou individual)?","fundamento":"art. 36, § 1º, I","ajuda":"","providencia":"Incluir a implantação no cronograma físico de obras e no termo de compromisso (art. 35, IX e X).","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"d2","tipo":"simnao","texto":"Existe sistema de coleta e tratamento de esgoto (coletivo ou individual)?","fundamento":"art. 36, § 1º, II","ajuda":"","providencia":"Incluir a implantação no cronograma físico de obras e no termo de compromisso (art. 35, IX e X).","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"d3","tipo":"simnao","texto":"Existe rede de energia elétrica domiciliar?","fundamento":"art. 36, § 1º, III","ajuda":"","providencia":"Incluir a implantação no cronograma físico de obras e no termo de compromisso (art. 35, IX e X).","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"d4","tipo":"simnaona","texto":"Há soluções de drenagem onde são necessárias?","fundamento":"art. 36, § 1º, IV","ajuda":"","providencia":"Incluir a implantação no cronograma físico de obras e no termo de compromisso (art. 35, IX e X).","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true},{"id":"na","rotulo":"Não se aplica","pendencia":false}],"mostrarSe":[],"filhos":[]},{"id":"d5","tipo":"simnaona","texto":"Calçadas já existem no núcleo habitacional?","fundamento":"art. 36, VII e § 1º, V; norma municipal","ajuda":"A lei federal não inclui calçadas no rol mínimo de infraestrutura essencial: a exigência vem da norma municipal (outros equipamentos definidos pelo Município) e das medidas de mobilidade e acessibilidade do projeto urbanístico.","providencia":"Prever a execução das calçadas no projeto urbanístico e no cronograma de obras, se exigidas pela norma municipal.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true},{"id":"na","rotulo":"Não se aplica","pendencia":false}],"mostrarSe":[],"filhos":[]},{"id":"d6","tipo":"simnao","texto":"O sistema viário e as vias de circulação estão definidos no projeto?","fundamento":"art. 36, I","ajuda":"","providencia":"Indicar no projeto urbanístico o sistema viário existente ou projetado.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"d7","tipo":"simnao","texto":"O Município definiu outros equipamentos de infraestrutura essencial em norma local?","fundamento":"art. 36, § 1º, V","ajuda":"","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":[],"filhos":[{"id":"d7_1","tipo":"texto","texto":"Quais equipamentos e em qual norma?","fundamento":"","ajuda":"","providencia":"","opcoes":[],"mostrarSe":["sim"],"filhos":[]}]},{"id":"d8","tipo":"simnaona","texto":"Os responsáveis pela implantação da infraestrutura foram definidos?","fundamento":"art. 33; art. 37 (Reurb-S); art. 38 (Reurb-E)","ajuda":"","providencia":"Definir os responsáveis pelas obras e serviços: o poder público na Reurb-S; os beneficiários ou requerentes na Reurb-E.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true},{"id":"na","rotulo":"Não se aplica","pendencia":false}],"mostrarSe":[],"filhos":[]}]},{"id":"sE","tipo":"secao","texto":"Projeto de regularização fundiária","fundamento":"Lei 13.465/2017, arts. 35 e 36","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[{"id":"e1","tipo":"simnao","texto":"Há levantamento planialtimétrico e cadastral georreferenciado, com ART ou RRT?","fundamento":"art. 35, I","ajuda":"","providencia":"Providenciar o levantamento subscrito por profissional habilitado, com ART ou RRT.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"e2","tipo":"simnao","texto":"Há planta do perímetro com as matrículas ou transcrições atingidas?","fundamento":"art. 35, II","ajuda":"","providencia":"Elaborar a planta do perímetro indicando as matrículas ou transcrições atingidas, quando possível.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"e3","tipo":"simnao","texto":"Há estudo preliminar das desconformidades e da situação jurídica, urbanística e ambiental?","fundamento":"art. 35, III","ajuda":"","providencia":"Elaborar o estudo preliminar das desconformidades.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"e4","tipo":"simnao","texto":"O projeto urbanístico indica áreas ocupadas, sistema viário, unidades, logradouros e áreas públicas?","fundamento":"art. 35, IV; art. 36","ajuda":"","providencia":"Completar o projeto urbanístico com os elementos mínimos do art. 36.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"e5","tipo":"simnao","texto":"Há memoriais descritivos?","fundamento":"art. 35, V","ajuda":"","providencia":"Elaborar os memoriais descritivos da gleba e das unidades.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"e6","tipo":"simnaona","texto":"Há proposta de soluções para questões ambientais, urbanísticas e de reassentamento?","fundamento":"art. 35, VI","ajuda":"","providencia":"Apresentar a proposta de soluções ambientais, urbanísticas e de reassentamento.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true},{"id":"na","rotulo":"Não se aplica","pendencia":false}],"mostrarSe":[],"filhos":[]},{"id":"e7","tipo":"simnaona","texto":"Há cronograma físico de serviços e obras de infraestrutura essencial?","fundamento":"art. 35, IX","ajuda":"","providencia":"Elaborar o cronograma físico de serviços e obras.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true},{"id":"na","rotulo":"Não se aplica","pendencia":false}],"mostrarSe":[],"filhos":[]},{"id":"e8","tipo":"simnaona","texto":"O termo de compromisso foi assinado pelos responsáveis pelo cronograma?","fundamento":"art. 35, X","ajuda":"","providencia":"Colher a assinatura do termo de compromisso pelos responsáveis, públicos ou privados.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true},{"id":"na","rotulo":"Não se aplica","pendencia":false}],"mostrarSe":[],"filhos":[]}]},{"id":"sF","tipo":"secao","texto":"Notificações e conflitos","fundamento":"Lei 13.465/2017, arts. 19 a 22, 31 e 34","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[{"id":"f1","tipo":"simnao","texto":"Titulares de domínio, responsáveis pela implantação, confinantes e terceiros interessados foram notificados?","fundamento":"art. 31, § 1º","ajuda":"","providencia":"Notificar para impugnação no prazo de 30 dias; os não encontrados, por edital.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[{"id":"f1_1","tipo":"simnao","texto":"Houve impugnação no prazo de 30 dias?","fundamento":"art. 31","ajuda":"A ausência de manifestação dos notificados é interpretada como concordância com a Reurb.","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":["sim"],"filhos":[{"id":"f1_1_1","tipo":"simnao","texto":"A impugnação foi superada (acordo, câmara de resolução de conflitos ou decisão)?","fundamento":"arts. 31 e 34","ajuda":"","providencia":"Buscar a composição extrajudicial do conflito antes de prosseguir.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":["sim"],"filhos":[]}]}]},{"id":"f2","tipo":"simnao","texto":"Foi utilizada a demarcação urbanística?","fundamento":"arts. 19 a 22","ajuda":"","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":[],"filhos":[{"id":"f2_1","tipo":"simnaona","texto":"O auto de demarcação urbanística foi averbado nas matrículas alcançadas?","fundamento":"arts. 19 a 22","ajuda":"","providencia":"Encaminhar o auto de demarcação ao Registro de Imóveis para averbação.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true},{"id":"na","rotulo":"Não se aplica","pendencia":false}],"mostrarSe":["sim"],"filhos":[]}]}]},{"id":"sG","tipo":"secao","texto":"Titulação, decisão e CRF","fundamento":"Lei 13.465/2017, arts. 15, 23, 40 e 41","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[{"id":"g1","tipo":"multipla","texto":"Instrumentos de titulação previstos","fundamento":"art. 15","ajuda":"","providencia":"","opcoes":[{"id":"lf","rotulo":"Legitimação fundiária","pendencia":false},{"id":"lp","rotulo":"Legitimação de posse","pendencia":false},{"id":"cdru","rotulo":"Concessão de direito real de uso","pendencia":false},{"id":"cuem","rotulo":"Concessão de uso especial para fins de moradia","pendencia":false},{"id":"doa","rotulo":"Doação ou compra e venda","pendencia":false},{"id":"usu","rotulo":"Usucapião","pendencia":false},{"id":"outro","rotulo":"Outro","pendencia":false}],"mostrarSe":[],"filhos":[{"id":"g1_1","tipo":"simnao","texto":"Os beneficiários atendem aos requisitos da legitimação fundiária na Reurb-S?","fundamento":"art. 23, § 1º","ajuda":"O beneficiário não pode ser concessionário, foreiro ou proprietário de imóvel urbano ou rural, nem ter sido contemplado com legitimação de posse ou fundiária de imóvel urbano com a mesma finalidade.","providencia":"Excluir da legitimação fundiária os ocupantes que não atendem aos requisitos ou adotar outro instrumento.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":["lf"],"filhos":[]}]},{"id":"g2","tipo":"simnao","texto":"A autoridade competente decidiu o processo, aprovando o projeto e identificando os ocupantes e seus direitos reais?","fundamento":"art. 40","ajuda":"","providencia":"Obter a decisão formal da autoridade competente, com publicidade.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"g3","tipo":"simnao","texto":"A CRF foi expedida com os requisitos mínimos?","fundamento":"art. 41","ajuda":"Nome do núcleo, localização, modalidade, responsabilidades pelas obras e serviços do cronograma, indicação numérica das unidades e listagem dos ocupantes.","providencia":"Complementar a CRF com os requisitos mínimos do art. 41.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[{"id":"g3_1","tipo":"simnao","texto":"A listagem dos ocupantes traz estado civil, profissão, CPF, RG e filiação?","fundamento":"art. 41, VI","ajuda":"","providencia":"Completar a qualificação dos ocupantes na listagem da CRF.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":["sim"],"filhos":[]}]}]},{"id":"sH","tipo":"secao","texto":"Registro","fundamento":"Lei 13.465/2017, arts. 13, § 1º, 42 e 44","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[{"id":"h1","tipo":"simnaona","texto":"Na Reurb-S, o requerimento ao Registro de Imóveis invoca a isenção de custas e emolumentos?","fundamento":"art. 13, § 1º","ajuda":"","providencia":"Indicar expressamente a isenção de custas e emolumentos da Reurb-S.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true},{"id":"na","rotulo":"Não se aplica","pendencia":false}],"mostrarSe":[],"filhos":[]},{"id":"h2","tipo":"simnao","texto":"A CRF e o projeto aprovado foram protocolados no Registro de Imóveis competente?","fundamento":"arts. 42 e 44","ajuda":"Recebida a CRF, o oficial prenota, autua e emite nota de exigência ou pratica os atos em 15 dias; o procedimento registral deve terminar em 60 dias, prorrogáveis por igual período.","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":[],"filhos":[{"id":"h2_1","tipo":"simnao","texto":"Houve nota de exigência do Registro de Imóveis?","fundamento":"","ajuda":"","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":["sim"],"filhos":[{"id":"h2_1_1","tipo":"simnao","texto":"As exigências foram cumpridas?","fundamento":"","ajuda":"","providencia":"Cumprir as exigências da nota devolutiva ou suscitar dúvida.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":["sim"],"filhos":[]}]}]},{"id":"h3","tipo":"texto","texto":"Observações gerais","fundamento":"","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[]}]}]}],"exemplo":{"id":"exemplo-vila-esperanca","ident":{"municipio":"Município Exemplo/UF","nucleo":"EXEMPLO — Núcleo Vila Esperança","processo":"0001/2026","responsavel":"","inicio":"2026-09-01"},"status":"andamento","respostas":{"a1":{"v":"sim"},"a1_1":{"v":"mun"},"a2":{"v":"2026-03-10"},"a3":{"v":"sim"},"a4":{"v":"s"},"a4_1":{"v":"sim"},"b1":{"v":"sim"},"b2":{"v":"sim"},"b2_1":{"v":"antes"},"b2_1_1":{"v":["img","iptu"]},"b3":{"v":"nao"},"b4":{"v":["mun"]},"b5":{"v":"Matrícula 12.345 do Registro de Imóveis local"},"c1":{"v":"sim"},"c1_1":{"v":"nao","obs":"Faixa de APP ao longo do córrego, fundos das quadras 3 e 4."},"c2":{"v":"nao"},"c3":{"v":"nao"},"d1":{"v":"sim"},"d2":{"v":"nao","obs":"Fossas individuais em parte dos lotes; avaliar solução individual."},"d3":{"v":"sim"},"d4":{"v":"sim"},"d5":{"v":"nao","obs":"Ruas A e B sem passeio."},"d6":{"v":"sim"},"d7":{"v":"nao"},"d8":{"v":"sim"},"e1":{"v":"sim"},"e2":{"v":"sim"},"e3":{"v":"nao"}}}}</script>
+<script>
+(() => {
+'use strict';
+
+/* ---------- utilidades ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const BIB = JSON.parse($('#biblioteca').textContent);
+const LS_DADOS = 'checklist-reurb:dados:v1';
+const LS_UI = 'checklist-reurb:ui:v1';
+const reduzMov = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  let valor;
+  if (attrs) for (const [k, v] of Object.entries(attrs)) {
+    if (v == null || v === false) continue;
+    if (k === 'class') el.className = v;
+    else if (k === 'value') valor = v;
+    else if (k.startsWith('on') && typeof v === 'function') el.addEventListener(k.slice(2), v);
+    else if (v === true) el.setAttribute(k, '');
+    else el.setAttribute(k, v);
+  }
+  for (const k of kids.flat(Infinity)) {
+    if (k == null || k === false) continue;
+    el.append(k instanceof Node ? k : document.createTextNode(String(k)));
+  }
+  if (valor !== undefined) el.value = valor;
+  return el;
+}
+const uid = (p = '') => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const clone = o => JSON.parse(JSON.stringify(o));
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const agora = () => new Date().toISOString();
+const hoje = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
+const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
+const slug = s => norm(s).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50) || 'checklist';
+function fmtData(iso) {
+  if (!iso) return '';
+  const [y, m, d] = String(iso).slice(0, 10).split('-');
+  return y && m && d ? `${d}/${m}/${y}` : String(iso);
+}
+function fmtQuando(iso) {
+  if (!iso) return '';
+  const t = new Date(iso), s = (Date.now() - t) / 1000;
+  if (isNaN(s)) return '';
+  if (s < 60) return 'agora';
+  if (s < 3600) return `há ${Math.floor(s / 60)} min`;
+  const hh = t.toTimeString().slice(0, 5);
+  if (new Date().toDateString() === t.toDateString()) return `hoje, ${hh}`;
+  return fmtData(new Date(t.getTime() - t.getTimezoneOffset() * 60000).toISOString());
+}
+
+const ICONES = {
+  mais: '<path d="M12 5v14M5 12h14"/>',
+  cima: '<path d="M12 19V5M6 11l6-6 6 6"/>',
+  baixo: '<path d="M12 5v14M6 13l6 6 6-6"/>',
+  lixo: '<path d="M4 7h16M9 7V4h6v3M6.5 7l1 13h9l1-13"/>',
+  copiar: '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/>',
+  olho: '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  baixar: '<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>',
+  enviar: '<path d="M12 21V9M7 14l5-5 5 5M5 3h14"/>',
+  voltar: '<path d="M15 18l-6-6 6-6"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
+  nota: '<path d="M4 20h4L19 9l-4-4L4 16v4z"/>',
+  check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  imprimir: '<path d="M6 9V3h12v6M6 18H4v-8h16v8h-2"/><path d="M8 14h8v7H8z"/>',
+  lista: '<path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/>',
+  x: '<path d="M6 6l12 12M18 6L6 18"/>',
+  aviso: '<path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18h.01"/>',
+  livro: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5z"/><path d="M4 19a2 2 0 0 1 2-2h13"/>'
+};
+function ico(nome) {
+  const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  s.setAttribute('viewBox', '0 0 24 24'); s.setAttribute('aria-hidden', 'true');
+  s.setAttribute('fill', 'none'); s.setAttribute('stroke', 'currentColor');
+  s.setAttribute('stroke-width', '1.8'); s.setAttribute('stroke-linecap', 'round'); s.setAttribute('stroke-linejoin', 'round');
+  s.innerHTML = ICONES[nome] || '';
+  return s;
+}
+function btn(rotulo, opts = {}) {
+  const cls = ['btn'];
+  if (opts.prim) cls.push('btn-prim');
+  if (opts.fant) cls.push('btn-fant');
+  if (opts.perigo) cls.push('btn-perigo');
+  if (opts.sm) cls.push('btn-sm');
+  if (opts.soIcone) cls.push('btn-ico');
+  if (opts.cls) cls.push(opts.cls);
+  return h('button', {
+    type: 'button', class: cls.join(' '), id: opts.id, title: opts.soIcone ? rotulo : opts.title,
+    'aria-label': opts.soIcone ? rotulo : null, disabled: opts.disabled, onclick: opts.onclick
+  }, opts.icone ? ico(opts.icone) : null, opts.soIcone ? null : rotulo);
+}
+/* Botão de duas etapas: o primeiro clique pede confirmação, o segundo executa. */
+function armar(b, acao) {
+  if (b.dataset.armado) { delete b.dataset.armado; acao(); return; }
+  const antes = [...b.childNodes], rotulo = b.getAttribute('aria-label');
+  b.dataset.armado = '1';
+  b.replaceChildren('Confirmar exclusão');
+  if (rotulo) b.setAttribute('aria-label', 'Confirmar exclusão');
+  setTimeout(() => {
+    if (b.isConnected && b.dataset.armado) { delete b.dataset.armado; b.replaceChildren(...antes); if (rotulo) b.setAttribute('aria-label', rotulo); }
+  }, 4000);
+}
+let toastTimer;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg; t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.hidden = true; }, 3800);
+}
+function autoAltura(t) { t.style.height = 'auto'; t.style.height = (t.scrollHeight + 2) + 'px'; }
+
+/* ---------- modelo de dados ---------- */
+const TIPOS = {
+  simnao: 'Sim / Não',
+  simnaona: 'Sim / Não / Não se aplica',
+  unica: 'Escolha única',
+  multipla: 'Múltipla escolha',
+  texto: 'Texto livre',
+  data: 'Data'
+};
+const FIXAS = {
+  simnao: [['sim', 'Sim'], ['nao', 'Não']],
+  simnaona: [['sim', 'Sim'], ['nao', 'Não'], ['na', 'Não se aplica']]
+};
+const ehEscolha = t => t === 'simnao' || t === 'simnaona' || t === 'unica' || t === 'multipla';
+
+function ajustarOpcoes(q) {
+  if (FIXAS[q.tipo]) {
+    const flags = Object.fromEntries((q.opcoes || []).map(o => [o.id, o.pendencia]));
+    q.opcoes = FIXAS[q.tipo].map(([id, rotulo]) => ({ id, rotulo, pendencia: !!flags[id] }));
+  } else if (q.tipo === 'unica' || q.tipo === 'multipla') {
+    if (!q.opcoes || !q.opcoes.length) q.opcoes = [
+      { id: uid('o'), rotulo: 'Opção 1', pendencia: false },
+      { id: uid('o'), rotulo: 'Opção 2', pendencia: false }
+    ];
+  } else q.opcoes = [];
+}
+/* Remove condições de exibição que apontam para opções que não existem mais. */
+function podarCondicoes(q) {
+  const ids = ehEscolha(q.tipo) ? new Set(q.opcoes.map(o => o.id)) : new Set();
+  for (const f of q.filhos) f.mostrarSe = (f.mostrarSe || []).filter(id => ids.has(id));
+}
+function novaPergunta(tipo = 'simnao') {
+  const q = { id: uid('q'), tipo, texto: '', fundamento: '', ajuda: '', providencia: '', opcoes: [], mostrarSe: [], filhos: [] };
+  ajustarOpcoes(q);
+  return q;
+}
+function novaSecao() {
+  return { id: uid('s'), tipo: 'secao', texto: '', fundamento: '', ajuda: '', providencia: '', opcoes: [], mostrarSe: [], filhos: [] };
+}
+function normalizarNo(n) {
+  n = n || {};
+  const no = {
+    id: String(n.id || uid('q')),
+    tipo: n.tipo === 'secao' || TIPOS[n.tipo] ? n.tipo : 'simnao',
+    texto: String(n.texto ?? ''),
+    fundamento: String(n.fundamento ?? ''),
+    ajuda: String(n.ajuda ?? ''),
+    providencia: String(n.providencia ?? ''),
+    opcoes: Array.isArray(n.opcoes) ? n.opcoes.map(o => ({ id: String(o.id || uid('o')), rotulo: String(o.rotulo ?? ''), pendencia: !!o.pendencia })) : [],
+    mostrarSe: Array.isArray(n.mostrarSe) ? n.mostrarSe.map(String) : [],
+    filhos: Array.isArray(n.filhos) ? n.filhos.map(normalizarNo) : []
+  };
+  if (no.tipo !== 'secao') ajustarOpcoes(no);
+  return no;
+}
+function normalizarModelo(m) {
+  return {
+    id: String(m.id || uid('m')),
+    nome: String(m.nome || 'Checklist sem nome'),
+    descricao: String(m.descricao || ''),
+    perguntas: Array.isArray(m.perguntas) ? m.perguntas.map(normalizarNo) : [],
+    criadoEm: m.criadoEm || agora(),
+    atualizadoEm: m.atualizadoEm || agora()
+  };
+}
+function normalizarAnalise(a) {
+  const mod = a.modelo || {};
+  return {
+    id: String(a.id || uid('a')),
+    modeloId: String(a.modeloId || ''),
+    modelo: { nome: String(mod.nome || 'Checklist'), perguntas: Array.isArray(mod.perguntas) ? mod.perguntas.map(normalizarNo) : [] },
+    modeloEm: a.modeloEm || '',
+    ident: Object.assign({ municipio: '', nucleo: '', processo: '', responsavel: '', inicio: '' }, a.ident || {}),
+    respostas: a.respostas && typeof a.respostas === 'object' ? a.respostas : {},
+    status: a.status === 'concluida' ? 'concluida' : 'andamento',
+    exemplo: !!a.exemplo,
+    criadoEm: a.criadoEm || agora(),
+    atualizadoEm: a.atualizadoEm || agora()
+  };
+}
+function novaAnalise(m, ident) {
+  return normalizarAnalise({
+    id: uid('a'), modeloId: m.id, modelo: { nome: m.nome, perguntas: clone(m.perguntas) }, modeloEm: m.atualizadoEm,
+    ident: ident || {}, respostas: {}, status: 'andamento'
+  });
+}
+/* Percorre a árvore numerando as perguntas: 1, 2, 2.1, 2.1.1… (seções não recebem número). */
+function indexar(perguntas) {
+  const mapa = new Map(), ordem = [];
+  let n = 0;
+  (function vis(lista, pai, prefixo, secao) {
+    let k = 0;
+    for (const no of lista) {
+      if (no.tipo === 'secao') {
+        mapa.set(no.id, { no, pai: null, num: '', secao: no });
+        ordem.push(no.id);
+        vis(no.filhos, null, '', no);
+        continue;
+      }
+      const num = prefixo ? `${prefixo}.${++k}` : String(++n);
+      mapa.set(no.id, { no, pai, num, secao });
+      ordem.push(no.id);
+      vis(no.filhos, no, num, secao);
+    }
+  })(perguntas, null, '', null);
+  return { mapa, ordem };
+}
+const selecionadas = (q, r) => { const v = r && r.v; return Array.isArray(v) ? v : (v ? [v] : []); };
+function visivel(info, idx, resp) {
+  let cur = info;
+  while (cur && cur.pai) {
+    const pai = cur.pai, q = cur.no;
+    if (ehEscolha(pai.tipo) && q.mostrarSe && q.mostrarSe.length) {
+      const sel = selecionadas(pai, resp[pai.id]);
+      if (!sel.some(x => q.mostrarSe.includes(x))) return false;
+    }
+    cur = idx.mapa.get(pai.id);
+  }
+  return true;
+}
+function respondida(q, r) {
+  const v = r && r.v;
+  return Array.isArray(v) ? v.length > 0 : (v != null && String(v).trim() !== '');
+}
+const opcoesMarcadas = (q, r) => { const ids = selecionadas(q, r); return q.opcoes.filter(o => ids.includes(o.id)); };
+const temPendencia = (q, r) => ehEscolha(q.tipo) && opcoesMarcadas(q, r).some(o => o.pendencia);
+function textoResposta(q, r) {
+  if (!respondida(q, r)) return '';
+  if (ehEscolha(q.tipo)) return opcoesMarcadas(q, r).map(o => o.rotulo).join('; ');
+  if (q.tipo === 'data') return fmtData(r.v);
+  return String(r.v);
+}
+function estatisticas(modelo, resp) {
+  const idx = indexar(modelo.perguntas);
+  let total = 0, feitas = 0;
+  const pendencias = [], abertas = [];
+  for (const id of idx.ordem) {
+    const info = idx.mapa.get(id);
+    if (info.no.tipo === 'secao' || !visivel(info, idx, resp)) continue;
+    total++;
+    const r = resp[id];
+    if (respondida(info.no, r)) { feitas++; if (temPendencia(info.no, r)) pendencias.push(info); }
+    else abertas.push(info);
+  }
+  return { idx, total, feitas, pendencias, abertas };
+}
+function contarPerguntas(perguntas) {
+  let n = 0, s = 0;
+  (function vis(l) { for (const x of l) { if (x.tipo === 'secao') s++; else n++; vis(x.filhos); } })(perguntas);
+  return { n, s };
+}
+function semear(dados) {
+  const base = BIB.modelos[0];
+  const m = normalizarModelo(clone(base));
+  dados.modelos[m.id] = m;
+  const ex = BIB.exemplo;
+  if (ex) {
+    const a = novaAnalise(m, ex.ident);
+    a.id = ex.id; a.respostas = clone(ex.respostas); a.exemplo = true;
+    dados.analises[a.id] = a;
+  }
+}
+
+/* ---------- armazenamento: db do artifact quando disponível, senão este navegador ---------- */
+const Store = {
+  modo: 'carregando', emArtifact: false, db: null,
+  dados: { modelos: {}, analises: {} },
+  revs: {}, timers: {}, cadeias: {}, pendentes: new Set(),
+  aoRemoto: null, aoStatus: null,
+  async iniciar() {
+    this.emArtifact = !!(window.claude && typeof window.claude.use === 'function');
+    let db = null;
+    if (this.emArtifact) { try { db = await window.claude.use('db'); } catch (e) { db = null; } }
+    if (db) { this.db = db; this.modo = 'db'; await this.iniciarDb(); }
+    else this.iniciarLocal();
+    this.status();
+  },
+  iniciarLocal() {
+    let bruto = null, ok = true;
+    try { bruto = localStorage.getItem(LS_DADOS); } catch (e) { ok = false; }
+    this.modo = ok ? 'local' : 'memoria';
+    let d = null;
+    if (bruto) { try { d = JSON.parse(bruto); } catch (e) { d = null; } }
+    if (d && d.modelos && d.analises) {
+      for (const m of Object.values(d.modelos)) { const x = normalizarModelo(m); this.dados.modelos[x.id] = x; }
+      for (const a of Object.values(d.analises)) { const x = normalizarAnalise(a); this.dados.analises[x.id] = x; }
+    } else {
+      semear(this.dados);
+      this.salvarLocal();
+    }
+  },
+  salvarLocal() {
+    if (this.modo !== 'local') return;
+    try { localStorage.setItem(LS_DADOS, JSON.stringify(this.dados)); }
+    catch (e) { toast('Não foi possível salvar neste navegador. Exporte um backup para não perder os dados.'); }
+  },
+  iniciarDb() {
+    return new Promise(resolve => {
+      let faltam = 2;
+      const pronto = () => { if (--faltam <= 0) resolve(); };
+      setTimeout(resolve, 9000);
+      for (const col of ['modelos', 'analises']) {
+        let primeira = true;
+        this.db.collection(col).onSnapshot(snap => {
+          this.aplicarSnap(col, snap, !primeira);
+          if (primeira) { primeira = false; pronto(); }
+        }, () => {
+          toast('A sincronização foi interrompida. Recarregue a página para voltar a salvar.');
+          if (primeira) { primeira = false; pronto(); }
+        });
+      }
+    });
+  },
+  aplicarSnap(col, snap, avisar) {
+    const mudados = [];
+    for (const ch of snap.docChanges()) {
+      const id = ch.doc.id, chave = col + '/' + id;
+      if (this.pendentes.has(chave)) continue; // há edição local ainda não gravada: ela prevalece
+      if (ch.type === 'removed') {
+        if (this.dados[col][id]) { delete this.dados[col][id]; mudados.push(id); }
+        continue;
+      }
+      const d = ch.doc.data();
+      if (!d || (d._rev && d._rev === this.revs[chave])) continue; // eco da própria gravação
+      const obj = Object.assign(clone(d), { id });
+      this.dados[col][id] = col === 'modelos' ? normalizarModelo(obj) : normalizarAnalise(obj);
+      mudados.push(id);
+    }
+    if (avisar && mudados.length && this.aoRemoto) this.aoRemoto(col, mudados);
+  },
+  put(col, obj, atraso = 700) {
+    obj.atualizadoEm = agora();
+    this.dados[col][obj.id] = obj;
+    const chave = col + '/' + obj.id;
+    this.pendentes.add(chave);
+    clearTimeout(this.timers[chave]);
+    this.timers[chave] = setTimeout(() => { this.timers[chave] = null; this.gravar(col, obj.id); }, atraso);
+    this.status();
+  },
+  gravar(col, id, tentativa = 0) {
+    const chave = col + '/' + id;
+    if (this.modo !== 'db') {
+      this.pendentes.delete(chave);
+      this.salvarLocal();
+      this.status();
+      return Promise.resolve();
+    }
+    const antes = this.cadeias[chave] || Promise.resolve();
+    const p = antes.then(async () => {
+      const obj = this.dados[col][id];
+      if (!obj) return;
+      const rev = uid('r');
+      this.revs[chave] = rev;
+      await this.db.collection(col).doc(id).set(Object.assign(clone(obj), { _rev: rev }));
+    }).catch(e => {
+      const c = e && e.code;
+      if ((c === 'unavailable' || c === 'resource_exhausted') && tentativa < 1) {
+        this.pendentes.add(chave);
+        setTimeout(() => this.gravar(col, id, tentativa + 1), 1500 + Math.random() * 1500);
+      } else this.erro(e);
+    }).finally(() => {
+      if (this.cadeias[chave] === p) {
+        delete this.cadeias[chave];
+        if (!this.timers[chave]) this.pendentes.delete(chave);
+      }
+      this.status();
+    });
+    this.cadeias[chave] = p;
+    return p;
+  },
+  async remover(col, id) {
+    const chave = col + '/' + id;
+    clearTimeout(this.timers[chave]);
+    this.timers[chave] = null;
+    delete this.dados[col][id];
+    if (this.modo === 'db') {
+      try { await (this.cadeias[chave] || Promise.resolve()); await this.db.collection(col).doc(id).delete(); }
+      catch (e) { this.erro(e); }
+    } else this.salvarLocal();
+    this.pendentes.delete(chave);
+    this.status();
+  },
+  descarregar() {
+    for (const [chave, t] of Object.entries(this.timers)) {
+      if (!t) continue;
+      clearTimeout(t);
+      this.timers[chave] = null;
+      const i = chave.indexOf('/');
+      this.gravar(chave.slice(0, i), chave.slice(i + 1));
+    }
+  },
+  erro(e) {
+    const c = e && e.code;
+    if (c === 'invalid_argument') toast('Você não tem permissão para salvar alterações aqui.');
+    else if (c === 'quota_exceeded') toast('Limite de armazenamento atingido. Exporte um backup e exclua análises antigas.');
+    else if (c === 'resource_exhausted') toast('Muitas gravações seguidas. Aguarde alguns segundos e continue.');
+    else toast('Não foi possível salvar: ' + ((e && e.message) || 'erro desconhecido'));
+  },
+  status() {
+    let estado = 'ok', txt;
+    if (this.modo === 'carregando') { estado = 'carregando'; txt = 'Carregando…'; }
+    else if (this.pendentes.size) { estado = 'salvando'; txt = 'Salvando…'; }
+    else if (this.modo === 'db') txt = 'Salvo e sincronizado';
+    else if (this.modo === 'local') txt = this.emArtifact ? 'Salvo só neste navegador' : 'Salvo neste navegador';
+    else { estado = 'aviso'; txt = 'Sem armazenamento: exporte um backup'; }
+    if (this.aoStatus) this.aoStatus(estado, txt);
+  }
+};
+
+/* ---------- estado da interface ---------- */
+const ui = (() => {
+  let u = null;
+  try { u = JSON.parse(localStorage.getItem(LS_UI) || 'null'); } catch (e) { u = null; }
+  u = Object.assign({ aba: 'analises', sel: {}, filtro: {}, filtroQ: 'todas' }, u || {});
+  u.sel = Object.assign({ analises: null, modelos: null }, u.sel);
+  u.filtro = Object.assign({ analises: '', modelos: '' }, u.filtro);
+  if (location.hash === '#modelos' || location.hash === '#analises') u.aba = location.hash.slice(1);
+  u.criando = false;
+  return u;
+})();
+function salvarUI() {
+  try { localStorage.setItem(LS_UI, JSON.stringify({ aba: ui.aba, sel: ui.sel, filtro: ui.filtro, filtroQ: ui.filtroQ })); } catch (e) { /* conveniência apenas */ }
+}
+const D = () => Store.dados;
+const analisesOrdenadas = () => Object.values(D().analises).sort((a, b) => String(b.atualizadoEm).localeCompare(String(a.atualizadoEm)));
+const modelosOrdenados = () => Object.values(D().modelos).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+function garantirSelecao() {
+  if (!D().analises[ui.sel.analises]) ui.sel.analises = (analisesOrdenadas()[0] || {}).id || null;
+  if (!D().modelos[ui.sel.modelos]) ui.sel.modelos = (modelosOrdenados()[0] || {}).id || null;
+}
+function mostrarDetalhe(sim) { document.body.classList.toggle('ver-detalhe', !!sim); }
+function voltarBtn() {
+  return btn('Voltar à lista', { icone: 'voltar', fant: true, sm: true, cls: 'so-movel', onclick: () => { mostrarDetalhe(false); window.scrollTo(0, 0); } });
+}
+
+/* ---------- casca: abas, lista lateral, backup ---------- */
+function trocarAba(aba) {
+  ui.aba = aba; ui.criando = false;
+  salvarUI();
+  try { history.replaceState(null, '', '#' + aba); } catch (e) { /* sem histórico no quadro */ }
+  mostrarDetalhe(false);
+  renderTudo();
+}
+function renderAbas() {
+  for (const b of document.querySelectorAll('.aba')) { if (b.dataset.aba === ui.aba) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }
+}
+function renderLateral() {
+  const aba = ui.aba;
+  $('#lat-tit').textContent = aba === 'analises' ? 'Análises' : 'Modelos de checklist';
+  const f = $('#filtro');
+  if (document.activeElement !== f) f.value = ui.filtro[aba] || '';
+  f.placeholder = aba === 'analises' ? 'Filtrar por núcleo, município ou processo' : 'Filtrar modelos';
+  const acoes = $('#lat-acoes');
+  if (aba === 'analises') {
+    acoes.replaceChildren(btn('Nova análise', { icone: 'mais', prim: true, onclick: () => abrirNovaAnalise() }));
+  } else {
+    acoes.replaceChildren(
+      btn('Novo modelo', { icone: 'mais', prim: true, onclick: criarModelo }),
+      btn('Importar JSON', { icone: 'enviar', onclick: () => $('#arquivo').click() })
+    );
+  }
+  renderItens();
+}
+function renderItens() {
+  const aba = ui.aba, termo = norm(ui.filtro[aba]);
+  const lista = $('#itens');
+  const itens = [];
+  if (Store.modo === 'carregando') { lista.replaceChildren(); $('#lat-cont').textContent = ''; return; }
+  if (aba === 'analises') {
+    const todas = analisesOrdenadas();
+    const vis = todas.filter(a => !termo || norm([a.ident.nucleo, a.ident.municipio, a.ident.processo, a.modelo.nome].join(' ')).includes(termo));
+    $('#lat-cont').textContent = String(todas.length);
+    for (const a of vis) {
+      const est = estatisticas(a.modelo, a.respostas);
+      const pct = est.total ? Math.round(est.feitas * 100 / est.total) : 0;
+      const sub = [a.ident.municipio, a.ident.processo && ('Proc. ' + a.ident.processo)].filter(Boolean).join(' · ');
+      itens.push(h('li', null, h('button', {
+        type: 'button', class: 'item', 'aria-current': String(!ui.criando && a.id === ui.sel.analises),
+        onclick: () => { ui.sel.analises = a.id; ui.criando = false; salvarUI(); mostrarDetalhe(true); renderItens(); renderDetalhe(); window.scrollTo(0, 0); }
+      },
+        h('span', { class: 'item-tit' }, a.ident.nucleo || 'Núcleo sem nome'),
+        sub ? h('span', { class: 'item-sub' }, sub) : null,
+        h('span', { class: 'item-meta' },
+          h('span', { class: 'barra', 'aria-hidden': 'true' }, h('i', { style: `width:${pct}%` })),
+          `${est.feitas}/${est.total}`,
+          est.pendencias.length ? h('span', { class: 'chip chip-pend' }, plural(est.pendencias.length, 'pendência', 'pendências')) : null,
+          a.status === 'concluida' ? h('span', { class: 'chip chip-ok' }, 'Concluída') : null,
+          a.exemplo ? h('span', { class: 'chip chip-ex' }, 'Exemplo') : null
+        )
+      )));
+    }
+    if (!todas.length) itens.push(h('li', { class: 'lat-vazio' }, 'Nenhuma análise ainda. Comece por “Nova análise”.'));
+    else if (!vis.length) itens.push(h('li', { class: 'lat-vazio' }, 'Nenhuma análise corresponde ao filtro.'));
+  } else {
+    const todos = modelosOrdenados();
+    const vis = todos.filter(m => !termo || norm(m.nome + ' ' + m.descricao).includes(termo));
+    $('#lat-cont').textContent = String(todos.length);
+    for (const m of vis) {
+      const c = contarPerguntas(m.perguntas);
+      itens.push(h('li', null, h('button', {
+        type: 'button', class: 'item', 'aria-current': String(m.id === ui.sel.modelos),
+        onclick: () => { ui.sel.modelos = m.id; salvarUI(); mostrarDetalhe(true); renderItens(); renderDetalhe(); window.scrollTo(0, 0); }
+      },
+        h('span', { class: 'item-tit' }, m.nome),
+        h('span', { class: 'item-meta' }, plural(c.n, 'pergunta', 'perguntas') + (c.s ? ' · ' + plural(c.s, 'seção', 'seções') : ''), ' · ', fmtQuando(m.atualizadoEm))
+      )));
+    }
+    if (!todos.length) itens.push(h('li', { class: 'lat-vazio' }, 'Nenhum modelo. Crie um novo ou adicione o modelo REURB da biblioteca.'));
+    else if (!vis.length) itens.push(h('li', { class: 'lat-vazio' }, 'Nenhum modelo corresponde ao filtro.'));
+  }
+  lista.replaceChildren(...itens);
+}
+function renderTudo() {
+  renderAbas();
+  renderLateral();
+  renderDetalhe();
+}
+let rerenderAdiado = false;
+function renderDetalhe() {
+  rerenderAdiado = false;
+  const d = $('#detalhe');
+  if (Store.modo === 'carregando') { d.replaceChildren(h('p', { class: 'carregando' }, 'Carregando dados…')); return; }
+  if (ui.aba === 'analises') {
+    if (ui.criando) return renderNovaAnalise();
+    const a = D().analises[ui.sel.analises];
+    return a ? renderAnalise(a) : renderVazioAnalises();
+  }
+  const m = D().modelos[ui.sel.modelos];
+  return m ? renderModelo(m) : renderVazioModelos();
+}
+
+/* ---------- questionário (usado na análise e na visualização) ---------- */
+function montarQuestionario(modelo, resp, aoMudar) {
+  const idx = indexar(modelo.perguntas);
+  const els = new Map();
+  const raiz = h('div', { class: 'quest' });
+
+  function definir(q, r) {
+    const vazio = !respondida(q, r) && !(r && r.obs);
+    if (vazio) delete resp[q.id]; else resp[q.id] = r;
+  }
+  function clicar(q, o) {
+    const r = Object.assign({}, resp[q.id] || {});
+    if (q.tipo === 'multipla') {
+      const cur = Array.isArray(r.v) ? r.v.slice() : [];
+      const i = cur.indexOf(o.id);
+      if (i >= 0) cur.splice(i, 1); else cur.push(o.id);
+      r.v = cur;
+    } else r.v = r.v === o.id ? null : o.id;
+    definir(q, r);
+    atualizar();
+    aoMudar();
+  }
+  function cartao(q) {
+    const info = idx.mapa.get(q.id);
+    const r0 = resp[q.id] || {};
+    const e = { botoes: new Map() };
+    const carimbo = h('span', { class: 'carimbo', hidden: true }, 'Pendência');
+    const cab = h('div', { class: 'q-cab' },
+      h('span', { class: 'q-estado', 'aria-hidden': 'true' }),
+      h('span', { class: 'q-num' }, info.num),
+      h('p', { class: 'q-txt', id: 'qt-' + q.id }, q.texto || 'Pergunta sem texto'),
+      carimbo);
+    const corpo = h('div', { class: 'q-corpo' });
+    if (q.fundamento) corpo.append(h('p', { class: 'q-fund' }, q.fundamento));
+    if (ehEscolha(q.tipo)) {
+      const grupo = h('div', { class: 'q-ops', role: 'group', 'aria-labelledby': 'qt-' + q.id });
+      for (const o of q.opcoes) {
+        const b = h('button', {
+          type: 'button', class: 'op' + (o.pendencia ? ' op-pend' : ''), 'data-multi': q.tipo === 'multipla',
+          'aria-pressed': 'false', onclick: () => clicar(q, o)
+        }, o.rotulo || '(sem rótulo)');
+        e.botoes.set(o.id, b);
+        grupo.append(b);
+      }
+      corpo.append(grupo);
+    } else if (q.tipo === 'texto') {
+      const t = h('textarea', { class: 'inp', id: 'r-' + q.id, rows: '2', 'aria-labelledby': 'qt-' + q.id, placeholder: 'Resposta', value: r0.v || '' });
+      t.addEventListener('input', () => { autoAltura(t); definir(q, Object.assign({}, resp[q.id] || {}, { v: t.value })); atualizar(); aoMudar(); });
+      corpo.append(t);
+      requestAnimationFrame(() => autoAltura(t));
+    } else if (q.tipo === 'data') {
+      const i = h('input', { class: 'inp', type: 'date', id: 'r-' + q.id, style: 'max-width:200px', 'aria-labelledby': 'qt-' + q.id, value: r0.v || '' });
+      i.addEventListener('change', () => { definir(q, Object.assign({}, resp[q.id] || {}, { v: i.value })); atualizar(); aoMudar(); });
+      corpo.append(i);
+    }
+    const extra = h('div', { class: 'q-extra' });
+    let ajuda = null;
+    if (q.ajuda) {
+      ajuda = h('p', { class: 'q-ajuda', hidden: true, id: 'qa-' + q.id }, q.ajuda);
+      const b = btn('Orientação', { icone: 'info', fant: true, sm: true });
+      b.setAttribute('aria-expanded', 'false'); b.setAttribute('aria-controls', 'qa-' + q.id);
+      b.onclick = () => { ajuda.hidden = !ajuda.hidden; b.setAttribute('aria-expanded', String(!ajuda.hidden)); };
+      extra.append(b);
+    }
+    const obs = h('textarea', { class: 'inp', id: 'o-' + q.id, rows: '2', placeholder: 'Observação sobre este item (aparece no relatório)', 'aria-label': 'Observação', value: r0.obs || '' });
+    const obsBox = h('div', { class: 'campo', hidden: !r0.obs }, obs);
+    obs.addEventListener('input', () => { autoAltura(obs); definir(q, Object.assign({}, resp[q.id] || {}, { obs: obs.value })); aoMudar(); });
+    const bObs = btn(r0.obs ? 'Observação' : 'Adicionar observação', { icone: 'nota', fant: true, sm: true });
+    bObs.setAttribute('aria-expanded', String(!!r0.obs));
+    bObs.onclick = () => { obsBox.hidden = !obsBox.hidden; bObs.setAttribute('aria-expanded', String(!obsBox.hidden)); if (!obsBox.hidden) { autoAltura(obs); obs.focus(); } };
+    if (r0.obs) requestAnimationFrame(() => autoAltura(obs));
+    extra.append(bObs);
+    corpo.append(extra);
+    if (ajuda) corpo.append(ajuda);
+    corpo.append(obsBox);
+    const prov = h('p', { class: 'q-prov', hidden: true }, h('strong', null, 'Providência: '), q.providencia || 'Registre na observação a providência necessária.');
+    corpo.append(prov);
+    const card = h('article', { class: 'q', id: 'q-' + q.id, 'aria-labelledby': 'qt-' + q.id }, cab, corpo);
+    if (q.filhos.length) {
+      const fb = h('div', { class: 'q-filhos' });
+      construir(q.filhos, fb);
+      card.append(fb);
+    }
+    Object.assign(e, { card, carimbo, prov });
+    els.set(q.id, e);
+    return card;
+  }
+  function construir(lista, destino) {
+    for (const no of lista) {
+      if (no.tipo === 'secao') {
+        const corpo = h('div', { class: 'quest' });
+        const sec = h('section', { class: 'q-sec', 'aria-labelledby': 'st-' + no.id },
+          h('header', { class: 'q-sec-cab' },
+            h('h2', { class: 'q-sec-tit', id: 'st-' + no.id }, no.texto || 'Seção sem título'),
+            no.fundamento ? h('span', { class: 'q-sec-ref' }, no.fundamento) : null),
+          corpo);
+        els.set(no.id, { card: sec, secao: true });
+        construir(no.filhos, corpo);
+        destino.append(sec);
+      } else destino.append(cartao(no));
+    }
+  }
+  construir(modelo.perguntas, raiz);
+  if (!modelo.perguntas.length) raiz.append(h('p', { class: 'dica' }, 'Este checklist ainda não tem perguntas.'));
+
+  let filtro = 'todas';
+  function atualizar(novoFiltro) {
+    if (novoFiltro) filtro = novoFiltro;
+    const casa = {}, mostra = {};
+    for (const id of idx.ordem) {
+      const info = idx.mapa.get(id), e = els.get(id);
+      if (info.no.tipo === 'secao') continue;
+      const q = info.no, r = resp[id];
+      const vis = visivel(info, idx, resp);
+      const feita = respondida(q, r), pend = feita && temPendencia(q, r);
+      e.card.classList.toggle('respondida', feita);
+      e.card.classList.toggle('pendente', pend);
+      e.carimbo.hidden = !pend;
+      e.prov.hidden = !pend;
+      const sel = selecionadas(q, r);
+      for (const [oid, b] of e.botoes) b.setAttribute('aria-pressed', String(sel.includes(oid)));
+      casa[id] = vis && (filtro === 'todas' || (filtro === 'abertas' && !feita) || (filtro === 'pendencias' && pend));
+      mostra[id] = vis;
+    }
+    // de baixo para cima: um item fora do filtro continua visível (compacto) se algum descendente estiver no filtro
+    const exibe = {};
+    for (let i = idx.ordem.length - 1; i >= 0; i--) {
+      const id = idx.ordem[i], info = idx.mapa.get(id), e = els.get(id);
+      const desc = info.no.filhos.some(f => exibe[f.id]);
+      if (info.no.tipo === 'secao') { exibe[id] = desc; e.card.hidden = !desc; continue; }
+      exibe[id] = mostra[id] && (casa[id] || desc);
+      e.card.hidden = !exibe[id];
+      e.card.classList.toggle('compacto', exibe[id] && !casa[id]);
+    }
+  }
+  function irPara(id) {
+    const e = els.get(id);
+    if (!e) return;
+    if (e.card.hidden) atualizar('todas');
+    e.card.scrollIntoView({ block: 'center', behavior: reduzMov ? 'auto' : 'smooth' });
+    e.card.classList.add('destaque');
+    setTimeout(() => e.card.classList.remove('destaque'), 1600);
+  }
+  atualizar();
+  return { el: raiz, atualizar, irPara, filtroAtual: () => filtro };
+}
+
+/* ---------- análise ---------- */
+function subtituloAnalise(a) {
+  return [a.ident.municipio, a.ident.processo && ('Processo ' + a.ident.processo), a.ident.inicio && ('Início em ' + fmtData(a.ident.inicio))].filter(Boolean).join(' · ') || 'Preencha a identificação do processo';
+}
+function renderAnalise(a) {
+  const d = $('#detalhe');
+  const titulo = h('h1', { class: 'titulo' }, a.ident.nucleo || 'Núcleo sem nome');
+  const sub = h('p', { class: 'subt' }, subtituloAnalise(a));
+  const concluida = a.status === 'concluida';
+  const acoes = h('div', { class: 'acoes' },
+    btn('Baixar relatório', { icone: 'baixar', prim: true, onclick: () => baixar(`relatorio-reurb-${slug(a.ident.nucleo)}-${hoje()}.html`, relatorioHTML(a)) }),
+    btn('Copiar pendências', { icone: 'copiar', onclick: () => copiar(textoPendencias(a)) }),
+    !Store.emArtifact ? btn('Imprimir', { icone: 'imprimir', onclick: () => imprimir(a) }) : null,
+    btn(concluida ? 'Reabrir análise' : 'Marcar como concluída', { icone: concluida ? 'voltar' : 'check', onclick: () => { a.status = concluida ? 'andamento' : 'concluida'; Store.put('analises', a, 0); renderItens(); renderDetalhe(); } }),
+    btn('Excluir análise', { icone: 'lixo', fant: true, perigo: true, onclick: ev => armar(ev.currentTarget, () => { Store.remover('analises', a.id); ui.sel.analises = null; garantirSelecao(); mostrarDetalhe(false); renderTudo(); toast('Análise excluída.'); }) })
+  );
+  const cab = h('div', { class: 'cab' },
+    h('div', { class: 'cab-txt' }, voltarBtn(),
+      h('span', { class: 'sobre' }, (concluida ? 'Análise concluída · ' : 'Análise em andamento · ') + a.modelo.nome),
+      titulo, sub),
+    acoes);
+  const blocos = [cab];
+  if (a.exemplo) blocos.push(h('p', { class: 'nota nota-info' }, ico('info'), h('span', null, 'Esta é uma análise de exemplo, com dados fictícios, para mostrar como o checklist funciona. Exclua-a quando não precisar mais.')));
+  const mAtual = D().modelos[a.modeloId];
+  if (mAtual && a.modeloEm && mAtual.atualizadoEm > a.modeloEm) {
+    blocos.push(h('div', { class: 'nota' }, ico('aviso'),
+      h('span', null, 'O modelo “' + mAtual.nome + '” foi alterado depois que esta análise começou. As respostas já dadas são mantidas ao atualizar.'),
+      btn('Usar versão atual do modelo', { sm: true, cls: 'nota-acao', onclick: () => {
+        a.modelo = { nome: mAtual.nome, perguntas: clone(mAtual.perguntas) }; a.modeloEm = mAtual.atualizadoEm;
+        Store.put('analises', a, 0); renderDetalhe(); renderItens(); toast('Análise atualizada para a versão atual do modelo.');
+      } })));
+  }
+  // identificação
+  const campos = [
+    ['municipio', 'Município/UF', 'text'], ['nucleo', 'Núcleo urbano informal', 'text'], ['processo', 'Processo ou protocolo', 'text'],
+    ['responsavel', 'Responsável técnico', 'text'], ['inicio', 'Início da análise', 'date']
+  ];
+  const ident = h('fieldset', { class: 'ident' }, h('legend', null, 'Identificação do processo'),
+    campos.map(([k, rot, tipo]) => {
+      const inp = h('input', { class: 'inp', type: tipo, id: 'an-' + k, value: a.ident[k] || '', autocomplete: 'off' });
+      inp.addEventListener('input', () => {
+        a.ident[k] = inp.value;
+        titulo.textContent = a.ident.nucleo || 'Núcleo sem nome';
+        sub.textContent = subtituloAnalise(a);
+        Store.put('analises', a);
+        renderItens();
+      });
+      return h('label', { class: 'campo', for: 'an-' + k }, h('span', { class: 'rot' }, rot), inp);
+    }));
+  blocos.push(ident);
+
+  const resumo = h('aside', { class: 'resumo', 'aria-label': 'Resumo da análise' });
+  let quest;
+  function atualizarResumo() {
+    const est = estatisticas(a.modelo, a.respostas);
+    const pct = est.total ? Math.round(est.feitas * 100 / est.total) : 0;
+    resumo.replaceChildren(
+      h('div', { class: 'res-prog' }, h('span', { class: 'res-num' }, `${est.feitas}/${est.total}`), h('span', { class: 'res-rot' }, 'respondidas')),
+      h('div', { class: 'barra barra-g', role: 'progressbar', 'aria-label': 'Progresso da análise', 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-valuenow': String(pct) }, h('i', { style: `width:${pct}%` })),
+      h('div', { class: 'res-cont' },
+        h('span', { class: 'chip' + (est.pendencias.length ? ' chip-pend' : '') }, plural(est.pendencias.length, 'pendência', 'pendências')),
+        h('span', { class: 'chip' }, `${est.abertas.length} em aberto`)),
+      h('h3', { class: 'res-tit' }, 'Pendências'),
+      est.pendencias.length
+        ? h('ol', { class: 'res-lista' }, est.pendencias.map(info => h('li', null,
+          h('button', { type: 'button', class: 'res-item', onclick: () => quest.irPara(info.no.id) }, h('span', { class: 'q-num' }, info.num), h('span', null, info.no.texto)))))
+        : h('p', { class: 'dica' }, est.feitas ? 'Nenhuma pendência até aqui.' : 'As pendências aparecem aqui conforme você responde.')
+    );
+  }
+  quest = montarQuestionario(a.modelo, a.respostas, () => { Store.put('analises', a); atualizarResumo(); renderItens(); });
+  const filtros = [['todas', 'Todas'], ['abertas', 'Em aberto'], ['pendencias', 'Pendências']];
+  const barraFiltro = h('div', { class: 'filtro-q', role: 'group', 'aria-label': 'Mostrar perguntas' },
+    filtros.map(([k, rot]) => h('button', {
+      type: 'button', 'aria-pressed': String(ui.filtroQ === k), 'data-f': k,
+      onclick: ev => {
+        ui.filtroQ = k; salvarUI();
+        for (const b of barraFiltro.children) b.setAttribute('aria-pressed', String(b.dataset.f === k));
+        quest.atualizar(k);
+      }
+    }, rot)));
+  quest.atualizar(ui.filtroQ);
+  atualizarResumo();
+  blocos.push(h('div', { class: 'an-grade' }, h('div', null, barraFiltro, quest.el), resumo));
+  d.replaceChildren(...blocos);
+}
+function renderVazioAnalises() {
+  const temModelo = modelosOrdenados().length > 0;
+  $('#detalhe').replaceChildren(h('div', { class: 'vazio' },
+    h('h2', null, 'Nenhuma análise aberta'),
+    h('p', null, 'Uma análise aplica um modelo de checklist a um núcleo urbano informal: você responde às perguntas, anota observações e o checklist aponta as pendências com a providência e a fundamentação legal de cada uma.'),
+    temModelo
+      ? btn('Nova análise', { icone: 'mais', prim: true, onclick: () => abrirNovaAnalise() })
+      : btn('Adicionar modelo REURB', { icone: 'livro', prim: true, onclick: () => { adicionarDaBiblioteca(); } })
+  ));
+}
+function abrirNovaAnalise(modeloId) {
+  ui.aba = 'analises'; ui.criando = true; ui.modeloNovo = modeloId || null;
+  mostrarDetalhe(true);
+  renderTudo();
+  window.scrollTo(0, 0);
+}
+function renderNovaAnalise() {
+  const d = $('#detalhe');
+  const modelos = modelosOrdenados();
+  if (!modelos.length) {
+    d.replaceChildren(h('div', { class: 'vazio' }, voltarBtn(), h('h2', null, 'Cadastre um modelo primeiro'),
+      h('p', null, 'Toda análise parte de um modelo de checklist. Adicione o modelo REURB pronto ou crie o seu.'),
+      h('div', { class: 'acoes' }, btn('Adicionar modelo REURB', { icone: 'livro', prim: true, onclick: adicionarDaBiblioteca }), btn('Criar modelo', { icone: 'mais', onclick: criarModelo }))));
+    return;
+  }
+  const sel = h('select', { class: 'inp', id: 'na-modelo' }, modelos.map(m => h('option', { value: m.id, selected: m.id === (ui.modeloNovo || modelos[0].id) }, m.nome)));
+  const campo = (id, rot, attrs = {}) => h('label', { class: 'campo' + (attrs.largo ? ' largo' : ''), for: id }, h('span', { class: 'rot' }, rot),
+    h('input', Object.assign({ class: 'inp', id, type: 'text', autocomplete: 'off' }, attrs, { largo: null })));
+  const form = h('form', { class: 'form-nova' },
+    h('label', { class: 'campo largo', for: 'na-modelo' }, h('span', { class: 'rot' }, 'Modelo de checklist'), sel),
+    campo('na-nucleo', 'Núcleo urbano informal', { required: true, placeholder: 'Ex.: Jardim das Palmeiras', largo: true }),
+    campo('na-municipio', 'Município/UF', { placeholder: 'Ex.: Assis Chateaubriand/PR' }),
+    campo('na-processo', 'Processo ou protocolo'),
+    campo('na-responsavel', 'Responsável técnico'),
+    campo('na-inicio', 'Início da análise', { type: 'date', value: hoje() }),
+    h('div', { class: 'acoes largo' },
+      h('button', { type: 'submit', class: 'btn btn-prim' }, ico('check'), 'Iniciar análise'),
+      btn('Cancelar', { fant: true, onclick: () => { ui.criando = false; mostrarDetalhe(false); renderTudo(); } }))
+  );
+  form.addEventListener('submit', ev => {
+    ev.preventDefault();
+    const m = D().modelos[sel.value];
+    if (!m) { toast('Escolha um modelo de checklist.'); return; }
+    const v = id => $('#' + id).value.trim();
+    const a = novaAnalise(m, { nucleo: v('na-nucleo'), municipio: v('na-municipio'), processo: v('na-processo'), responsavel: v('na-responsavel'), inicio: $('#na-inicio').value });
+    Store.put('analises', a, 0);
+    ui.sel.analises = a.id; ui.criando = false; ui.filtroQ = 'todas'; salvarUI();
+    renderTudo();
+    toast('Análise iniciada.');
+  });
+  d.replaceChildren(h('div', { class: 'cab' }, h('div', { class: 'cab-txt' }, voltarBtn(), h('span', { class: 'sobre' }, 'Nova análise'),
+    h('h1', { class: 'titulo' }, 'Aplicar um checklist a um núcleo'),
+    h('p', { class: 'subt' }, 'A análise guarda uma cópia do modelo escolhido, então mudanças futuras no modelo não alteram o que já foi respondido.'))), form);
+  $('#na-nucleo').focus();
+}
+
+/* ---------- editor de modelo ---------- */
+const edAbertos = new Set();
+function salvarModelo(m, atraso) { Store.put('modelos', m, atraso ?? 900); }
+function renderModelo(m) {
+  const d = $('#detalhe');
+  const nome = h('input', { class: 'ed-nome', id: 'ed-nome', 'aria-label': 'Nome do checklist', placeholder: 'Nome do checklist', value: m.nome });
+  nome.addEventListener('input', () => { m.nome = nome.value; salvarModelo(m); renderItens(); });
+  const desc = h('textarea', { class: 'inp', id: 'ed-desc', rows: '2', placeholder: 'Para que serve este checklist e quando aplicá-lo', 'aria-label': 'Descrição', value: m.descricao });
+  desc.addEventListener('input', () => { m.descricao = desc.value; autoAltura(desc); salvarModelo(m); });
+  requestAnimationFrame(() => autoAltura(desc));
+  const meta = h('p', { class: 'ed-meta', id: 'ed-meta' });
+  const acoes = h('div', { class: 'acoes' },
+    btn('Visualizar', { icone: 'olho', prim: true, onclick: () => visualizar(m) }),
+    btn('Nova análise', { icone: 'mais', onclick: () => abrirNovaAnalise(m.id) }),
+    btn('Clonar', { icone: 'copiar', onclick: () => clonarModelo(m) }),
+    btn('Exportar JSON', { icone: 'baixar', onclick: () => baixar(`checklist-${slug(m.nome)}.json`, JSON.stringify({ formato: 'checklist-modelo', versao: 1, modelo: limparModelo(m) }, null, 2)) }),
+    btn('Excluir', { icone: 'lixo', fant: true, perigo: true, onclick: ev => armar(ev.currentTarget, () => { Store.remover('modelos', m.id); ui.sel.modelos = null; garantirSelecao(); mostrarDetalhe(false); renderTudo(); toast('Modelo excluído. As análises feitas com ele continuam disponíveis.'); }) })
+  );
+  const arv = h('div', { class: 'ed-arvore', id: 'ed-arvore' });
+  const fim = h('div', { class: 'ed-add ed-fim' },
+    btn('Pergunta', { icone: 'mais', onclick: () => { const q = novaPergunta(); m.perguntas.push(q); estrutural(m, q.id); } }),
+    btn('Seção', { icone: 'mais', onclick: () => { const s = novaSecao(); m.perguntas.push(s); estrutural(m, s.id); } }));
+  d.replaceChildren(
+    h('div', { class: 'cab' }, h('div', { class: 'cab-txt' }, voltarBtn(), h('span', { class: 'sobre' }, 'Modelo de checklist'), nome), acoes),
+    h('div', { class: 'ed-topo' }, desc, meta,
+      h('p', { class: 'nota nota-info', style: 'margin:0' }, ico('info'), h('span', null, 'Tudo é salvo automaticamente. As mudanças valem para as próximas análises; as já iniciadas mantêm a versão com que começaram, até você atualizá-las.'))),
+    arv, fim);
+  renderArvore(m);
+  atualizarMeta(m);
+}
+function atualizarMeta(m) {
+  const el = $('#ed-meta');
+  if (!el) return;
+  const c = contarPerguntas(m.perguntas);
+  const usos = Object.values(D().analises).filter(a => a.modeloId === m.id).length;
+  el.textContent = [plural(c.n, 'pergunta', 'perguntas'), plural(c.s, 'seção', 'seções'), 'usado em ' + plural(usos, 'análise', 'análises')].join(' · ');
+}
+function estrutural(m, focoId) {
+  salvarModelo(m, 400);
+  renderArvore(m, focoId);
+  atualizarMeta(m);
+  renderItens();
+}
+function renderArvore(m, focoId) {
+  const arv = $('#ed-arvore');
+  if (!arv) return;
+  const idx = indexar(m.perguntas);
+  arv.replaceChildren(...m.perguntas.map(no => noEditor(m, idx, no, m.perguntas, null)));
+  if (!m.perguntas.length) arv.append(h('p', { class: 'lat-vazio' }, 'Nenhuma pergunta ainda. Adicione a primeira pergunta ou uma seção para agrupar perguntas.'));
+  requestAnimationFrame(() => {
+    for (const t of arv.querySelectorAll('textarea.auto')) autoAltura(t);
+    if (focoId) {
+      const el = document.getElementById(focoId.startsWith('#') ? focoId.slice(1) : 'e-' + focoId + '-texto');
+      if (el) { el.focus({ preventScroll: true }); el.scrollIntoView({ block: 'center', behavior: reduzMov ? 'auto' : 'smooth' }); }
+    }
+  });
+}
+function duplicarNo(no) {
+  const c = clone(no);
+  (function novos(n) { n.id = uid(n.tipo === 'secao' ? 's' : 'q'); n.filhos.forEach(novos); })(c);
+  return c;
+}
+function acoesNo(m, no, lista) {
+  const i = lista.indexOf(no);
+  const mover = delta => { const j = i + delta; [lista[i], lista[j]] = [lista[j], lista[i]]; estrutural(m, '#e-' + no.id + (delta < 0 ? '-sobe' : '-desce')); };
+  const bs = h('div', { class: 'ed-acoes' },
+    btn('Mover para cima', { icone: 'cima', soIcone: true, fant: true, id: 'e-' + no.id + '-sobe', disabled: i === 0, onclick: () => mover(-1) }),
+    btn('Mover para baixo', { icone: 'baixo', soIcone: true, fant: true, id: 'e-' + no.id + '-desce', disabled: i === lista.length - 1, onclick: () => mover(1) }),
+    btn('Duplicar', { icone: 'copiar', soIcone: true, fant: true, onclick: () => { const c = duplicarNo(no); lista.splice(i + 1, 0, c); estrutural(m, c.id); } }),
+    btn(no.tipo === 'secao' ? 'Excluir seção e suas perguntas' : 'Excluir pergunta', { icone: 'lixo', soIcone: true, fant: true, perigo: true, onclick: ev => armar(ev.currentTarget, () => { lista.splice(i, 1); estrutural(m); }) }));
+  return bs;
+}
+function campoTexto(no, chave, rot, attrs = {}) {
+  const id = `e-${no.id}-${chave}`;
+  const el = attrs.multilinha
+    ? h('textarea', { class: 'inp auto', id, rows: '1', placeholder: attrs.placeholder || '', value: no[chave] })
+    : h('input', { class: 'inp', id, type: 'text', placeholder: attrs.placeholder || '', value: no[chave] });
+  return { el, rotulo: h('label', { class: 'campo' + (attrs.largo ? ' largo' : ''), for: id }, h('span', { class: 'rot' }, rot), el) };
+}
+function noEditor(m, idx, no, lista, pai) {
+  const info = idx.mapa.get(no.id);
+  const ligar = (el, chave, extra) => el.addEventListener('input', () => { no[chave] = el.value; if (el.tagName === 'TEXTAREA') autoAltura(el); salvarModelo(m); if (extra) extra(); });
+  if (no.tipo === 'secao') {
+    const tit = h('input', { class: 'inp ed-texto', id: 'e-' + no.id + '-texto', placeholder: 'Título da seção', 'aria-label': 'Título da seção', value: no.texto });
+    ligar(tit, 'texto');
+    const ref = campoTexto(no, 'fundamento', 'Referência legal da seção', { placeholder: 'Ex.: Lei 13.465/2017, art. 36' });
+    ligar(ref.el, 'fundamento');
+    return h('section', { class: 'ed-no ed-secao' },
+      h('div', { class: 'ed-linha' }, h('span', { class: 'ed-sec-rot' }, 'Seção'), tit, acoesNo(m, no, lista)),
+      ref.rotulo,
+      no.filhos.length ? h('div', { class: 'ed-filhos' }, no.filhos.map(f => noEditor(m, idx, f, no.filhos, null))) : null,
+      h('div', { class: 'ed-add' }, btn('Pergunta nesta seção', { icone: 'mais', sm: true, onclick: () => { const q = novaPergunta(); no.filhos.push(q); estrutural(m, q.id); } })));
+  }
+  const txt = h('textarea', { class: 'inp auto ed-texto', id: 'e-' + no.id + '-texto', rows: '1', placeholder: 'Escreva a pergunta', 'aria-label': 'Pergunta ' + info.num, value: no.texto });
+  ligar(txt, 'texto');
+  const tipo = h('select', { class: 'inp ed-tipo', id: 'e-' + no.id + '-tipo', 'aria-label': 'Tipo de resposta' },
+    Object.entries(TIPOS).map(([k, v]) => h('option', { value: k, selected: k === no.tipo }, v)));
+  tipo.addEventListener('change', () => { no.tipo = tipo.value; ajustarOpcoes(no); podarCondicoes(no); estrutural(m, '#e-' + no.id + '-tipo'); });
+  const card = h('div', { class: 'ed-no' },
+    h('div', { class: 'ed-linha' }, h('span', { class: 'ed-num' }, info.num), txt),
+    h('div', { class: 'ed-linha' }, tipo, acoesNo(m, no, lista)));
+
+  // condição de exibição (sub-pergunta de pergunta de escolha)
+  if (pai && ehEscolha(pai.tipo)) {
+    const pinfo = idx.mapa.get(pai.id);
+    const dica = h('span', { class: 'dica' });
+    const atualizarDica = () => { dica.textContent = no.mostrarSe.length ? '' : '(nenhuma marcada: sempre exibe)'; };
+    const cond = h('div', { class: 'ed-cond' }, h('span', null, `Exibir quando a ${pinfo.num} for:`),
+      pai.opcoes.map(o => {
+        const t = h('button', { type: 'button', class: 'tog', 'aria-pressed': String(no.mostrarSe.includes(o.id)) }, o.rotulo || '(sem rótulo)');
+        t.onclick = () => {
+          const k = no.mostrarSe.indexOf(o.id);
+          if (k >= 0) no.mostrarSe.splice(k, 1); else no.mostrarSe.push(o.id);
+          t.setAttribute('aria-pressed', String(k < 0));
+          atualizarDica(); salvarModelo(m);
+        };
+        return t;
+      }), dica);
+    atualizarDica();
+    card.append(cond);
+  }
+  // opções e pendências
+  if (FIXAS[no.tipo]) {
+    card.append(h('div', { class: 'ed-flags' }, h('span', null, 'Gera pendência quando a resposta for:'),
+      no.opcoes.map(o => {
+        const t = h('button', { type: 'button', class: 'tog tog-pend', 'aria-pressed': String(o.pendencia) }, o.rotulo);
+        t.onclick = () => { o.pendencia = !o.pendencia; t.setAttribute('aria-pressed', String(o.pendencia)); salvarModelo(m); };
+        return t;
+      })));
+  } else if (no.tipo === 'unica' || no.tipo === 'multipla') {
+    const ops = h('div', { class: 'ed-ops' }, h('span', { class: 'rot' }, 'Opções de resposta'),
+      no.opcoes.map((o, k) => {
+        const inp = h('input', { class: 'inp', id: `e-${no.id}-op-${o.id}`, 'aria-label': 'Opção ' + (k + 1), value: o.rotulo });
+        inp.addEventListener('input', () => { o.rotulo = inp.value; salvarModelo(m); });
+        const t = h('button', { type: 'button', class: 'tog tog-pend', 'aria-pressed': String(o.pendencia), title: 'Marcar esta opção como pendência' }, 'Pendência');
+        t.onclick = () => { o.pendencia = !o.pendencia; t.setAttribute('aria-pressed', String(o.pendencia)); salvarModelo(m); };
+        return h('div', { class: 'ed-op' }, inp, t,
+          btn('Remover opção', { icone: 'x', soIcone: true, fant: true, disabled: no.opcoes.length <= 1, onclick: () => { no.opcoes.splice(k, 1); podarCondicoes(no); estrutural(m); } }));
+      }),
+      h('div', null, btn('Opção', { icone: 'mais', sm: true, fant: true, onclick: () => { const o = { id: uid('o'), rotulo: '', pendencia: false }; no.opcoes.push(o); estrutural(m, `#e-${no.id}-op-${o.id}`); } })));
+    card.append(ops);
+  }
+  // detalhes
+  const fund = campoTexto(no, 'fundamento', 'Fundamentação legal', { placeholder: 'Ex.: Lei 13.465/2017, art. 36, § 1º, I' });
+  const resumoFund = h('em', null, no.fundamento);
+  ligar(fund.el, 'fundamento', () => { resumoFund.textContent = no.fundamento; });
+  const campos = [fund.rotulo];
+  if (ehEscolha(no.tipo)) {
+    const prov = campoTexto(no, 'providencia', 'Providência quando houver pendência', { multilinha: true, placeholder: 'O que o município precisa fazer para sanar' });
+    ligar(prov.el, 'providencia');
+    campos.push(prov.rotulo);
+  }
+  const aj = campoTexto(no, 'ajuda', 'Orientação para quem responde', { multilinha: true, largo: true, placeholder: 'Critérios, documentos a conferir, observações da legislação municipal' });
+  ligar(aj.el, 'ajuda');
+  campos.push(aj.rotulo);
+  const det = h('details', { class: 'ed-det', open: edAbertos.has(no.id) },
+    h('summary', null, h('span', null, 'Fundamentação, providência e orientação'), resumoFund),
+    h('div', { class: 'ed-campos' }, campos));
+  det.addEventListener('toggle', () => {
+    if (det.open) { edAbertos.add(no.id); for (const t of det.querySelectorAll('textarea.auto')) autoAltura(t); } else edAbertos.delete(no.id);
+  });
+  card.append(det);
+  if (no.filhos.length) card.append(h('div', { class: 'ed-filhos' }, no.filhos.map(f => noEditor(m, idx, f, no.filhos, no))));
+  card.append(h('div', { class: 'ed-add' }, btn('Sub-pergunta', { icone: 'mais', sm: true, fant: true, onclick: () => {
+    const q = novaPergunta();
+    if (ehEscolha(no.tipo) && no.opcoes.length) q.mostrarSe = [no.opcoes[0].id];
+    no.filhos.push(q);
+    estrutural(m, q.id);
+  } })));
+  return card;
+}
+function limparModelo(m) {
+  return { id: m.id, nome: m.nome, descricao: m.descricao, perguntas: clone(m.perguntas) };
+}
+function criarModelo() {
+  const m = normalizarModelo({ id: uid('m'), nome: 'Novo checklist', perguntas: [novaPergunta()] });
+  Store.put('modelos', m, 0);
+  ui.aba = 'modelos'; ui.sel.modelos = m.id; salvarUI();
+  mostrarDetalhe(true);
+  renderTudo();
+  requestAnimationFrame(() => { const n = $('#ed-nome'); if (n) { n.focus(); n.select(); } });
+}
+function clonarModelo(m) {
+  const c = normalizarModelo(Object.assign(limparModelo(m), { id: uid('m'), nome: 'Cópia de ' + m.nome, criadoEm: null, atualizadoEm: null }));
+  Store.put('modelos', c, 0);
+  ui.sel.modelos = c.id; salvarUI();
+  renderTudo();
+  toast('Modelo clonado.');
+}
+function adicionarModelo(bruto) {
+  const m = normalizarModelo(clone(bruto));
+  if (D().modelos[m.id]) m.id = uid('m');
+  m.criadoEm = m.atualizadoEm = agora();
+  Store.put('modelos', m, 0);
+  return m;
+}
+function adicionarDaBiblioteca() {
+  const m = adicionarModelo(BIB.modelos[0]);
+  ui.aba = 'modelos'; ui.sel.modelos = m.id; salvarUI();
+  mostrarDetalhe(true);
+  renderTudo();
+  toast('Modelo REURB adicionado.');
+}
+
+/* ---------- visualização (modo de teste) ---------- */
+function visualizar(m) {
+  const resp = {};
+  const cont = h('p', { class: 'dica' });
+  let quest;
+  const atualizarCont = () => {
+    const est = estatisticas(m, resp);
+    cont.textContent = `${est.feitas}/${est.total} respondidas · ${plural(est.pendencias.length, 'pendência', 'pendências')}`;
+  };
+  quest = montarQuestionario(m, resp, atualizarCont);
+  atualizarCont();
+  const fechar = () => { modal.remove(); document.removeEventListener('keydown', esc_); if (voltaFoco) voltaFoco.focus(); };
+  const esc_ = ev => { if (ev.key === 'Escape') fechar(); };
+  const voltaFoco = document.activeElement;
+  const bFechar = btn('Fechar', { icone: 'x', onclick: fechar });
+  const modal = h('div', { class: 'modal', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'vis-tit' },
+    h('div', { class: 'modal-painel' },
+      h('div', { class: 'modal-cab' }, h('div', null, h('span', { class: 'sobre' }, 'Visualizar checklist · modo de teste'), h('h2', { id: 'vis-tit' }, m.nome), cont), bFechar),
+      h('div', { class: 'modal-corpo' }, h('p', { class: 'nota nota-info', style: 'margin:0' }, ico('info'), h('span', null, 'Teste as respostas e as sub-perguntas condicionais. Nada do que você marcar aqui é salvo.')), quest.el)));
+  modal.addEventListener('click', ev => { if (ev.target === modal) fechar(); });
+  document.addEventListener('keydown', esc_);
+  document.body.append(modal);
+  bFechar.focus();
+}
+
+/* ---------- relatório, cópia, impressão, arquivos ---------- */
+function relatorioHTML(a) {
+  const est = estatisticas(a.modelo, a.respostas);
+  const I = a.ident;
+  const ident = [['Município', I.municipio], ['Núcleo urbano informal', I.nucleo], ['Processo ou protocolo', I.processo],
+    ['Responsável técnico', I.responsavel], ['Início da análise', fmtData(I.inicio)], ['Checklist aplicado', a.modelo.nome],
+    ['Situação', a.status === 'concluida' ? 'Concluída' : 'Em andamento'], ['Emitido em', fmtData(hoje())]].filter(([, v]) => v);
+  const linhaPend = info => {
+    const r = a.respostas[info.no.id];
+    return `<tr><td class="n">${esc(info.num)}</td><td>${esc(info.no.texto)}${info.no.fundamento ? `<div class="fund">${esc(info.no.fundamento)}</div>` : ''}</td><td class="pend">${esc(textoResposta(info.no, r))}</td><td>${esc(info.no.providencia)}${r && r.obs ? `<div class="obs">Obs.: ${esc(r.obs)}</div>` : ''}</td></tr>`;
+  };
+  let corpo = '', ultimaSec = null, aberta = false;
+  const fechaTabela = () => { if (aberta) { corpo += '</tbody></table>'; aberta = false; } };
+  const abreTabela = () => { if (!aberta) { corpo += '<table><thead><tr><th>Item</th><th>Pergunta</th><th>Resposta</th><th>Observação</th></tr></thead><tbody>'; aberta = true; } };
+  for (const id of est.idx.ordem) {
+    const info = est.idx.mapa.get(id);
+    if (info.no.tipo === 'secao' || !visivel(info, est.idx, a.respostas)) continue;
+    if (info.secao && info.secao.id !== ultimaSec) {
+      fechaTabela();
+      corpo += `<h3>${esc(info.secao.texto)}${info.secao.fundamento ? ` <span class="fund">— ${esc(info.secao.fundamento)}</span>` : ''}</h3>`;
+      ultimaSec = info.secao.id;
+    }
+    abreTabela();
+    const r = a.respostas[id];
+    const pend = temPendencia(info.no, r);
+    corpo += `<tr><td class="n">${esc(info.num)}</td><td>${esc(info.no.texto)}</td><td class="${pend ? 'pend' : ''}">${respondida(info.no, r) ? esc(textoResposta(info.no, r)) : '<span class="nr">sem resposta</span>'}${pend ? ' <b class="pend">(pendência)</b>' : ''}</td><td>${r && r.obs ? esc(r.obs) : ''}</td></tr>`;
+  }
+  fechaTabela();
+  const css = `body{font:11pt/1.5 Georgia,"Times New Roman",serif;color:#1b1b1b;max-width:820px;margin:32px auto;padding:0 24px}
+h1{font-size:19pt;margin:0 0 2px;line-height:1.2}h2{font-size:13pt;border-bottom:1.5px solid #1b1b1b;padding-bottom:4px;margin:30px 0 10px}
+h3{font-size:11.5pt;margin:20px 0 6px}.sub{font:9.5pt Arial,sans-serif;color:#555;margin:0 0 20px;text-transform:uppercase;letter-spacing:.06em}
+table{width:100%;border-collapse:collapse;margin:6px 0 14px;font-size:10pt}th,td{border:1px solid #b9bfbb;padding:6px 8px;text-align:left;vertical-align:top}
+th{background:#eef1ef;font:bold 8.5pt Arial,sans-serif;text-transform:uppercase;letter-spacing:.05em}td.n{font-family:"Courier New",monospace;white-space:nowrap;width:1%}
+.ident td:first-child{width:32%;font:9.5pt Arial,sans-serif;color:#444}.pend{color:#a11d12}.fund{font-style:italic;color:#555;font-size:9.5pt}
+.obs{margin-top:4px;color:#333;font-size:9.5pt}.nr{color:#888;font-style:italic}.cont{font:10pt Arial,sans-serif}
+.ass{margin-top:64px;border-top:1px solid #1b1b1b;width:340px;padding-top:4px;font:9.5pt Arial,sans-serif}
+.aviso{font:8.5pt Arial,sans-serif;color:#666;margin-top:28px}@media print{body{margin:0;max-width:none}h2,h3{break-after:avoid}tr{break-inside:avoid}}`;
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Relatório — ${esc(I.nucleo || 'Análise REURB')}</title><style>${css}</style></head><body>
+<p class="sub">Relatório de análise · ${esc(a.modelo.nome)}</p>
+<h1>${esc(I.nucleo || 'Núcleo sem nome')}</h1>
+<h2>Identificação</h2><table class="ident"><tbody>${ident.map(([k, v]) => `<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>`).join('')}</tbody></table>
+<h2>Resumo</h2><p class="cont">${est.feitas} de ${est.total} itens respondidos · ${plural(est.pendencias.length, 'pendência', 'pendências')} · ${est.abertas.length} em aberto</p>
+<h2>Pendências e providências</h2>${est.pendencias.length ? `<table><thead><tr><th>Item</th><th>Pergunta e fundamento</th><th>Resposta</th><th>Providência</th></tr></thead><tbody>${est.pendencias.map(linhaPend).join('')}</tbody></table>` : '<p>Nenhuma pendência identificada nos itens respondidos.</p>'}
+${est.abertas.length ? `<h2>Itens em aberto</h2><table><thead><tr><th>Item</th><th>Pergunta</th></tr></thead><tbody>${est.abertas.map(i => `<tr><td class="n">${esc(i.num)}</td><td>${esc(i.no.texto)}</td></tr>`).join('')}</tbody></table>` : ''}
+<h2>Respostas</h2>${corpo}
+<div class="ass">${esc(I.responsavel || 'Responsável técnico')}</div>
+<p class="aviso">Documento gerado pelo Checklist REURB. As referências legais devem ser conferidas com a legislação federal, estadual e municipal vigente.</p>
+</body></html>`;
+}
+function textoPendencias(a) {
+  const est = estatisticas(a.modelo, a.respostas);
+  const I = a.ident;
+  const linhas = [
+    `Análise REURB — ${I.nucleo || 'Núcleo sem nome'}${I.municipio ? ' (' + I.municipio + ')' : ''}`,
+    [I.processo && 'Processo ' + I.processo, `${est.feitas}/${est.total} respondidas`, plural(est.pendencias.length, 'pendência', 'pendências')].filter(Boolean).join(' · '),
+    ''
+  ];
+  if (!est.pendencias.length) linhas.push('Nenhuma pendência identificada nos itens respondidos.');
+  est.pendencias.forEach((info, k) => {
+    const r = a.respostas[info.no.id];
+    linhas.push(`${k + 1}. [item ${info.num}] ${info.no.texto}`);
+    linhas.push(`   Resposta: ${textoResposta(info.no, r)}`);
+    if (info.no.providencia) linhas.push(`   Providência: ${info.no.providencia}`);
+    if (info.no.fundamento) linhas.push(`   Fundamento: ${info.no.fundamento}`);
+    if (r && r.obs) linhas.push(`   Observação: ${r.obs}`);
+  });
+  return linhas.join('\n');
+}
+function mostrarTexto(titulo, texto, dica) {
+  const ta = h('textarea', { class: 'inp', id: 'txt-manual', rows: '14', readonly: true, value: texto, style: 'font:12.5px/1.5 var(--f-mono)' });
+  const fechar = () => modal.remove();
+  const modal = h('div', { class: 'modal', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'txt-tit' },
+    h('div', { class: 'modal-painel' },
+      h('div', { class: 'modal-cab' }, h('div', null, h('h2', { id: 'txt-tit' }, titulo)), btn('Fechar', { icone: 'x', onclick: fechar })),
+      h('div', { class: 'modal-corpo' }, h('p', { class: 'dica' }, dica), ta)));
+  modal.addEventListener('click', ev => { if (ev.target === modal) fechar(); });
+  document.body.append(modal);
+  ta.focus(); ta.select();
+}
+function copiar(texto) {
+  const falhou = () => mostrarTexto('Copiar pendências', texto, 'Selecione o texto abaixo e copie com Ctrl+C.');
+  try {
+    navigator.clipboard.writeText(texto).then(() => toast('Pendências copiadas.'), falhou);
+  } catch (e) { falhou(); }
+}
+let downloadsP = null;
+async function baixar(nome, conteudo) {
+  if (Store.emArtifact) {
+    if (!downloadsP) downloadsP = window.claude.use('downloads').catch(() => null);
+    const dl = await downloadsP;
+    if (dl) {
+      try { await dl.save({ filename: nome, data: conteudo }); toast('Arquivo salvo: ' + nome); }
+      catch (e) {
+        if (e && e.code === 'declined') return;
+        if (e && e.code === 'rate_limited') { toast('Já há um download aguardando confirmação.'); return; }
+        mostrarTexto(nome, conteudo, 'Não foi possível baixar o arquivo aqui. Copie o conteúdo abaixo e salve-o com o nome ' + nome + '.');
+      }
+      return;
+    }
+    mostrarTexto(nome, conteudo, 'Downloads não estão disponíveis nesta visualização. Copie o conteúdo abaixo e salve-o com o nome ' + nome + '.');
+    return;
+  }
+  const tipo = nome.endsWith('.json') ? 'application/json' : 'text/html';
+  const url = URL.createObjectURL(new Blob([conteudo], { type: tipo + ';charset=utf-8' }));
+  const a = h('a', { href: url, download: nome });
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+function imprimir(a) {
+  const w = window.open('', '_blank');
+  if (!w) { toast('O navegador bloqueou a janela de impressão. Use “Baixar relatório” e imprima o arquivo.'); return; }
+  w.document.open(); w.document.write(relatorioHTML(a)); w.document.close();
+  w.focus();
+  setTimeout(() => w.print(), 300);
+}
+function exportarBackup() {
+  const dados = { formato: 'checklist-backup', versao: 1, exportadoEm: agora(), modelos: Object.values(D().modelos), analises: Object.values(D().analises) };
+  baixar(`checklist-reurb-backup-${hoje()}.json`, JSON.stringify(dados, null, 2));
+}
+async function importarArquivo(arq) {
+  let obj;
+  try { obj = JSON.parse(await arq.text()); } catch (e) { toast('O arquivo não é um JSON válido.'); return; }
+  let nm = 0, na = 0, ultimo = null;
+  if (obj && obj.formato === 'checklist-backup') {
+    for (const m of obj.modelos || []) { const x = normalizarModelo(m); Store.put('modelos', x, 200 + nm * 50); nm++; }
+    for (const a of obj.analises || []) { const x = normalizarAnalise(a); Store.put('analises', x, 200 + na * 50); na++; }
+  } else if (obj && obj.formato === 'checklist-modelo' && obj.modelo) { ultimo = adicionarModelo(obj.modelo); nm = 1; }
+  else if (obj && obj.formato === 'checklist-biblioteca' && Array.isArray(obj.modelos)) { for (const m of obj.modelos) { ultimo = adicionarModelo(m); nm++; } }
+  else if (obj && Array.isArray(obj.perguntas)) { ultimo = adicionarModelo(obj); nm = 1; }
+  else { toast('Arquivo não reconhecido: use um modelo ou backup exportado por este checklist.'); return; }
+  if (ultimo) { ui.aba = 'modelos'; ui.sel.modelos = ultimo.id; }
+  garantirSelecao(); salvarUI();
+  renderTudo();
+  toast(`Importado: ${plural(nm, 'modelo', 'modelos')}${na ? ' e ' + plural(na, 'análise', 'análises') : ''}.`);
+}
+
+/* ---------- ligação inicial ---------- */
+for (const b of document.querySelectorAll('.aba')) b.addEventListener('click', () => trocarAba(b.dataset.aba));
+$('#filtro').addEventListener('input', ev => { ui.filtro[ui.aba] = ev.target.value; salvarUI(); renderItens(); });
+const menu = $('#menu-backup');
+$('#bk-exportar').append(ico('baixar'), 'Exportar backup (JSON)');
+$('#bk-importar').append(ico('enviar'), 'Importar arquivo JSON');
+$('#bk-exportar').addEventListener('click', () => { menu.open = false; exportarBackup(); });
+$('#bk-importar').addEventListener('click', () => { menu.open = false; $('#arquivo').click(); });
+document.addEventListener('click', ev => { if (menu.open && !menu.contains(ev.target)) menu.open = false; });
+$('#arquivo').addEventListener('change', ev => { const f = ev.target.files && ev.target.files[0]; ev.target.value = ''; if (f) importarArquivo(f); });
+const topo = $('#topo');
+const medirTopo = () => document.documentElement.style.setProperty('--topo-h', topo.offsetHeight + 'px');
+medirTopo();
+if ('ResizeObserver' in window) new ResizeObserver(medirTopo).observe(topo);
+Store.aoStatus = (estado, txt) => { const s = $('#salvo'); s.dataset.estado = estado; s.textContent = txt; };
+Store.aoRemoto = (col, ids) => {
+  const antes = ui.sel[col];
+  garantirSelecao();
+  renderItens();
+  if (ui.aba !== col || ui.criando) return;
+  if (ui.sel[col] === antes && !ids.includes(antes)) return;
+  const det = $('#detalhe');
+  if (det.contains(document.activeElement) && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) rerenderAdiado = true;
+  else renderDetalhe();
+};
+$('#detalhe').addEventListener('focusout', ev => {
+  if (rerenderAdiado && !(ev.relatedTarget && $('#detalhe').contains(ev.relatedTarget))) renderDetalhe();
+});
+addEventListener('pagehide', () => Store.descarregar());
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') Store.descarregar(); });
+
+renderTudo();
+Store.status();
+Store.iniciar().then(() => {
+  garantirSelecao();
+  renderTudo();
+});
+})();
+</script>
+</body>
+</html>
