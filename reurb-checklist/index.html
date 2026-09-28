@@ -72,12 +72,11 @@ h1,h2,h3{text-wrap:balance}
 .mb-btn svg{width:14px;height:14px;opacity:.7}
 .mb-btn:hover,.mb-item:hover>.mb-btn,.mb-item.aberto>.mb-btn{color:var(--tinta);background:var(--sup2)}
 .mb-btn[aria-current="page"]{color:var(--tinta);border-bottom-color:var(--acento)}
-.mb-sub{display:none;position:absolute;left:0;top:100%;z-index:35;min-width:270px;background:var(--sup);border:1px solid var(--linha);border-radius:0 0 10px 10px;box-shadow:var(--sombra);padding:6px}
+.mb-sub{display:none;position:absolute;left:0;top:100%;z-index:35;min-width:220px;background:var(--sup);border:1px solid var(--linha);border-radius:0 0 10px 10px;box-shadow:var(--sombra);padding:6px}
 .mb-item:hover>.mb-sub,.mb-item.aberto>.mb-sub{display:grid}
-.mb-op{display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:start;border:0;background:transparent;text-align:left;padding:9px 10px;border-radius:7px;color:var(--tinta)}
-.mb-op svg{width:18px;height:18px;color:var(--acento);grid-row:span 2;margin-top:1px}
-.mb-op span{font-weight:600}
-.mb-op small{font-size:12px;color:var(--tinta3)}
+.mb-op{display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:center;border:0;background:transparent;text-align:left;padding:9px 10px;border-radius:7px;color:var(--tinta)}
+.mb-op svg{width:18px;height:18px;color:var(--acento)}
+.mb-op span{font-weight:600;white-space:nowrap}
 .mb-op:hover,.mb-op:focus-visible{background:var(--acento-suave)}
 .mb-op[aria-current="page"] span{color:var(--acento-texto)}
 .topo-dir{margin-left:auto;display:flex;align-items:center;gap:12px}
@@ -287,7 +286,7 @@ select.inp{padding-right:28px}
       <div class="mb-item" id="mb-cadastros">
         <button type="button" class="mb-btn" id="mb-cadastros-btn" aria-haspopup="true" aria-expanded="false" aria-controls="mb-cadastros-sub">Cadastros<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <div class="mb-sub" id="mb-cadastros-sub" role="menu" aria-labelledby="mb-cadastros-btn">
-          <button type="button" class="mb-op" role="menuitem" id="mb-modelos" data-aba="modelos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Modelos de checklist</span><small>Criar e editar perguntas, pendências e fundamentos</small></button>
+          <button type="button" class="mb-op" role="menuitem" id="mb-modelos" data-aba="modelos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Modelos de checklist</span></button>
         </div>
       </div>
       <div class="mb-item"><button type="button" class="mb-btn" id="mb-analises" data-aba="analises" aria-current="page">Análises</button></div>
