@@ -80,6 +80,12 @@ h1,h2,h3{text-wrap:balance}
 .mb-op span{font-weight:600;white-space:nowrap}
 .mb-op:hover,.mb-op:focus-visible{background:var(--acento-suave)}
 .mb-op[aria-current="page"] span{color:var(--acento-texto)}
+@media (max-width:560px){
+  .menubar{width:100%;margin-block:0 -10px;gap:0;flex-wrap:wrap}
+  .mb-btn{padding:0 8px;min-height:40px;font-size:13.5px;gap:3px}
+  .mb-btn svg{width:12px;height:12px}
+  .mb-sub{min-width:0;width:max-content;max-width:calc(100vw - 32px)}
+}
 .topo-dir{margin-left:auto;display:flex;align-items:center;gap:12px}
 .salvo{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--tinta3);white-space:nowrap}
 .salvo::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ok);flex:none}
@@ -318,6 +324,11 @@ select.inp{padding-right:28px}
         <button type="button" class="mb-btn" id="mb-recepcao-btn" aria-haspopup="true" aria-expanded="false" aria-controls="mb-recepcao-sub">Recepção<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <div class="mb-sub" id="mb-recepcao-sub" role="menu" aria-labelledby="mb-recepcao-btn">
           <button type="button" class="mb-op" role="menuitem" id="mb-abrir-protocolo" data-aba="protocolos" data-novo="1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5z M14 3v5h5 M12 11v6 M9 14h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Abrir protocolo</span></button>
+        </div>
+      </div>
+      <div class="mb-item" id="mb-protocolo">
+        <button type="button" class="mb-btn" id="mb-protocolo-btn" aria-haspopup="true" aria-expanded="false" aria-controls="mb-protocolo-sub">Protocolo<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="mb-sub" id="mb-protocolo-sub" role="menu" aria-labelledby="mb-protocolo-btn">
           <button type="button" class="mb-op" role="menuitem" id="mb-protocolos" data-aba="protocolos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span>Consultar protocolos</span></button>
         </div>
       </div>
@@ -884,7 +895,8 @@ function renderAbas() {
   marcar($('#mb-analises'), ui.aba === 'analises');
   marcar($('#mb-modelos'), ui.aba === 'modelos');
   marcar($('#mb-cadastros-btn'), ui.aba === 'modelos');
-  marcar($('#mb-recepcao-btn'), ui.aba === 'protocolos');
+  marcar($('#mb-recepcao-btn'), ui.aba === 'protocolos' && ui.criando);
+  marcar($('#mb-protocolo-btn'), ui.aba === 'protocolos' && !ui.criando);
   marcar($('#mb-abrir-protocolo'), ui.aba === 'protocolos' && ui.criando);
   marcar($('#mb-protocolos'), ui.aba === 'protocolos' && !ui.criando);
 }
@@ -1832,8 +1844,20 @@ async function importarArquivo(arq) {
 /* ---------- ligação inicial ---------- */
 /* menus do topo (Cadastros, Recepção): abrem ao passar o mouse, com toque ou pelo teclado */
 const menusTopo = [...document.querySelectorAll('.mb-item')].filter(it => it.querySelector('.mb-sub'));
+/* mantém o submenu dentro da tela (celular): encosta à direita do botão se passar da borda */
+function posicionarSub(it) {
+  const sub = it.querySelector('.mb-sub');
+  sub.style.left = ''; sub.style.right = '';
+  const r = sub.getBoundingClientRect();
+  if (!r.width) return;
+  if (r.right > innerWidth - 8) {
+    sub.style.left = 'auto'; sub.style.right = '0';
+    if (sub.getBoundingClientRect().left < 8) { sub.style.right = 'auto'; sub.style.left = (8 - it.getBoundingClientRect().left) + 'px'; }
+  }
+}
 function abrirMenu(it, sim, focar) {
   it.classList.toggle('aberto', sim);
+  if (sim) posicionarSub(it);
   it.querySelector('.mb-btn').setAttribute('aria-expanded', String(sim));
   if (sim && focar) it.querySelector('.mb-op').focus();
 }
@@ -1847,6 +1871,7 @@ for (const it of menusTopo) {
     if (ev.key === 'Escape') { abrirMenu(it, false); b.focus(); }
     else if (i >= 0 && (ev.key === 'ArrowDown' || ev.key === 'ArrowUp')) { ev.preventDefault(); ops[(i + (ev.key === 'ArrowDown' ? 1 : ops.length - 1)) % ops.length].focus(); }
   });
+  it.addEventListener('pointerenter', () => posicionarSub(it));
   it.addEventListener('pointerleave', ev => { it.classList.remove('suprimir'); if (ev.pointerType === 'mouse') abrirMenu(it, false); });
 }
 document.addEventListener('click', ev => { for (const it of menusTopo) if (!it.contains(ev.target)) abrirMenu(it, false); });
