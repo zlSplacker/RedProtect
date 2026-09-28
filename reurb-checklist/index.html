@@ -150,6 +150,8 @@ select.inp{padding-right:28px}
 .chip-pend{background:var(--pend-suave);color:var(--pend);border-color:transparent}
 .chip-ok{background:var(--ok-suave);color:var(--ok);border-color:transparent}
 .chip-ex{background:var(--aviso-suave);color:var(--aviso);border-color:transparent}
+.chip-acento{background:var(--acento-suave);color:var(--acento-texto);border-color:transparent}
+.item-num{font:500 12.5px var(--f-mono);color:var(--acento-texto);margin-right:6px}
 .lat-vazio{padding:12px;border:1px dashed var(--linha);border-radius:9px;color:var(--tinta3);font-size:13px}
 
 /* cabeçalho do detalhe */
@@ -166,7 +168,7 @@ select.inp{padding-right:28px}
 .nota-info svg{color:var(--acento)}
 
 /* análise */
-.ident{min-width:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;padding:16px;background:var(--sup);border:1px solid var(--linha);border-radius:10px;margin:0 0 22px}
+.ident{min-width:0;display:grid;align-items:end;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;padding:16px;background:var(--sup);border:1px solid var(--linha);border-radius:10px;margin:0 0 22px}
 .ident legend{float:left;grid-column:1/-1;width:100%;padding:0;margin-bottom:2px;font:600 15px/1.3 var(--f-serif)}
 .an-grade{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:28px;align-items:start}
 .resumo{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--topo-h,58px) + 16px);display:grid;gap:12px;background:var(--sup);border:1px solid var(--linha);border-radius:10px;padding:16px;max-height:calc(100vh - var(--topo-h,58px) - 32px);overflow:auto}
@@ -273,6 +275,26 @@ select.inp{padding-right:28px}
 .modal-corpo{padding:20px;display:grid;gap:14px}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--tinta);color:var(--chao);padding:10px 16px;border-radius:9px;font-weight:500;z-index:60;box-shadow:var(--sombra);max-width:calc(100% - 32px);width:max-content}
 .carregando{color:var(--tinta3);padding:40px 0}
+
+/* protocolos */
+.cab-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.situacao{display:flex;align-items:center;gap:8px}
+.situacao .inp{width:auto;min-width:200px}
+.pr-grade{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start}
+@media (max-width:1180px){.pr-grade{grid-template-columns:minmax(0,1fr)}}
+.bloco{background:var(--sup);border:1px solid var(--linha);border-radius:10px;padding:16px;display:grid;gap:14px;align-content:start;min-width:0}
+.bloco-tit{margin:0;font:600 15px/1.3 var(--f-serif)}
+.and-form{display:flex;gap:8px;flex-wrap:wrap}
+.and-form .inp{flex:1 1 240px}
+.and-form input[type="date"]{flex:0 1 170px}
+.and-lista{list-style:none;margin:0 0 0 6px;padding:0;border-left:2px solid var(--linha)}
+.and-item{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 12px;align-items:start;padding:8px 0 8px 16px;position:relative}
+.and-item::before{content:"";position:absolute;left:-7px;top:14px;width:12px;height:12px;border-radius:50%;background:var(--sup);border:2px solid var(--acento)}
+.and-data{font:500 12.5px/1.7 var(--f-mono);color:var(--tinta2);white-space:nowrap;font-variant-numeric:tabular-nums}
+.and-txt{overflow-wrap:anywhere;line-height:1.5;padding-top:2px}
+.vinc{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.ident textarea.inp{grid-column:1/-1}
+.ident .largo{grid-column:1/-1}
 </style>
 </head>
 <body>
@@ -289,6 +311,13 @@ select.inp{padding-right:28px}
           <button type="button" class="mb-op" role="menuitem" id="mb-modelos" data-aba="modelos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Modelos de checklist</span></button>
         </div>
       </div>
+      <div class="mb-item" id="mb-recepcao">
+        <button type="button" class="mb-btn" id="mb-recepcao-btn" aria-haspopup="true" aria-expanded="false" aria-controls="mb-recepcao-sub">Recepção<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="mb-sub" id="mb-recepcao-sub" role="menu" aria-labelledby="mb-recepcao-btn">
+          <button type="button" class="mb-op" role="menuitem" id="mb-abrir-protocolo" data-aba="protocolos" data-novo="1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5z M14 3v5h5 M12 11v6 M9 14h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Abrir protocolo</span></button>
+          <button type="button" class="mb-op" role="menuitem" id="mb-protocolos" data-aba="protocolos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span>Consultar protocolos</span></button>
+        </div>
+      </div>
       <div class="mb-item"><button type="button" class="mb-btn" id="mb-analises" data-aba="analises" aria-current="page">Análises</button></div>
     </nav>
     <div class="topo-dir">
@@ -298,7 +327,7 @@ select.inp{padding-right:28px}
         <div class="menu-pop">
           <button type="button" id="bk-exportar"></button>
           <button type="button" id="bk-importar"></button>
-          <p>O backup reúne todos os modelos e análises num arquivo JSON, para guardar ou levar para outro computador.</p>
+          <p>O backup reúne todos os protocolos, modelos e análises num arquivo JSON, para guardar ou levar para outro computador.</p>
         </div>
       </details>
     </div>
@@ -319,7 +348,7 @@ select.inp{padding-right:28px}
 <input type="file" id="arquivo" accept=".json,application/json" hidden>
 <div class="toast" id="toast" role="status" hidden></div>
 
-<script type="application/json" id="biblioteca">{"formato":"checklist-biblioteca","versao":1,"modelos":[{"id":"reurb-13465","nome":"REURB — Análise do processo (Lei 13.465/2017)","descricao":"Roteiro de análise da regularização fundiária urbana, do requerimento ao registro da CRF. Revise as referências legais e acrescente as exigências da lei municipal.","perguntas":[{"id":"sA","tipo":"secao","texto":"Requerimento e instauração","fundamento":"Lei 13.465/2017, arts. 13, 14, 30 e 32","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[{"id":"a1","tipo":"simnao","texto":"O requerimento foi apresentado por um dos legitimados?","fundamento":"Lei 13.465/2017, art. 14","ajuda":"","providencia":"Confirmar a legitimidade do requerente ou obter requerimento de um legitimado: União, Estados, DF e Municípios; beneficiários, individual ou coletivamente; proprietários, loteadores ou incorporadores; Defensoria Pública; Ministério Público.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[{"id":"a1_1","tipo":"unica","texto":"Quem é o requerente?","fundamento":"art. 14, I a V","ajuda":"","providencia":"","opcoes":[{"id":"mun","rotulo":"Município","pendencia":false},{"id":"est","rotulo":"Estado, DF ou União","pendencia":false},{"id":"ben","rotulo":"Beneficiários (individual ou coletivamente)","pendencia":false},{"id":"assoc","rotulo":"Associação ou cooperativa de moradores","pendencia":false},{"id":"prop","rotulo":"Proprietário, loteador ou incorporador","pendencia":false},{"id":"dp","rotulo":"Defensoria Pública","pendencia":false},{"id":"mp","rotulo":"Ministério Público","pendencia":false}],"mostrarSe":["sim"],"filhos":[]}]},{"id":"a2","tipo":"data","texto":"Data do requerimento","fundamento":"art. 30, § 2º","ajuda":"O Município tem até 180 dias, contados do requerimento, para classificar a modalidade ou indeferir fundamentadamente.","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[]},{"id":"a3","tipo":"simnao","texto":"A Reurb foi instaurada por decisão do Município?","fundamento":"art. 32","ajuda":"","providencia":"Providenciar a decisão municipal de instauração, a partir do requerimento escrito do legitimado.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"a4","tipo":"unica","texto":"Modalidade classificada pelo Município","fundamento":"art. 13; art. 30, I e §§ 2º e 3º","ajuda":"","providencia":"Classificar a modalidade em até 180 dias do requerimento ou indeferir fundamentadamente; a inércia fixa automaticamente a modalidade indicada pelo legitimado.","opcoes":[{"id":"s","rotulo":"Reurb-S (interesse social)","pendencia":false},{"id":"e","rotulo":"Reurb-E (interesse específico)","pendencia":false},{"id":"mista","rotulo":"Reurb-S e Reurb-E no mesmo núcleo","pendencia":false},{"id":"pend","rotulo":"Ainda não classificada","pendencia":true}],"mostrarSe":[],"filhos":[{"id":"a4_1","tipo":"simnao","texto":"Há ato do Poder Executivo municipal declarando os ocupantes como população de baixa renda?","fundamento":"art. 13, I","ajuda":"O Decreto nº 9.310/2018 permite ao Município fixar a faixa de renda familiar, limitada a cinco salários mínimos. Confira o dispositivo e a norma municipal.","providencia":"Editar ato do Executivo municipal que declare a baixa renda dos ocupantes.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":["s","mista"],"filhos":[]},{"id":"a4_2","tipo":"simnao","texto":"O custeio do projeto e das obras foi atribuído aos beneficiários ou requerentes privados?","fundamento":"art. 33","ajuda":"","providencia":"Na Reurb-E, definir a contratação e o custeio pelos potenciais beneficiários ou requerentes privados.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":["e","mista"],"filhos":[]}]}]},{"id":"sB","tipo":"secao","texto":"Núcleo urbano informal","fundamento":"Lei 13.465/2017, arts. 9º, 11, 23 e 69","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[{"id":"b1","tipo":"simnao","texto":"A área configura núcleo urbano informal (clandestino, irregular ou sem titulação)?","fundamento":"art. 11, II","ajuda":"","providencia":"Reavaliar o enquadramento: a Reurb se destina a núcleos urbanos informais.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"b2","tipo":"simnao","texto":"O núcleo é consolidado (de difícil reversão)?","fundamento":"art. 11, III","ajuda":"Considere o tempo da ocupação, a natureza das edificações, a localização das vias de circulação e a presença de equipamentos públicos, entre outras circunstâncias avaliadas pelo Município.","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":[],"filhos":[{"id":"b2_1","tipo":"unica","texto":"Em qual data o núcleo já existia?","fundamento":"art. 9º, § 2º; art. 23","ajuda":"","providencia":"A legitimação fundiária só se aplica a núcleos comprovadamente existentes até 22/12/2016: reunir a prova da data ou definir outro instrumento de titulação.","opcoes":[{"id":"antes","rotulo":"Existente até 22/12/2016","pendencia":false},{"id":"depois","rotulo":"Formado após 22/12/2016","pendencia":true},{"id":"semprova","rotulo":"Data ainda não comprovada","pendencia":true}],"mostrarSe":["sim"],"filhos":[{"id":"b2_1_1","tipo":"multipla","texto":"Quais provas da data foram juntadas?","fundamento":"","ajuda":"","providencia":"","opcoes":[{"id":"img","rotulo":"Imagens aéreas ou de satélite","pendencia":false},{"id":"iptu","rotulo":"Cadastro imobiliário ou lançamento de IPTU","pendencia":false},{"id":"contas","rotulo":"Contas de água ou energia","pendencia":false},{"id":"plantas","rotulo":"Levantamentos ou plantas antigas","pendencia":false},{"id":"decl","rotulo":"Declarações e outros documentos","pendencia":false}],"mostrarSe":["antes"],"filhos":[]}]}]},{"id":"b3","tipo":"simnao","texto":"O parcelamento foi implantado antes de 19/12/1979?","fundamento":"art. 69","ajuda":"Glebas parceladas para fins urbanos antes de 19/12/1979, sem registro, podem ser regularizadas pelo registro do parcelamento, desde que implantado e integrado à cidade.","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":[],"filhos":[]},{"id":"b4","tipo":"multipla","texto":"Titularidade da área","fundamento":"art. 31","ajuda":"","providencia":"Fazer as buscas no Registro de Imóveis para determinar a titularidade do domínio.","opcoes":[{"id":"mun","rotulo":"Pública municipal","pendencia":false},{"id":"est","rotulo":"Pública estadual","pendencia":false},{"id":"fed","rotulo":"Pública federal","pendencia":false},{"id":"part","rotulo":"Particular, proprietário identificado","pendencia":false},{"id":"partni","rotulo":"Particular, proprietário não identificado","pendencia":false},{"id":"naoap","rotulo":"Ainda não apurada","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"b5","tipo":"texto","texto":"Matrículas e transcrições atingidas pelo perímetro","fundamento":"art. 35, II","ajuda":"Liste os números e o cartório de cada matrícula ou transcrição.","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[]},{"id":"b6","tipo":"texto","texto":"Número estimado de lotes ou unidades","fundamento":"","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[]}]},{"id":"sC","tipo":"secao","texto":"Restrições ambientais e áreas de risco","fundamento":"Lei 13.465/2017, arts. 11, §§ 2º e 3º, e 39","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[{"id":"c1","tipo":"simnao","texto":"Há ocupação em Área de Preservação Permanente (APP)?","fundamento":"art. 11, § 2º; Lei 12.651/2012, arts. 64 e 65","ajuda":"","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":[],"filhos":[{"id":"c1_1","tipo":"simnao","texto":"Há estudo técnico que demonstre a melhoria das condições ambientais em relação à ocupação anterior?","fundamento":"art. 11, § 2º; art. 35, VIII","ajuda":"","providencia":"Elaborar o estudo técnico ambiental, inclusive com as compensações cabíveis.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":["sim"],"filhos":[]}]},{"id":"c2","tipo":"simnao","texto":"O núcleo está em unidade de conservação de uso sustentável ou em área de proteção de mananciais?","fundamento":"art. 11, §§ 2º e 3º","ajuda":"","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":[],"filhos":[{"id":"c2_1","tipo":"simnaona","texto":"Há anuência do órgão gestor da unidade de conservação?","fundamento":"art. 11, § 3º","ajuda":"","providencia":"Obter a anuência do órgão gestor da unidade de conservação.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true},{"id":"na","rotulo":"Não se aplica","pendencia":false}],"mostrarSe":["sim"],"filhos":[]}]},{"id":"c3","tipo":"simnao","texto":"Existem áreas de risco (geotécnico, de inundação ou outros)?","fundamento":"art. 39","ajuda":"","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":[],"filhos":[{"id":"c3_1","tipo":"simnao","texto":"Foram elaborados estudos técnicos de risco?","fundamento":"art. 35, VII; art. 39","ajuda":"","providencia":"Elaborar estudo técnico para examinar a eliminação, correção ou administração dos riscos.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":["sim"],"filhos":[]},{"id":"c3_2","tipo":"unica","texto":"Os riscos podem ser eliminados, corrigidos ou administrados?","fundamento":"art. 39","ajuda":"","providencia":"Na Reurb-S, promover a realocação dos ocupantes da parcela em risco que não admite correção.","opcoes":[{"id":"sim","rotulo":"Sim, com as medidas indicadas no estudo","pendencia":false},{"id":"nao","rotulo":"Não, exige realocação dos ocupantes","pendencia":true}],"mostrarSe":["sim"],"filhos":[]}]}]},{"id":"sD","tipo":"secao","texto":"Infraestrutura essencial","fundamento":"Lei 13.465/2017, art. 36, § 1º","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[{"id":"d1","tipo":"simnao","texto":"Existe sistema de abastecimento de água potável (coletivo ou individual)?","fundamento":"art. 36, § 1º, I","ajuda":"","providencia":"Incluir a implantação no cronograma físico de obras e no termo de compromisso (art. 35, IX e X).","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"d2","tipo":"simnao","texto":"Existe sistema de coleta e tratamento de esgoto (coletivo ou individual)?","fundamento":"art. 36, § 1º, II","ajuda":"","providencia":"Incluir a implantação no cronograma físico de obras e no termo de compromisso (art. 35, IX e X).","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"d3","tipo":"simnao","texto":"Existe rede de energia elétrica domiciliar?","fundamento":"art. 36, § 1º, III","ajuda":"","providencia":"Incluir a implantação no cronograma físico de obras e no termo de compromisso (art. 35, IX e X).","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"d4","tipo":"simnaona","texto":"Há soluções de drenagem onde são necessárias?","fundamento":"art. 36, § 1º, IV","ajuda":"","providencia":"Incluir a implantação no cronograma físico de obras e no termo de compromisso (art. 35, IX e X).","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true},{"id":"na","rotulo":"Não se aplica","pendencia":false}],"mostrarSe":[],"filhos":[]},{"id":"d5","tipo":"simnaona","texto":"Calçadas já existem no núcleo habitacional?","fundamento":"art. 36, VII e § 1º, V; norma municipal","ajuda":"A lei federal não inclui calçadas no rol mínimo de infraestrutura essencial: a exigência vem da norma municipal (outros equipamentos definidos pelo Município) e das medidas de mobilidade e acessibilidade do projeto urbanístico.","providencia":"Prever a execução das calçadas no projeto urbanístico e no cronograma de obras, se exigidas pela norma municipal.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true},{"id":"na","rotulo":"Não se aplica","pendencia":false}],"mostrarSe":[],"filhos":[]},{"id":"d6","tipo":"simnao","texto":"O sistema viário e as vias de circulação estão definidos no projeto?","fundamento":"art. 36, I","ajuda":"","providencia":"Indicar no projeto urbanístico o sistema viário existente ou projetado.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"d7","tipo":"simnao","texto":"O Município definiu outros equipamentos de infraestrutura essencial em norma local?","fundamento":"art. 36, § 1º, V","ajuda":"","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":[],"filhos":[{"id":"d7_1","tipo":"texto","texto":"Quais equipamentos e em qual norma?","fundamento":"","ajuda":"","providencia":"","opcoes":[],"mostrarSe":["sim"],"filhos":[]}]},{"id":"d8","tipo":"simnaona","texto":"Os responsáveis pela implantação da infraestrutura foram definidos?","fundamento":"art. 33; art. 37 (Reurb-S); art. 38 (Reurb-E)","ajuda":"","providencia":"Definir os responsáveis pelas obras e serviços: o poder público na Reurb-S; os beneficiários ou requerentes na Reurb-E.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true},{"id":"na","rotulo":"Não se aplica","pendencia":false}],"mostrarSe":[],"filhos":[]}]},{"id":"sE","tipo":"secao","texto":"Projeto de regularização fundiária","fundamento":"Lei 13.465/2017, arts. 35 e 36","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[{"id":"e1","tipo":"simnao","texto":"Há levantamento planialtimétrico e cadastral georreferenciado, com ART ou RRT?","fundamento":"art. 35, I","ajuda":"","providencia":"Providenciar o levantamento subscrito por profissional habilitado, com ART ou RRT.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"e2","tipo":"simnao","texto":"Há planta do perímetro com as matrículas ou transcrições atingidas?","fundamento":"art. 35, II","ajuda":"","providencia":"Elaborar a planta do perímetro indicando as matrículas ou transcrições atingidas, quando possível.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"e3","tipo":"simnao","texto":"Há estudo preliminar das desconformidades e da situação jurídica, urbanística e ambiental?","fundamento":"art. 35, III","ajuda":"","providencia":"Elaborar o estudo preliminar das desconformidades.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"e4","tipo":"simnao","texto":"O projeto urbanístico indica áreas ocupadas, sistema viário, unidades, logradouros e áreas públicas?","fundamento":"art. 35, IV; art. 36","ajuda":"","providencia":"Completar o projeto urbanístico com os elementos mínimos do art. 36.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"e5","tipo":"simnao","texto":"Há memoriais descritivos?","fundamento":"art. 35, V","ajuda":"","providencia":"Elaborar os memoriais descritivos da gleba e das unidades.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"e6","tipo":"simnaona","texto":"Há proposta de soluções para questões ambientais, urbanísticas e de reassentamento?","fundamento":"art. 35, VI","ajuda":"","providencia":"Apresentar a proposta de soluções ambientais, urbanísticas e de reassentamento.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true},{"id":"na","rotulo":"Não se aplica","pendencia":false}],"mostrarSe":[],"filhos":[]},{"id":"e7","tipo":"simnaona","texto":"Há cronograma físico de serviços e obras de infraestrutura essencial?","fundamento":"art. 35, IX","ajuda":"","providencia":"Elaborar o cronograma físico de serviços e obras.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true},{"id":"na","rotulo":"Não se aplica","pendencia":false}],"mostrarSe":[],"filhos":[]},{"id":"e8","tipo":"simnaona","texto":"O termo de compromisso foi assinado pelos responsáveis pelo cronograma?","fundamento":"art. 35, X","ajuda":"","providencia":"Colher a assinatura do termo de compromisso pelos responsáveis, públicos ou privados.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true},{"id":"na","rotulo":"Não se aplica","pendencia":false}],"mostrarSe":[],"filhos":[]}]},{"id":"sF","tipo":"secao","texto":"Notificações e conflitos","fundamento":"Lei 13.465/2017, arts. 19 a 22, 31 e 34","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[{"id":"f1","tipo":"simnao","texto":"Titulares de domínio, responsáveis pela implantação, confinantes e terceiros interessados foram notificados?","fundamento":"art. 31, § 1º","ajuda":"","providencia":"Notificar para impugnação no prazo de 30 dias; os não encontrados, por edital.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[{"id":"f1_1","tipo":"simnao","texto":"Houve impugnação no prazo de 30 dias?","fundamento":"art. 31","ajuda":"A ausência de manifestação dos notificados é interpretada como concordância com a Reurb.","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":["sim"],"filhos":[{"id":"f1_1_1","tipo":"simnao","texto":"A impugnação foi superada (acordo, câmara de resolução de conflitos ou decisão)?","fundamento":"arts. 31 e 34","ajuda":"","providencia":"Buscar a composição extrajudicial do conflito antes de prosseguir.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":["sim"],"filhos":[]}]}]},{"id":"f2","tipo":"simnao","texto":"Foi utilizada a demarcação urbanística?","fundamento":"arts. 19 a 22","ajuda":"","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":[],"filhos":[{"id":"f2_1","tipo":"simnaona","texto":"O auto de demarcação urbanística foi averbado nas matrículas alcançadas?","fundamento":"arts. 19 a 22","ajuda":"","providencia":"Encaminhar o auto de demarcação ao Registro de Imóveis para averbação.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true},{"id":"na","rotulo":"Não se aplica","pendencia":false}],"mostrarSe":["sim"],"filhos":[]}]}]},{"id":"sG","tipo":"secao","texto":"Titulação, decisão e CRF","fundamento":"Lei 13.465/2017, arts. 15, 23, 40 e 41","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[{"id":"g1","tipo":"multipla","texto":"Instrumentos de titulação previstos","fundamento":"art. 15","ajuda":"","providencia":"","opcoes":[{"id":"lf","rotulo":"Legitimação fundiária","pendencia":false},{"id":"lp","rotulo":"Legitimação de posse","pendencia":false},{"id":"cdru","rotulo":"Concessão de direito real de uso","pendencia":false},{"id":"cuem","rotulo":"Concessão de uso especial para fins de moradia","pendencia":false},{"id":"doa","rotulo":"Doação ou compra e venda","pendencia":false},{"id":"usu","rotulo":"Usucapião","pendencia":false},{"id":"outro","rotulo":"Outro","pendencia":false}],"mostrarSe":[],"filhos":[{"id":"g1_1","tipo":"simnao","texto":"Os beneficiários atendem aos requisitos da legitimação fundiária na Reurb-S?","fundamento":"art. 23, § 1º","ajuda":"O beneficiário não pode ser concessionário, foreiro ou proprietário de imóvel urbano ou rural, nem ter sido contemplado com legitimação de posse ou fundiária de imóvel urbano com a mesma finalidade.","providencia":"Excluir da legitimação fundiária os ocupantes que não atendem aos requisitos ou adotar outro instrumento.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":["lf"],"filhos":[]}]},{"id":"g2","tipo":"simnao","texto":"A autoridade competente decidiu o processo, aprovando o projeto e identificando os ocupantes e seus direitos reais?","fundamento":"art. 40","ajuda":"","providencia":"Obter a decisão formal da autoridade competente, com publicidade.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"g3","tipo":"simnao","texto":"A CRF foi expedida com os requisitos mínimos?","fundamento":"art. 41","ajuda":"Nome do núcleo, localização, modalidade, responsabilidades pelas obras e serviços do cronograma, indicação numérica das unidades e listagem dos ocupantes.","providencia":"Complementar a CRF com os requisitos mínimos do art. 41.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[{"id":"g3_1","tipo":"simnao","texto":"A listagem dos ocupantes traz estado civil, profissão, CPF, RG e filiação?","fundamento":"art. 41, VI","ajuda":"","providencia":"Completar a qualificação dos ocupantes na listagem da CRF.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":["sim"],"filhos":[]}]}]},{"id":"sH","tipo":"secao","texto":"Registro","fundamento":"Lei 13.465/2017, arts. 13, § 1º, 42 e 44","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[{"id":"h1","tipo":"simnaona","texto":"Na Reurb-S, o requerimento ao Registro de Imóveis invoca a isenção de custas e emolumentos?","fundamento":"art. 13, § 1º","ajuda":"","providencia":"Indicar expressamente a isenção de custas e emolumentos da Reurb-S.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true},{"id":"na","rotulo":"Não se aplica","pendencia":false}],"mostrarSe":[],"filhos":[]},{"id":"h2","tipo":"simnao","texto":"A CRF e o projeto aprovado foram protocolados no Registro de Imóveis competente?","fundamento":"arts. 42 e 44","ajuda":"Recebida a CRF, o oficial prenota, autua e emite nota de exigência ou pratica os atos em 15 dias; o procedimento registral deve terminar em 60 dias, prorrogáveis por igual período.","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":[],"filhos":[{"id":"h2_1","tipo":"simnao","texto":"Houve nota de exigência do Registro de Imóveis?","fundamento":"","ajuda":"","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":["sim"],"filhos":[{"id":"h2_1_1","tipo":"simnao","texto":"As exigências foram cumpridas?","fundamento":"","ajuda":"","providencia":"Cumprir as exigências da nota devolutiva ou suscitar dúvida.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":["sim"],"filhos":[]}]}]},{"id":"h3","tipo":"texto","texto":"Observações gerais","fundamento":"","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[]}]}]}],"exemplo":{"id":"exemplo-vila-esperanca","ident":{"municipio":"Município Exemplo/UF","nucleo":"EXEMPLO — Núcleo Vila Esperança","processo":"0001/2026","responsavel":"","inicio":"2026-09-01"},"status":"andamento","respostas":{"a1":{"v":"sim"},"a1_1":{"v":"mun"},"a2":{"v":"2026-03-10"},"a3":{"v":"sim"},"a4":{"v":"s"},"a4_1":{"v":"sim"},"b1":{"v":"sim"},"b2":{"v":"sim"},"b2_1":{"v":"antes"},"b2_1_1":{"v":["img","iptu"]},"b3":{"v":"nao"},"b4":{"v":["mun"]},"b5":{"v":"Matrícula 12.345 do Registro de Imóveis local"},"c1":{"v":"sim"},"c1_1":{"v":"nao","obs":"Faixa de APP ao longo do córrego, fundos das quadras 3 e 4."},"c2":{"v":"nao"},"c3":{"v":"nao"},"d1":{"v":"sim"},"d2":{"v":"nao","obs":"Fossas individuais em parte dos lotes; avaliar solução individual."},"d3":{"v":"sim"},"d4":{"v":"sim"},"d5":{"v":"nao","obs":"Ruas A e B sem passeio."},"d6":{"v":"sim"},"d7":{"v":"nao"},"d8":{"v":"sim"},"e1":{"v":"sim"},"e2":{"v":"sim"},"e3":{"v":"nao"}}}}</script>
+<script type="application/json" id="biblioteca">{"formato":"checklist-biblioteca","versao":1,"modelos":[{"id":"reurb-13465","nome":"REURB — Análise do processo (Lei 13.465/2017)","descricao":"Roteiro de análise da regularização fundiária urbana, do requerimento ao registro da CRF. Revise as referências legais e acrescente as exigências da lei municipal.","perguntas":[{"id":"sA","tipo":"secao","texto":"Requerimento e instauração","fundamento":"Lei 13.465/2017, arts. 13, 14, 30 e 32","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[{"id":"a1","tipo":"simnao","texto":"O requerimento foi apresentado por um dos legitimados?","fundamento":"Lei 13.465/2017, art. 14","ajuda":"","providencia":"Confirmar a legitimidade do requerente ou obter requerimento de um legitimado: União, Estados, DF e Municípios; beneficiários, individual ou coletivamente; proprietários, loteadores ou incorporadores; Defensoria Pública; Ministério Público.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[{"id":"a1_1","tipo":"unica","texto":"Quem é o requerente?","fundamento":"art. 14, I a V","ajuda":"","providencia":"","opcoes":[{"id":"mun","rotulo":"Município","pendencia":false},{"id":"est","rotulo":"Estado, DF ou União","pendencia":false},{"id":"ben","rotulo":"Beneficiários (individual ou coletivamente)","pendencia":false},{"id":"assoc","rotulo":"Associação ou cooperativa de moradores","pendencia":false},{"id":"prop","rotulo":"Proprietário, loteador ou incorporador","pendencia":false},{"id":"dp","rotulo":"Defensoria Pública","pendencia":false},{"id":"mp","rotulo":"Ministério Público","pendencia":false}],"mostrarSe":["sim"],"filhos":[]}]},{"id":"a2","tipo":"data","texto":"Data do requerimento","fundamento":"art. 30, § 2º","ajuda":"O Município tem até 180 dias, contados do requerimento, para classificar a modalidade ou indeferir fundamentadamente.","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[]},{"id":"a3","tipo":"simnao","texto":"A Reurb foi instaurada por decisão do Município?","fundamento":"art. 32","ajuda":"","providencia":"Providenciar a decisão municipal de instauração, a partir do requerimento escrito do legitimado.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"a4","tipo":"unica","texto":"Modalidade classificada pelo Município","fundamento":"art. 13; art. 30, I e §§ 2º e 3º","ajuda":"","providencia":"Classificar a modalidade em até 180 dias do requerimento ou indeferir fundamentadamente; a inércia fixa automaticamente a modalidade indicada pelo legitimado.","opcoes":[{"id":"s","rotulo":"Reurb-S (interesse social)","pendencia":false},{"id":"e","rotulo":"Reurb-E (interesse específico)","pendencia":false},{"id":"mista","rotulo":"Reurb-S e Reurb-E no mesmo núcleo","pendencia":false},{"id":"pend","rotulo":"Ainda não classificada","pendencia":true}],"mostrarSe":[],"filhos":[{"id":"a4_1","tipo":"simnao","texto":"Há ato do Poder Executivo municipal declarando os ocupantes como população de baixa renda?","fundamento":"art. 13, I","ajuda":"O Decreto nº 9.310/2018 permite ao Município fixar a faixa de renda familiar, limitada a cinco salários mínimos. Confira o dispositivo e a norma municipal.","providencia":"Editar ato do Executivo municipal que declare a baixa renda dos ocupantes.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":["s","mista"],"filhos":[]},{"id":"a4_2","tipo":"simnao","texto":"O custeio do projeto e das obras foi atribuído aos beneficiários ou requerentes privados?","fundamento":"art. 33","ajuda":"","providencia":"Na Reurb-E, definir a contratação e o custeio pelos potenciais beneficiários ou requerentes privados.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":["e","mista"],"filhos":[]}]}]},{"id":"sB","tipo":"secao","texto":"Núcleo urbano informal","fundamento":"Lei 13.465/2017, arts. 9º, 11, 23 e 69","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[{"id":"b1","tipo":"simnao","texto":"A área configura núcleo urbano informal (clandestino, irregular ou sem titulação)?","fundamento":"art. 11, II","ajuda":"","providencia":"Reavaliar o enquadramento: a Reurb se destina a núcleos urbanos informais.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"b2","tipo":"simnao","texto":"O núcleo é consolidado (de difícil reversão)?","fundamento":"art. 11, III","ajuda":"Considere o tempo da ocupação, a natureza das edificações, a localização das vias de circulação e a presença de equipamentos públicos, entre outras circunstâncias avaliadas pelo Município.","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":[],"filhos":[{"id":"b2_1","tipo":"unica","texto":"Em qual data o núcleo já existia?","fundamento":"art. 9º, § 2º; art. 23","ajuda":"","providencia":"A legitimação fundiária só se aplica a núcleos comprovadamente existentes até 22/12/2016: reunir a prova da data ou definir outro instrumento de titulação.","opcoes":[{"id":"antes","rotulo":"Existente até 22/12/2016","pendencia":false},{"id":"depois","rotulo":"Formado após 22/12/2016","pendencia":true},{"id":"semprova","rotulo":"Data ainda não comprovada","pendencia":true}],"mostrarSe":["sim"],"filhos":[{"id":"b2_1_1","tipo":"multipla","texto":"Quais provas da data foram juntadas?","fundamento":"","ajuda":"","providencia":"","opcoes":[{"id":"img","rotulo":"Imagens aéreas ou de satélite","pendencia":false},{"id":"iptu","rotulo":"Cadastro imobiliário ou lançamento de IPTU","pendencia":false},{"id":"contas","rotulo":"Contas de água ou energia","pendencia":false},{"id":"plantas","rotulo":"Levantamentos ou plantas antigas","pendencia":false},{"id":"decl","rotulo":"Declarações e outros documentos","pendencia":false}],"mostrarSe":["antes"],"filhos":[]}]}]},{"id":"b3","tipo":"simnao","texto":"O parcelamento foi implantado antes de 19/12/1979?","fundamento":"art. 69","ajuda":"Glebas parceladas para fins urbanos antes de 19/12/1979, sem registro, podem ser regularizadas pelo registro do parcelamento, desde que implantado e integrado à cidade.","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":[],"filhos":[]},{"id":"b4","tipo":"multipla","texto":"Titularidade da área","fundamento":"art. 31","ajuda":"","providencia":"Fazer as buscas no Registro de Imóveis para determinar a titularidade do domínio.","opcoes":[{"id":"mun","rotulo":"Pública municipal","pendencia":false},{"id":"est","rotulo":"Pública estadual","pendencia":false},{"id":"fed","rotulo":"Pública federal","pendencia":false},{"id":"part","rotulo":"Particular, proprietário identificado","pendencia":false},{"id":"partni","rotulo":"Particular, proprietário não identificado","pendencia":false},{"id":"naoap","rotulo":"Ainda não apurada","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"b5","tipo":"texto","texto":"Matrículas e transcrições atingidas pelo perímetro","fundamento":"art. 35, II","ajuda":"Liste os números e o cartório de cada matrícula ou transcrição.","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[]},{"id":"b6","tipo":"texto","texto":"Número estimado de lotes ou unidades","fundamento":"","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[]}]},{"id":"sC","tipo":"secao","texto":"Restrições ambientais e áreas de risco","fundamento":"Lei 13.465/2017, arts. 11, §§ 2º e 3º, e 39","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[{"id":"c1","tipo":"simnao","texto":"Há ocupação em Área de Preservação Permanente (APP)?","fundamento":"art. 11, § 2º; Lei 12.651/2012, arts. 64 e 65","ajuda":"","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":[],"filhos":[{"id":"c1_1","tipo":"simnao","texto":"Há estudo técnico que demonstre a melhoria das condições ambientais em relação à ocupação anterior?","fundamento":"art. 11, § 2º; art. 35, VIII","ajuda":"","providencia":"Elaborar o estudo técnico ambiental, inclusive com as compensações cabíveis.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":["sim"],"filhos":[]}]},{"id":"c2","tipo":"simnao","texto":"O núcleo está em unidade de conservação de uso sustentável ou em área de proteção de mananciais?","fundamento":"art. 11, §§ 2º e 3º","ajuda":"","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":[],"filhos":[{"id":"c2_1","tipo":"simnaona","texto":"Há anuência do órgão gestor da unidade de conservação?","fundamento":"art. 11, § 3º","ajuda":"","providencia":"Obter a anuência do órgão gestor da unidade de conservação.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true},{"id":"na","rotulo":"Não se aplica","pendencia":false}],"mostrarSe":["sim"],"filhos":[]}]},{"id":"c3","tipo":"simnao","texto":"Existem áreas de risco (geotécnico, de inundação ou outros)?","fundamento":"art. 39","ajuda":"","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":[],"filhos":[{"id":"c3_1","tipo":"simnao","texto":"Foram elaborados estudos técnicos de risco?","fundamento":"art. 35, VII; art. 39","ajuda":"","providencia":"Elaborar estudo técnico para examinar a eliminação, correção ou administração dos riscos.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":["sim"],"filhos":[]},{"id":"c3_2","tipo":"unica","texto":"Os riscos podem ser eliminados, corrigidos ou administrados?","fundamento":"art. 39","ajuda":"","providencia":"Na Reurb-S, promover a realocação dos ocupantes da parcela em risco que não admite correção.","opcoes":[{"id":"sim","rotulo":"Sim, com as medidas indicadas no estudo","pendencia":false},{"id":"nao","rotulo":"Não, exige realocação dos ocupantes","pendencia":true}],"mostrarSe":["sim"],"filhos":[]}]}]},{"id":"sD","tipo":"secao","texto":"Infraestrutura essencial","fundamento":"Lei 13.465/2017, art. 36, § 1º","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[{"id":"d1","tipo":"simnao","texto":"Existe sistema de abastecimento de água potável (coletivo ou individual)?","fundamento":"art. 36, § 1º, I","ajuda":"","providencia":"Incluir a implantação no cronograma físico de obras e no termo de compromisso (art. 35, IX e X).","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"d2","tipo":"simnao","texto":"Existe sistema de coleta e tratamento de esgoto (coletivo ou individual)?","fundamento":"art. 36, § 1º, II","ajuda":"","providencia":"Incluir a implantação no cronograma físico de obras e no termo de compromisso (art. 35, IX e X).","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"d3","tipo":"simnao","texto":"Existe rede de energia elétrica domiciliar?","fundamento":"art. 36, § 1º, III","ajuda":"","providencia":"Incluir a implantação no cronograma físico de obras e no termo de compromisso (art. 35, IX e X).","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"d4","tipo":"simnaona","texto":"Há soluções de drenagem onde são necessárias?","fundamento":"art. 36, § 1º, IV","ajuda":"","providencia":"Incluir a implantação no cronograma físico de obras e no termo de compromisso (art. 35, IX e X).","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true},{"id":"na","rotulo":"Não se aplica","pendencia":false}],"mostrarSe":[],"filhos":[]},{"id":"d5","tipo":"simnaona","texto":"Calçadas já existem no núcleo habitacional?","fundamento":"art. 36, VII e § 1º, V; norma municipal","ajuda":"A lei federal não inclui calçadas no rol mínimo de infraestrutura essencial: a exigência vem da norma municipal (outros equipamentos definidos pelo Município) e das medidas de mobilidade e acessibilidade do projeto urbanístico.","providencia":"Prever a execução das calçadas no projeto urbanístico e no cronograma de obras, se exigidas pela norma municipal.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true},{"id":"na","rotulo":"Não se aplica","pendencia":false}],"mostrarSe":[],"filhos":[]},{"id":"d6","tipo":"simnao","texto":"O sistema viário e as vias de circulação estão definidos no projeto?","fundamento":"art. 36, I","ajuda":"","providencia":"Indicar no projeto urbanístico o sistema viário existente ou projetado.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"d7","tipo":"simnao","texto":"O Município definiu outros equipamentos de infraestrutura essencial em norma local?","fundamento":"art. 36, § 1º, V","ajuda":"","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":[],"filhos":[{"id":"d7_1","tipo":"texto","texto":"Quais equipamentos e em qual norma?","fundamento":"","ajuda":"","providencia":"","opcoes":[],"mostrarSe":["sim"],"filhos":[]}]},{"id":"d8","tipo":"simnaona","texto":"Os responsáveis pela implantação da infraestrutura foram definidos?","fundamento":"art. 33; art. 37 (Reurb-S); art. 38 (Reurb-E)","ajuda":"","providencia":"Definir os responsáveis pelas obras e serviços: o poder público na Reurb-S; os beneficiários ou requerentes na Reurb-E.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true},{"id":"na","rotulo":"Não se aplica","pendencia":false}],"mostrarSe":[],"filhos":[]}]},{"id":"sE","tipo":"secao","texto":"Projeto de regularização fundiária","fundamento":"Lei 13.465/2017, arts. 35 e 36","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[{"id":"e1","tipo":"simnao","texto":"Há levantamento planialtimétrico e cadastral georreferenciado, com ART ou RRT?","fundamento":"art. 35, I","ajuda":"","providencia":"Providenciar o levantamento subscrito por profissional habilitado, com ART ou RRT.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"e2","tipo":"simnao","texto":"Há planta do perímetro com as matrículas ou transcrições atingidas?","fundamento":"art. 35, II","ajuda":"","providencia":"Elaborar a planta do perímetro indicando as matrículas ou transcrições atingidas, quando possível.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"e3","tipo":"simnao","texto":"Há estudo preliminar das desconformidades e da situação jurídica, urbanística e ambiental?","fundamento":"art. 35, III","ajuda":"","providencia":"Elaborar o estudo preliminar das desconformidades.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"e4","tipo":"simnao","texto":"O projeto urbanístico indica áreas ocupadas, sistema viário, unidades, logradouros e áreas públicas?","fundamento":"art. 35, IV; art. 36","ajuda":"","providencia":"Completar o projeto urbanístico com os elementos mínimos do art. 36.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"e5","tipo":"simnao","texto":"Há memoriais descritivos?","fundamento":"art. 35, V","ajuda":"","providencia":"Elaborar os memoriais descritivos da gleba e das unidades.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"e6","tipo":"simnaona","texto":"Há proposta de soluções para questões ambientais, urbanísticas e de reassentamento?","fundamento":"art. 35, VI","ajuda":"","providencia":"Apresentar a proposta de soluções ambientais, urbanísticas e de reassentamento.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true},{"id":"na","rotulo":"Não se aplica","pendencia":false}],"mostrarSe":[],"filhos":[]},{"id":"e7","tipo":"simnaona","texto":"Há cronograma físico de serviços e obras de infraestrutura essencial?","fundamento":"art. 35, IX","ajuda":"","providencia":"Elaborar o cronograma físico de serviços e obras.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true},{"id":"na","rotulo":"Não se aplica","pendencia":false}],"mostrarSe":[],"filhos":[]},{"id":"e8","tipo":"simnaona","texto":"O termo de compromisso foi assinado pelos responsáveis pelo cronograma?","fundamento":"art. 35, X","ajuda":"","providencia":"Colher a assinatura do termo de compromisso pelos responsáveis, públicos ou privados.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true},{"id":"na","rotulo":"Não se aplica","pendencia":false}],"mostrarSe":[],"filhos":[]}]},{"id":"sF","tipo":"secao","texto":"Notificações e conflitos","fundamento":"Lei 13.465/2017, arts. 19 a 22, 31 e 34","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[{"id":"f1","tipo":"simnao","texto":"Titulares de domínio, responsáveis pela implantação, confinantes e terceiros interessados foram notificados?","fundamento":"art. 31, § 1º","ajuda":"","providencia":"Notificar para impugnação no prazo de 30 dias; os não encontrados, por edital.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[{"id":"f1_1","tipo":"simnao","texto":"Houve impugnação no prazo de 30 dias?","fundamento":"art. 31","ajuda":"A ausência de manifestação dos notificados é interpretada como concordância com a Reurb.","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":["sim"],"filhos":[{"id":"f1_1_1","tipo":"simnao","texto":"A impugnação foi superada (acordo, câmara de resolução de conflitos ou decisão)?","fundamento":"arts. 31 e 34","ajuda":"","providencia":"Buscar a composição extrajudicial do conflito antes de prosseguir.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":["sim"],"filhos":[]}]}]},{"id":"f2","tipo":"simnao","texto":"Foi utilizada a demarcação urbanística?","fundamento":"arts. 19 a 22","ajuda":"","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":[],"filhos":[{"id":"f2_1","tipo":"simnaona","texto":"O auto de demarcação urbanística foi averbado nas matrículas alcançadas?","fundamento":"arts. 19 a 22","ajuda":"","providencia":"Encaminhar o auto de demarcação ao Registro de Imóveis para averbação.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true},{"id":"na","rotulo":"Não se aplica","pendencia":false}],"mostrarSe":["sim"],"filhos":[]}]}]},{"id":"sG","tipo":"secao","texto":"Titulação, decisão e CRF","fundamento":"Lei 13.465/2017, arts. 15, 23, 40 e 41","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[{"id":"g1","tipo":"multipla","texto":"Instrumentos de titulação previstos","fundamento":"art. 15","ajuda":"","providencia":"","opcoes":[{"id":"lf","rotulo":"Legitimação fundiária","pendencia":false},{"id":"lp","rotulo":"Legitimação de posse","pendencia":false},{"id":"cdru","rotulo":"Concessão de direito real de uso","pendencia":false},{"id":"cuem","rotulo":"Concessão de uso especial para fins de moradia","pendencia":false},{"id":"doa","rotulo":"Doação ou compra e venda","pendencia":false},{"id":"usu","rotulo":"Usucapião","pendencia":false},{"id":"outro","rotulo":"Outro","pendencia":false}],"mostrarSe":[],"filhos":[{"id":"g1_1","tipo":"simnao","texto":"Os beneficiários atendem aos requisitos da legitimação fundiária na Reurb-S?","fundamento":"art. 23, § 1º","ajuda":"O beneficiário não pode ser concessionário, foreiro ou proprietário de imóvel urbano ou rural, nem ter sido contemplado com legitimação de posse ou fundiária de imóvel urbano com a mesma finalidade.","providencia":"Excluir da legitimação fundiária os ocupantes que não atendem aos requisitos ou adotar outro instrumento.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":["lf"],"filhos":[]}]},{"id":"g2","tipo":"simnao","texto":"A autoridade competente decidiu o processo, aprovando o projeto e identificando os ocupantes e seus direitos reais?","fundamento":"art. 40","ajuda":"","providencia":"Obter a decisão formal da autoridade competente, com publicidade.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[]},{"id":"g3","tipo":"simnao","texto":"A CRF foi expedida com os requisitos mínimos?","fundamento":"art. 41","ajuda":"Nome do núcleo, localização, modalidade, responsabilidades pelas obras e serviços do cronograma, indicação numérica das unidades e listagem dos ocupantes.","providencia":"Complementar a CRF com os requisitos mínimos do art. 41.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":[],"filhos":[{"id":"g3_1","tipo":"simnao","texto":"A listagem dos ocupantes traz estado civil, profissão, CPF, RG e filiação?","fundamento":"art. 41, VI","ajuda":"","providencia":"Completar a qualificação dos ocupantes na listagem da CRF.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":["sim"],"filhos":[]}]}]},{"id":"sH","tipo":"secao","texto":"Registro","fundamento":"Lei 13.465/2017, arts. 13, § 1º, 42 e 44","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[{"id":"h1","tipo":"simnaona","texto":"Na Reurb-S, o requerimento ao Registro de Imóveis invoca a isenção de custas e emolumentos?","fundamento":"art. 13, § 1º","ajuda":"","providencia":"Indicar expressamente a isenção de custas e emolumentos da Reurb-S.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true},{"id":"na","rotulo":"Não se aplica","pendencia":false}],"mostrarSe":[],"filhos":[]},{"id":"h2","tipo":"simnao","texto":"A CRF e o projeto aprovado foram protocolados no Registro de Imóveis competente?","fundamento":"arts. 42 e 44","ajuda":"Recebida a CRF, o oficial prenota, autua e emite nota de exigência ou pratica os atos em 15 dias; o procedimento registral deve terminar em 60 dias, prorrogáveis por igual período.","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":[],"filhos":[{"id":"h2_1","tipo":"simnao","texto":"Houve nota de exigência do Registro de Imóveis?","fundamento":"","ajuda":"","providencia":"","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":false}],"mostrarSe":["sim"],"filhos":[{"id":"h2_1_1","tipo":"simnao","texto":"As exigências foram cumpridas?","fundamento":"","ajuda":"","providencia":"Cumprir as exigências da nota devolutiva ou suscitar dúvida.","opcoes":[{"id":"sim","rotulo":"Sim","pendencia":false},{"id":"nao","rotulo":"Não","pendencia":true}],"mostrarSe":["sim"],"filhos":[]}]}]},{"id":"h3","tipo":"texto","texto":"Observações gerais","fundamento":"","ajuda":"","providencia":"","opcoes":[],"mostrarSe":[],"filhos":[]}]}]}],"exemplo":{"id":"exemplo-vila-esperanca","ident":{"municipio":"Município Exemplo/UF","nucleo":"EXEMPLO — Núcleo Vila Esperança","processo":"0001/2026","responsavel":"","inicio":"2026-09-01"},"status":"andamento","respostas":{"a1":{"v":"sim"},"a1_1":{"v":"mun"},"a2":{"v":"2026-03-10"},"a3":{"v":"sim"},"a4":{"v":"s"},"a4_1":{"v":"sim"},"b1":{"v":"sim"},"b2":{"v":"sim"},"b2_1":{"v":"antes"},"b2_1_1":{"v":["img","iptu"]},"b3":{"v":"nao"},"b4":{"v":["mun"]},"b5":{"v":"Matrícula 12.345 do Registro de Imóveis local"},"c1":{"v":"sim"},"c1_1":{"v":"nao","obs":"Faixa de APP ao longo do córrego, fundos das quadras 3 e 4."},"c2":{"v":"nao"},"c3":{"v":"nao"},"d1":{"v":"sim"},"d2":{"v":"nao","obs":"Fossas individuais em parte dos lotes; avaliar solução individual."},"d3":{"v":"sim"},"d4":{"v":"sim"},"d5":{"v":"nao","obs":"Ruas A e B sem passeio."},"d6":{"v":"sim"},"d7":{"v":"nao"},"d8":{"v":"sim"},"e1":{"v":"sim"},"e2":{"v":"sim"},"e3":{"v":"nao"}},"protocolo":{"id":"exemplo-protocolo","ano":2026,"seq":1,"numero":"0001/2026","abertura":"2026-09-01","municipio":"Município Exemplo/UF","nucleo":"EXEMPLO — Núcleo Vila Esperança","interessado":"Prefeitura Municipal (exemplo)","natureza":"Reurb-S","prazo":"2026-10-30","descricao":"Consultoria para análise do processo de Reurb-S do núcleo e indicação das pendências para o registro.","situacao":"analise","andamentos":[{"id":"and1","data":"2026-09-01","texto":"Protocolo aberto."},{"id":"and2","data":"2026-09-01","texto":"Checklist “REURB — Análise do processo (Lei 13.465/2017)” aplicado."},{"id":"and3","data":"2026-09-10","texto":"Solicitada ao município a planta do perímetro com as matrículas atingidas."}],"exemplo":true}}}</script>
 <script>
 (() => {
 'use strict';
@@ -390,7 +419,8 @@ const ICONES = {
   lista: '<path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/>',
   x: '<path d="M6 6l12 12M18 6L6 18"/>',
   aviso: '<path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18h.01"/>',
-  livro: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5z"/><path d="M4 19a2 2 0 0 1 2-2h13"/>'
+  livro: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5z"/><path d="M4 19a2 2 0 0 1 2-2h13"/>',
+  pasta: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/>'
 };
 function ico(nome) {
   const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -505,6 +535,7 @@ function normalizarAnalise(a) {
     modeloId: String(a.modeloId || ''),
     modelo: { nome: String(mod.nome || 'Checklist'), perguntas: Array.isArray(mod.perguntas) ? mod.perguntas.map(normalizarNo) : [] },
     modeloEm: a.modeloEm || '',
+    protocoloId: String(a.protocoloId || ''),
     ident: Object.assign({ municipio: '', nucleo: '', processo: '', responsavel: '', inicio: '' }, a.ident || {}),
     respostas: a.respostas && typeof a.respostas === 'object' ? a.respostas : {},
     status: a.status === 'concluida' ? 'concluida' : 'andamento',
@@ -513,10 +544,10 @@ function normalizarAnalise(a) {
     atualizadoEm: a.atualizadoEm || agora()
   };
 }
-function novaAnalise(m, ident) {
+function novaAnalise(m, ident, protocoloId) {
   return normalizarAnalise({
     id: uid('a'), modeloId: m.id, modelo: { nome: m.nome, perguntas: clone(m.perguntas) }, modeloEm: m.atualizadoEm,
-    ident: ident || {}, respostas: {}, status: 'andamento'
+    protocoloId: protocoloId || '', ident: ident || {}, respostas: {}, status: 'andamento'
   });
 }
 /* Percorre a árvore numerando as perguntas: 1, 2, 2.1, 2.1.1… (seções não recebem número). */
@@ -592,14 +623,65 @@ function semear(dados) {
   if (ex) {
     const a = novaAnalise(m, ex.ident);
     a.id = ex.id; a.respostas = clone(ex.respostas); a.exemplo = true;
+    if (ex.protocolo) {
+      const p = normalizarProtocolo(clone(ex.protocolo));
+      dados.protocolos[p.id] = p;
+      a.protocoloId = p.id;
+    }
     dados.analises[a.id] = a;
   }
 }
 
+/* ---------- protocolos (menu Recepção) ---------- */
+const SITUACOES = {
+  aberto: ['Aberto', 'chip-acento'],
+  analise: ['Em análise', 'chip-acento'],
+  exigencia: ['Aguardando documentos', 'chip-ex'],
+  concluido: ['Concluído', 'chip-ok'],
+  arquivado: ['Arquivado', '']
+};
+const NATUREZAS = ['Reurb-S', 'Reurb-E', 'Reurb — modalidade a definir', 'Consulta jurídica', 'Outro'];
+const numeroProtocolo = (ano, seq) => String(seq).padStart(4, '0') + '/' + ano;
+function normalizarProtocolo(p) {
+  const ano = Number(p.ano) || new Date().getFullYear(), seq = Number(p.seq) || 1;
+  return {
+    id: String(p.id || uid('p')), ano, seq, numero: String(p.numero || numeroProtocolo(ano, seq)),
+    abertura: String(p.abertura || hoje()),
+    municipio: String(p.municipio || ''), nucleo: String(p.nucleo || ''), interessado: String(p.interessado || ''),
+    natureza: String(p.natureza || ''), prazo: String(p.prazo || ''), descricao: String(p.descricao || ''),
+    situacao: SITUACOES[p.situacao] ? p.situacao : 'aberto',
+    andamentos: Array.isArray(p.andamentos) ? p.andamentos.map(x => ({ id: String(x.id || uid('n')), data: String(x.data || ''), texto: String(x.texto || ''), em: x.em || '' })) : [],
+    exemplo: !!p.exemplo,
+    criadoEm: p.criadoEm || agora(),
+    atualizadoEm: p.atualizadoEm || agora()
+  };
+}
+function proximoSeq(ano) {
+  let max = 0;
+  for (const p of Object.values(Store.dados.protocolos)) if (p.ano === ano) max = Math.max(max, p.seq);
+  return max + 1;
+}
+function registrarAndamento(p, texto, data) {
+  p.andamentos.push({ id: uid('n'), data: data || hoje(), texto, em: agora() });
+}
+function andamentosOrdenados(p) {
+  return p.andamentos.slice().sort((a, b) => String(b.data).localeCompare(String(a.data)) || String(b.em).localeCompare(String(a.em)));
+}
+function prazoInfo(p) {
+  if (!p.prazo || p.situacao === 'concluido' || p.situacao === 'arquivado') return null;
+  const dias = Math.round((new Date(p.prazo + 'T00:00:00') - new Date(hoje() + 'T00:00:00')) / 86400000);
+  if (isNaN(dias)) return null;
+  if (dias < 0) return ['Prazo vencido há ' + plural(-dias, 'dia', 'dias'), 'chip-pend'];
+  if (dias === 0) return ['Prazo vence hoje', 'chip-pend'];
+  if (dias <= 7) return ['Prazo em ' + plural(dias, 'dia', 'dias'), 'chip-ex'];
+  return ['Prazo ' + fmtData(p.prazo), ''];
+}
+const NORMALIZAR = { modelos: m => normalizarModelo(m), analises: a => normalizarAnalise(a), protocolos: p => normalizarProtocolo(p) };
+
 /* ---------- armazenamento: db do artifact quando disponível, senão este navegador ---------- */
 const Store = {
   modo: 'carregando', emArtifact: false, db: null,
-  dados: { modelos: {}, analises: {} },
+  dados: { modelos: {}, analises: {}, protocolos: {} },
   revs: {}, timers: {}, cadeias: {}, pendentes: new Set(),
   aoRemoto: null, aoStatus: null,
   async iniciar() {
@@ -619,6 +701,7 @@ const Store = {
     if (d && d.modelos && d.analises) {
       for (const m of Object.values(d.modelos)) { const x = normalizarModelo(m); this.dados.modelos[x.id] = x; }
       for (const a of Object.values(d.analises)) { const x = normalizarAnalise(a); this.dados.analises[x.id] = x; }
+      for (const p of Object.values(d.protocolos || {})) { const x = normalizarProtocolo(p); this.dados.protocolos[x.id] = x; }
     } else {
       semear(this.dados);
       this.salvarLocal();
@@ -631,10 +714,10 @@ const Store = {
   },
   iniciarDb() {
     return new Promise(resolve => {
-      let faltam = 2;
+      let faltam = 3;
       const pronto = () => { if (--faltam <= 0) resolve(); };
       setTimeout(resolve, 9000);
-      for (const col of ['modelos', 'analises']) {
+      for (const col of ['modelos', 'analises', 'protocolos']) {
         let primeira = true;
         this.db.collection(col).onSnapshot(snap => {
           this.aplicarSnap(col, snap, !primeira);
@@ -658,7 +741,7 @@ const Store = {
       const d = ch.doc.data();
       if (!d || (d._rev && d._rev === this.revs[chave])) continue; // eco da própria gravação
       const obj = Object.assign(clone(d), { id });
-      this.dados[col][id] = col === 'modelos' ? normalizarModelo(obj) : normalizarAnalise(obj);
+      this.dados[col][id] = NORMALIZAR[col](obj);
       mudados.push(id);
     }
     if (avisar && mudados.length && this.aoRemoto) this.aoRemoto(col, mudados);
@@ -747,9 +830,10 @@ const ui = (() => {
   let u = null;
   try { u = JSON.parse(localStorage.getItem(LS_UI) || 'null'); } catch (e) { u = null; }
   u = Object.assign({ aba: 'analises', sel: {}, filtro: {}, filtroQ: 'todas' }, u || {});
-  u.sel = Object.assign({ analises: null, modelos: null }, u.sel);
-  u.filtro = Object.assign({ analises: '', modelos: '' }, u.filtro);
-  if (location.hash === '#modelos' || location.hash === '#analises') u.aba = location.hash.slice(1);
+  u.sel = Object.assign({ analises: null, modelos: null, protocolos: null }, u.sel);
+  u.filtro = Object.assign({ analises: '', modelos: '', protocolos: '' }, u.filtro);
+  if (['#modelos', '#analises', '#protocolos'].includes(location.hash)) u.aba = location.hash.slice(1);
+  if (!['modelos', 'analises', 'protocolos'].includes(u.aba)) u.aba = 'analises';
   u.criando = false;
   return u;
 })();
@@ -759,7 +843,10 @@ function salvarUI() {
 const D = () => Store.dados;
 const analisesOrdenadas = () => Object.values(D().analises).sort((a, b) => String(b.atualizadoEm).localeCompare(String(a.atualizadoEm)));
 const modelosOrdenados = () => Object.values(D().modelos).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+const protocolosOrdenados = () => Object.values(D().protocolos).sort((a, b) => (b.ano - a.ano) || (b.seq - a.seq));
+const analisesDoProtocolo = id => analisesOrdenadas().filter(a => a.protocoloId === id);
 function garantirSelecao() {
+  if (!D().protocolos[ui.sel.protocolos]) ui.sel.protocolos = (protocolosOrdenados()[0] || {}).id || null;
   if (!D().analises[ui.sel.analises]) ui.sel.analises = (analisesOrdenadas()[0] || {}).id || null;
   if (!D().modelos[ui.sel.modelos]) ui.sel.modelos = (modelosOrdenados()[0] || {}).id || null;
 }
@@ -769,27 +856,39 @@ function voltarBtn() {
 }
 
 /* ---------- casca: abas, lista lateral, backup ---------- */
-function trocarAba(aba) {
-  ui.aba = aba; ui.criando = false;
+function trocarAba(aba, criando) {
+  ui.aba = aba; ui.criando = !!criando;
   salvarUI();
   try { history.replaceState(null, '', '#' + aba); } catch (e) { /* sem histórico no quadro */ }
-  mostrarDetalhe(false);
+  mostrarDetalhe(!!criando);
   renderTudo();
+  if (criando) window.scrollTo(0, 0);
+}
+function irPara(aba, id) {
+  ui.sel[aba] = id;
+  trocarAba(aba);
+  mostrarDetalhe(true);
+  window.scrollTo(0, 0);
 }
 function renderAbas() {
   const marcar = (el, sim) => { if (sim) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current'); };
   marcar($('#mb-analises'), ui.aba === 'analises');
   marcar($('#mb-modelos'), ui.aba === 'modelos');
   marcar($('#mb-cadastros-btn'), ui.aba === 'modelos');
+  marcar($('#mb-recepcao-btn'), ui.aba === 'protocolos');
+  marcar($('#mb-abrir-protocolo'), ui.aba === 'protocolos' && ui.criando);
+  marcar($('#mb-protocolos'), ui.aba === 'protocolos' && !ui.criando);
 }
 function renderLateral() {
   const aba = ui.aba;
-  $('#lat-tit').textContent = aba === 'analises' ? 'Análises' : 'Modelos de checklist';
+  $('#lat-tit').textContent = { analises: 'Análises', modelos: 'Modelos de checklist', protocolos: 'Protocolos' }[aba];
   const f = $('#filtro');
   if (document.activeElement !== f) f.value = ui.filtro[aba] || '';
-  f.placeholder = aba === 'analises' ? 'Filtrar por núcleo, município ou processo' : 'Filtrar modelos';
+  f.placeholder = { analises: 'Filtrar por núcleo, município ou processo', modelos: 'Filtrar modelos', protocolos: 'Filtrar por número, núcleo, município ou interessado' }[aba];
   const acoes = $('#lat-acoes');
-  if (aba === 'analises') {
+  if (aba === 'protocolos') {
+    acoes.replaceChildren(btn('Abrir protocolo', { icone: 'mais', prim: true, onclick: () => trocarAba('protocolos', true) }));
+  } else if (aba === 'analises') {
     acoes.replaceChildren(btn('Nova análise', { icone: 'mais', prim: true, onclick: () => abrirNovaAnalise() }));
   } else {
     acoes.replaceChildren(
@@ -804,7 +903,32 @@ function renderItens() {
   const lista = $('#itens');
   const itens = [];
   if (Store.modo === 'carregando') { lista.replaceChildren(); $('#lat-cont').textContent = ''; return; }
-  if (aba === 'analises') {
+  if (aba === 'protocolos') {
+    const todos = protocolosOrdenados();
+    const vis = todos.filter(p => !termo || norm([p.numero, p.nucleo, p.municipio, p.interessado, p.natureza].join(' ')).includes(termo));
+    $('#lat-cont').textContent = String(todos.length);
+    for (const p of vis) {
+      const [sitRot, sitCls] = SITUACOES[p.situacao];
+      const prazo = prazoInfo(p);
+      const nChk = analisesDoProtocolo(p.id).length;
+      const sub = [p.nucleo && p.municipio, p.interessado, p.natureza].filter(Boolean).join(' · ');
+      itens.push(h('li', null, h('button', {
+        type: 'button', class: 'item', 'aria-current': String(!ui.criando && p.id === ui.sel.protocolos),
+        onclick: () => { ui.sel.protocolos = p.id; ui.criando = false; salvarUI(); mostrarDetalhe(true); renderAbas(); renderItens(); renderDetalhe(); window.scrollTo(0, 0); }
+      },
+        h('span', { class: 'item-tit' }, h('span', { class: 'item-num' }, p.numero), p.nucleo || p.municipio || 'Sem identificação'),
+        sub ? h('span', { class: 'item-sub' }, sub) : null,
+        h('span', { class: 'item-meta' },
+          h('span', { class: 'chip ' + sitCls }, sitRot),
+          prazo ? h('span', { class: 'chip ' + prazo[1] }, prazo[0]) : null,
+          nChk ? plural(nChk, 'checklist', 'checklists') : null,
+          p.exemplo ? h('span', { class: 'chip chip-ex' }, 'Exemplo') : null
+        )
+      )));
+    }
+    if (!todos.length) itens.push(h('li', { class: 'lat-vazio' }, 'Nenhum protocolo aberto.'));
+    else if (!vis.length) itens.push(h('li', { class: 'lat-vazio' }, 'Nenhum protocolo corresponde ao filtro.'));
+  } else if (aba === 'analises') {
     const todas = analisesOrdenadas();
     const vis = todas.filter(a => !termo || norm([a.ident.nucleo, a.ident.municipio, a.ident.processo, a.modelo.nome].join(' ')).includes(termo));
     $('#lat-cont').textContent = String(todas.length);
@@ -858,6 +982,11 @@ function renderDetalhe() {
   rerenderAdiado = false;
   const d = $('#detalhe');
   if (Store.modo === 'carregando') { d.replaceChildren(h('p', { class: 'carregando' }, 'Carregando dados…')); return; }
+  if (ui.aba === 'protocolos') {
+    if (ui.criando) return renderNovoProtocolo();
+    const p = D().protocolos[ui.sel.protocolos];
+    return p ? renderProtocolo(p) : renderVazioProtocolos();
+  }
   if (ui.aba === 'analises') {
     if (ui.criando) return renderNovaAnalise();
     const a = D().analises[ui.sel.analises];
@@ -1030,10 +1159,12 @@ function renderAnalise(a) {
     btn(concluida ? 'Reabrir análise' : 'Marcar como concluída', { icone: concluida ? 'voltar' : 'check', onclick: () => { a.status = concluida ? 'andamento' : 'concluida'; Store.put('analises', a, 0); renderItens(); renderDetalhe(); } }),
     btn('Excluir análise', { icone: 'lixo', fant: true, perigo: true, onclick: ev => armar(ev.currentTarget, () => { Store.remover('analises', a.id); ui.sel.analises = null; garantirSelecao(); mostrarDetalhe(false); renderTudo(); toast('Análise excluída.'); }) })
   );
+  const prot = D().protocolos[a.protocoloId];
   const cab = h('div', { class: 'cab' },
     h('div', { class: 'cab-txt' }, voltarBtn(),
       h('span', { class: 'sobre' }, (concluida ? 'Análise concluída · ' : 'Análise em andamento · ') + a.modelo.nome),
-      titulo, sub),
+      titulo, sub,
+      prot ? btn('Protocolo ' + prot.numero, { icone: 'pasta', fant: true, sm: true, cls: 'link-prot', onclick: () => irPara('protocolos', prot.id) }) : null),
     acoes);
   const blocos = [cab];
   if (a.exemplo) blocos.push(h('p', { class: 'nota nota-info' }, ico('info'), h('span', null, 'Esta é uma análise de exemplo, com dados fictícios, para mostrar como o checklist funciona. Exclua-a quando não precisar mais.')));
@@ -1109,8 +1240,8 @@ function renderVazioAnalises() {
       : btn('Adicionar modelo REURB', { icone: 'livro', prim: true, onclick: () => { adicionarDaBiblioteca(); } })
   ));
 }
-function abrirNovaAnalise(modeloId) {
-  ui.aba = 'analises'; ui.criando = true; ui.modeloNovo = modeloId || null;
+function abrirNovaAnalise(modeloId, protocoloId) {
+  ui.aba = 'analises'; ui.criando = true; ui.modeloNovo = modeloId || null; ui.protocoloNovo = protocoloId || null;
   mostrarDetalhe(true);
   renderTudo();
   window.scrollTo(0, 0);
@@ -1127,7 +1258,20 @@ function renderNovaAnalise() {
   const sel = h('select', { class: 'inp', id: 'na-modelo' }, modelos.map(m => h('option', { value: m.id, selected: m.id === (ui.modeloNovo || modelos[0].id) }, m.nome)));
   const campo = (id, rot, attrs = {}) => h('label', { class: 'campo' + (attrs.largo ? ' largo' : ''), for: id }, h('span', { class: 'rot' }, rot),
     h('input', Object.assign({ class: 'inp', id, type: 'text', autocomplete: 'off' }, attrs, { largo: null })));
+  const protocolos = protocolosOrdenados();
+  const selProt = h('select', { class: 'inp', id: 'na-protocolo' },
+    h('option', { value: '' }, 'Sem protocolo'),
+    protocolos.map(p => h('option', { value: p.id, selected: p.id === ui.protocoloNovo }, `${p.numero} · ${p.nucleo || p.municipio || 'Sem identificação'}`)));
+  const preencher = () => {
+    const p = D().protocolos[selProt.value];
+    if (!p) return;
+    form.querySelector('#na-nucleo').value = p.nucleo;
+    form.querySelector('#na-municipio').value = p.municipio;
+    form.querySelector('#na-processo').value = p.numero;
+  };
+  selProt.addEventListener('change', preencher);
   const form = h('form', { class: 'form-nova' },
+    h('label', { class: 'campo largo', for: 'na-protocolo' }, h('span', { class: 'rot' }, 'Protocolo'), selProt),
     h('label', { class: 'campo largo', for: 'na-modelo' }, h('span', { class: 'rot' }, 'Modelo de checklist'), sel),
     campo('na-nucleo', 'Núcleo urbano informal', { required: true, placeholder: 'Ex.: Jardim das Palmeiras', largo: true }),
     campo('na-municipio', 'Município/UF', { placeholder: 'Ex.: Assis Chateaubriand/PR' }),
@@ -1143,8 +1287,10 @@ function renderNovaAnalise() {
     const m = D().modelos[sel.value];
     if (!m) { toast('Escolha um modelo de checklist.'); return; }
     const v = id => $('#' + id).value.trim();
-    const a = novaAnalise(m, { nucleo: v('na-nucleo'), municipio: v('na-municipio'), processo: v('na-processo'), responsavel: v('na-responsavel'), inicio: $('#na-inicio').value });
+    const p = D().protocolos[selProt.value];
+    const a = novaAnalise(m, { nucleo: v('na-nucleo'), municipio: v('na-municipio'), processo: v('na-processo'), responsavel: v('na-responsavel'), inicio: $('#na-inicio').value }, p ? p.id : '');
     Store.put('analises', a, 0);
+    if (p) { registrarAndamento(p, `Checklist “${m.nome}” aplicado.`); Store.put('protocolos', p, 0); }
     ui.sel.analises = a.id; ui.criando = false; ui.filtroQ = 'todas'; salvarUI();
     renderTudo();
     toast('Análise iniciada.');
@@ -1152,7 +1298,164 @@ function renderNovaAnalise() {
   d.replaceChildren(h('div', { class: 'cab' }, h('div', { class: 'cab-txt' }, voltarBtn(), h('span', { class: 'sobre' }, 'Nova análise'),
     h('h1', { class: 'titulo' }, 'Aplicar um checklist a um núcleo'),
     h('p', { class: 'subt' }, 'A análise guarda uma cópia do modelo escolhido, então mudanças futuras no modelo não alteram o que já foi respondido.'))), form);
+  preencher();
   $('#na-nucleo').focus();
+}
+
+/* ---------- protocolos: abrir, consultar, andamentos ---------- */
+function subtituloProtocolo(p) {
+  return [p.nucleo && p.municipio, p.interessado, p.natureza, 'Aberto em ' + fmtData(p.abertura)].filter(Boolean).join(' · ');
+}
+function campoProt(p, k, rot, tipo, extra = {}) {
+  const id = 'pr-' + k;
+  let el;
+  if (tipo === 'natureza') el = h('select', { class: 'inp', id }, h('option', { value: '' }, 'Não informada'),
+    NATUREZAS.map(n => h('option', { value: n, selected: n === p[k] }, n)));
+  else if (tipo === 'textarea') el = h('textarea', { class: 'inp', id, rows: '2', value: p[k] || '' });
+  else el = h('input', { class: 'inp', id, type: tipo, value: p[k] || '', autocomplete: 'off' });
+  return { el, rotulo: h('label', { class: 'campo' + (extra.largo ? ' largo' : ''), for: id }, h('span', { class: 'rot' }, rot), el) };
+}
+function renderProtocolo(p) {
+  const d = $('#detalhe');
+  const titulo = h('h1', { class: 'titulo' }, p.nucleo || p.municipio || 'Sem identificação');
+  const sub = h('p', { class: 'subt' }, subtituloProtocolo(p));
+  const chips = h('div', { class: 'cab-chips' });
+  const atualizarChips = () => {
+    const [rot, cls] = SITUACOES[p.situacao], prazo = prazoInfo(p);
+    chips.replaceChildren(h('span', { class: 'chip ' + cls }, rot), prazo ? h('span', { class: 'chip ' + prazo[1] }, prazo[0]) : null);
+  };
+  atualizarChips();
+  const selSit = h('select', { class: 'inp', id: 'pr-situacao' },
+    Object.entries(SITUACOES).map(([k, [rot]]) => h('option', { value: k, selected: k === p.situacao }, rot)));
+  selSit.addEventListener('change', () => {
+    p.situacao = selSit.value;
+    registrarAndamento(p, `Situação alterada para “${SITUACOES[p.situacao][0]}”.`);
+    Store.put('protocolos', p, 0);
+    renderItens(); renderDetalhe();
+  });
+  const acoes = h('div', { class: 'acoes' },
+    h('label', { class: 'situacao', for: 'pr-situacao' }, h('span', { class: 'rot' }, 'Situação'), selSit),
+    btn('Aplicar checklist', { icone: 'check', prim: true, onclick: () => abrirNovaAnalise(null, p.id) }),
+    btn('Excluir protocolo', { icone: 'lixo', fant: true, perigo: true, onclick: ev => armar(ev.currentTarget, () => {
+      Store.remover('protocolos', p.id); ui.sel.protocolos = null; garantirSelecao(); mostrarDetalhe(false); renderTudo();
+      toast('Protocolo excluído. Os checklists aplicados continuam em Análises.');
+    }) }));
+  const blocos = [h('div', { class: 'cab' },
+    h('div', { class: 'cab-txt' }, voltarBtn(), h('span', { class: 'sobre' }, 'Protocolo ' + p.numero), titulo, sub, chips), acoes)];
+  if (p.exemplo) blocos.push(h('p', { class: 'nota nota-info' }, ico('info'), h('span', null, 'Protocolo de exemplo, com dados fictícios. Exclua-o quando não precisar mais.')));
+
+  // dados do protocolo (salvos automaticamente)
+  const campos = [
+    campoProt(p, 'abertura', 'Abertura', 'date'), campoProt(p, 'municipio', 'Município/UF', 'text'),
+    campoProt(p, 'nucleo', 'Núcleo urbano informal', 'text'), campoProt(p, 'interessado', 'Interessado ou requerente', 'text'),
+    campoProt(p, 'natureza', 'Natureza', 'natureza'), campoProt(p, 'prazo', 'Prazo', 'date'),
+    campoProt(p, 'descricao', 'Descrição do pedido', 'textarea', { largo: true })
+  ];
+  for (const c of campos) {
+    const k = c.el.id.slice(3);
+    c.el.addEventListener(c.el.tagName === 'SELECT' ? 'change' : 'input', () => {
+      p[k] = c.el.value;
+      if (c.el.tagName === 'TEXTAREA') autoAltura(c.el);
+      titulo.textContent = p.nucleo || p.municipio || 'Sem identificação';
+      sub.textContent = subtituloProtocolo(p);
+      atualizarChips();
+      Store.put('protocolos', p);
+      renderItens();
+    });
+  }
+  blocos.push(h('fieldset', { class: 'ident' }, h('legend', null, 'Dados do protocolo'), campos.map(c => c.rotulo)));
+  requestAnimationFrame(() => { const t = $('#pr-descricao'); if (t) autoAltura(t); });
+
+  // andamentos
+  const lista = h('ol', { class: 'and-lista' });
+  const desenharAndamentos = () => {
+    const ands = andamentosOrdenados(p);
+    lista.hidden = !ands.length;
+    lista.replaceChildren(...ands.map(x => h('li', { class: 'and-item' },
+      h('span', { class: 'and-data' }, fmtData(x.data)),
+      h('span', { class: 'and-txt' }, x.texto),
+      btn('Excluir andamento', { icone: 'x', soIcone: true, fant: true, onclick: ev => armar(ev.currentTarget, () => {
+        p.andamentos = p.andamentos.filter(y => y.id !== x.id);
+        Store.put('protocolos', p, 0); desenharAndamentos();
+      }) }))));
+  };
+  desenharAndamentos();
+  const andData = h('input', { class: 'inp', type: 'date', id: 'and-data', 'aria-label': 'Data do andamento', value: hoje() });
+  const andTexto = h('input', { class: 'inp', id: 'and-texto', 'aria-label': 'Andamento', placeholder: 'Ex.: enviado ofício ao município pedindo a planta do perímetro', autocomplete: 'off' });
+  const formAnd = h('form', { class: 'and-form' }, andData, andTexto, h('button', { type: 'submit', class: 'btn btn-prim' }, ico('mais'), 'Registrar'));
+  formAnd.addEventListener('submit', ev => {
+    ev.preventDefault();
+    const texto = andTexto.value.trim();
+    if (!texto) { toast('Escreva o andamento antes de registrar.'); andTexto.focus(); return; }
+    registrarAndamento(p, texto, andData.value || hoje());
+    Store.put('protocolos', p, 0);
+    andTexto.value = '';
+    desenharAndamentos(); renderItens();
+    andTexto.focus();
+  });
+  const blocoAnd = h('section', { class: 'bloco', 'aria-labelledby': 'and-tit' }, h('h2', { class: 'bloco-tit', id: 'and-tit' }, 'Andamentos'), formAnd, lista);
+
+  // checklists aplicados a este protocolo
+  const vinc = analisesDoProtocolo(p.id);
+  const blocoVinc = h('aside', { class: 'bloco', 'aria-labelledby': 'vinc-tit' }, h('h2', { class: 'bloco-tit', id: 'vinc-tit' }, 'Checklists aplicados'),
+    vinc.length ? h('ul', { class: 'vinc' }, vinc.map(a => {
+      const est = estatisticas(a.modelo, a.respostas);
+      const pct = est.total ? Math.round(est.feitas * 100 / est.total) : 0;
+      return h('li', null, h('button', { type: 'button', class: 'item', onclick: () => irPara('analises', a.id) },
+        h('span', { class: 'item-tit' }, a.modelo.nome),
+        h('span', { class: 'item-meta' },
+          h('span', { class: 'barra', 'aria-hidden': 'true' }, h('i', { style: `width:${pct}%` })), `${est.feitas}/${est.total}`,
+          est.pendencias.length ? h('span', { class: 'chip chip-pend' }, plural(est.pendencias.length, 'pendência', 'pendências')) : null,
+          a.status === 'concluida' ? h('span', { class: 'chip chip-ok' }, 'Concluída') : null)));
+    })) : h('p', { class: 'dica' }, 'Nenhum checklist aplicado.'),
+    h('div', null, btn('Aplicar checklist', { icone: 'mais', sm: true, onclick: () => abrirNovaAnalise(null, p.id) })));
+  blocos.push(h('div', { class: 'pr-grade' }, blocoAnd, blocoVinc));
+  d.replaceChildren(...blocos);
+}
+function renderVazioProtocolos() {
+  $('#detalhe').replaceChildren(h('div', { class: 'vazio' },
+    h('h2', null, 'Nenhum protocolo aberto'),
+    btn('Abrir protocolo', { icone: 'mais', prim: true, onclick: () => trocarAba('protocolos', true) })));
+}
+function renderNovoProtocolo() {
+  const d = $('#detalhe');
+  const numero = h('span', { class: 'sobre' });
+  const campo = (id, rot, attrs = {}) => h('label', { class: 'campo' + (attrs.largo ? ' largo' : ''), for: id }, h('span', { class: 'rot' }, rot),
+    h('input', Object.assign({ class: 'inp', id, type: 'text', autocomplete: 'off' }, attrs, { largo: null })));
+  const natureza = h('select', { class: 'inp', id: 'np-natureza' }, h('option', { value: '' }, 'Não informada'), NATUREZAS.map(n => h('option', { value: n }, n)));
+  const form = h('form', { class: 'form-nova' },
+    campo('np-municipio', 'Município/UF', { required: true, placeholder: 'Ex.: Assis Chateaubriand/PR' }),
+    campo('np-abertura', 'Abertura', { type: 'date', value: hoje(), required: true }),
+    campo('np-nucleo', 'Núcleo urbano informal', { placeholder: 'Ex.: Jardim das Palmeiras', largo: true }),
+    campo('np-interessado', 'Interessado ou requerente', { placeholder: 'Ex.: Prefeitura Municipal' }),
+    h('label', { class: 'campo', for: 'np-natureza' }, h('span', { class: 'rot' }, 'Natureza'), natureza),
+    campo('np-prazo', 'Prazo', { type: 'date' }),
+    h('label', { class: 'campo largo', for: 'np-descricao' }, h('span', { class: 'rot' }, 'Descrição do pedido'),
+      h('textarea', { class: 'inp', id: 'np-descricao', rows: '3' })),
+    h('div', { class: 'acoes largo' },
+      h('button', { type: 'submit', class: 'btn btn-prim' }, ico('check'), 'Abrir protocolo'),
+      btn('Cancelar', { fant: true, onclick: () => { ui.criando = false; mostrarDetalhe(false); renderTudo(); } })));
+  const anoDe = () => Number((form.querySelector('#np-abertura').value || hoje()).slice(0, 4)) || new Date().getFullYear();
+  const atualizarNumero = () => { const ano = anoDe(); numero.textContent = 'Protocolo nº ' + numeroProtocolo(ano, proximoSeq(ano)); };
+  form.querySelector('#np-abertura').addEventListener('input', atualizarNumero);
+  atualizarNumero();
+  form.addEventListener('submit', ev => {
+    ev.preventDefault();
+    const v = id => form.querySelector('#' + id).value.trim();
+    const ano = anoDe(), abertura = v('np-abertura') || hoje();
+    const p = normalizarProtocolo({
+      id: uid('p'), ano, seq: proximoSeq(ano), abertura,
+      municipio: v('np-municipio'), nucleo: v('np-nucleo'), interessado: v('np-interessado'),
+      natureza: natureza.value, prazo: v('np-prazo'), descricao: v('np-descricao'), situacao: 'aberto',
+      andamentos: [{ id: uid('n'), data: abertura, texto: 'Protocolo aberto.', em: agora() }]
+    });
+    Store.put('protocolos', p, 0);
+    ui.sel.protocolos = p.id; ui.criando = false; salvarUI();
+    renderTudo();
+    toast(`Protocolo ${p.numero} aberto.`);
+  });
+  d.replaceChildren(h('div', { class: 'cab' }, h('div', { class: 'cab-txt' }, voltarBtn(), numero, h('h1', { class: 'titulo' }, 'Abrir protocolo'))), form);
+  form.querySelector('#np-municipio').focus();
 }
 
 /* ---------- editor de modelo ---------- */
@@ -1500,14 +1803,15 @@ function imprimir(a) {
   setTimeout(() => w.print(), 300);
 }
 function exportarBackup() {
-  const dados = { formato: 'checklist-backup', versao: 1, exportadoEm: agora(), modelos: Object.values(D().modelos), analises: Object.values(D().analises) };
+  const dados = { formato: 'checklist-backup', versao: 1, exportadoEm: agora(), protocolos: Object.values(D().protocolos), modelos: Object.values(D().modelos), analises: Object.values(D().analises) };
   baixar(`checklist-reurb-backup-${hoje()}.json`, JSON.stringify(dados, null, 2));
 }
 async function importarArquivo(arq) {
   let obj;
   try { obj = JSON.parse(await arq.text()); } catch (e) { toast('O arquivo não é um JSON válido.'); return; }
-  let nm = 0, na = 0, ultimo = null;
+  let nm = 0, na = 0, np = 0, ultimo = null;
   if (obj && obj.formato === 'checklist-backup') {
+    for (const p of obj.protocolos || []) { const x = normalizarProtocolo(p); Store.put('protocolos', x, 200 + np * 50); np++; }
     for (const m of obj.modelos || []) { const x = normalizarModelo(m); Store.put('modelos', x, 200 + nm * 50); nm++; }
     for (const a of obj.analises || []) { const x = normalizarAnalise(a); Store.put('analises', x, 200 + na * 50); na++; }
   } else if (obj && obj.formato === 'checklist-modelo' && obj.modelo) { ultimo = adicionarModelo(obj.modelo); nm = 1; }
@@ -1517,25 +1821,34 @@ async function importarArquivo(arq) {
   if (ultimo) { ui.aba = 'modelos'; ui.sel.modelos = ultimo.id; }
   garantirSelecao(); salvarUI();
   renderTudo();
-  toast(`Importado: ${plural(nm, 'modelo', 'modelos')}${na ? ' e ' + plural(na, 'análise', 'análises') : ''}.`);
+  toast('Importado: ' + [np && plural(np, 'protocolo', 'protocolos'), plural(nm, 'modelo', 'modelos'), na && plural(na, 'análise', 'análises')].filter(Boolean).join(', ') + '.');
 }
 
 /* ---------- ligação inicial ---------- */
-const cadastros = $('#mb-cadastros'), cadBtn = $('#mb-cadastros-btn');
-function abrirCadastros(sim, focar) {
-  cadastros.classList.toggle('aberto', sim);
-  cadBtn.setAttribute('aria-expanded', String(sim));
-  if (sim && focar) $('#mb-modelos').focus();
+/* menus do topo (Cadastros, Recepção): abrem ao passar o mouse, com toque ou pelo teclado */
+const menusTopo = [...document.querySelectorAll('.mb-item')].filter(it => it.querySelector('.mb-sub'));
+function abrirMenu(it, sim, focar) {
+  it.classList.toggle('aberto', sim);
+  it.querySelector('.mb-btn').setAttribute('aria-expanded', String(sim));
+  if (sim && focar) it.querySelector('.mb-op').focus();
 }
-cadBtn.addEventListener('click', () => abrirCadastros(!cadastros.classList.contains('aberto')));
-cadBtn.addEventListener('keydown', ev => { if (ev.key === 'ArrowDown') { ev.preventDefault(); abrirCadastros(true, true); } });
-cadastros.addEventListener('keydown', ev => { if (ev.key === 'Escape') { abrirCadastros(false); cadBtn.focus(); } });
-cadastros.addEventListener('pointerleave', ev => { if (ev.pointerType === 'mouse') abrirCadastros(false); });
-document.addEventListener('click', ev => { if (!cadastros.contains(ev.target)) abrirCadastros(false); });
+const fecharMenus = exceto => { for (const it of menusTopo) if (it !== exceto) abrirMenu(it, false); };
+for (const it of menusTopo) {
+  const b = it.querySelector('.mb-btn');
+  b.addEventListener('click', () => { const abrir = !it.classList.contains('aberto'); fecharMenus(it); abrirMenu(it, abrir); });
+  b.addEventListener('keydown', ev => { if (ev.key === 'ArrowDown') { ev.preventDefault(); fecharMenus(it); abrirMenu(it, true, true); } });
+  it.addEventListener('keydown', ev => {
+    const ops = [...it.querySelectorAll('.mb-op')], i = ops.indexOf(document.activeElement);
+    if (ev.key === 'Escape') { abrirMenu(it, false); b.focus(); }
+    else if (i >= 0 && (ev.key === 'ArrowDown' || ev.key === 'ArrowUp')) { ev.preventDefault(); ops[(i + (ev.key === 'ArrowDown' ? 1 : ops.length - 1)) % ops.length].focus(); }
+  });
+  it.addEventListener('pointerleave', ev => { if (ev.pointerType === 'mouse') abrirMenu(it, false); });
+}
+document.addEventListener('click', ev => { for (const it of menusTopo) if (!it.contains(ev.target)) abrirMenu(it, false); });
 for (const b of document.querySelectorAll('[data-aba]')) b.addEventListener('click', () => {
-  abrirCadastros(false);
-  if (cadastros.contains(b)) b.blur();
-  trocarAba(b.dataset.aba);
+  fecharMenus();
+  if (b.classList.contains('mb-op')) b.blur();
+  trocarAba(b.dataset.aba, !!b.dataset.novo);
 });
 $('#filtro').addEventListener('input', ev => { ui.filtro[ui.aba] = ev.target.value; salvarUI(); renderItens(); });
 const menu = $('#menu-backup');

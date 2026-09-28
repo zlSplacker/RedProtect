@@ -12,7 +12,17 @@ Abra `index.html` no navegador (Chrome, Edge ou Firefox). Não precisa instalar 
 A barra de menus do topo segue o S.R.I.:
 
 - **Cadastros → Modelos de checklist**: passe o mouse sobre *Cadastros* (no celular, toque) e escolha a opção para criar e editar os modelos. Os próximos cadastros do sistema entram neste mesmo menu.
+- **Recepção → Abrir protocolo / Consultar protocolos**: controle de cada processo acompanhado (veja abaixo).
 - **Análises**: aplica os modelos aos núcleos e mostra as pendências.
+
+### Protocolos (Recepção)
+
+- **Número automático** por ano: `0001/2026`, `0002/2026`…
+- **Dados do protocolo**: abertura, município, núcleo, interessado, natureza (Reurb-S, Reurb-E…), prazo e descrição do pedido.
+- **Situação**: aberto, em análise, aguardando documentos, concluído ou arquivado. Cada mudança fica registrada nos andamentos.
+- **Prazo**: o protocolo avisa quando faltam 7 dias ou menos e quando o prazo venceu.
+- **Andamentos**: histórico datado de tudo o que aconteceu no processo.
+- **Aplicar checklist**: abre uma análise já vinculada ao protocolo, com núcleo, município e número preenchidos. A análise mostra o link de volta para o protocolo.
 
 > Use **Backup → Exportar backup (JSON)** de tempos em tempos. Se você limpar os dados do navegador ou trocar de computador, é esse arquivo que recupera os modelos e as análises (**Backup → Importar arquivo JSON**).
 
