@@ -9,6 +9,11 @@ Ferramenta de checklist para consultoria jurídica em processos de Regularizaç�
 
 Abra `index.html` no navegador (Chrome, Edge ou Firefox). Não precisa instalar nada nem estar online. Os dados ficam salvos no próprio navegador.
 
+A barra de menus do topo segue o S.R.I.:
+
+- **Cadastros → Modelos de checklist**: passe o mouse sobre *Cadastros* (no celular, toque) e escolha a opção para criar e editar os modelos. Os próximos cadastros do sistema entram neste mesmo menu.
+- **Análises**: aplica os modelos aos núcleos e mostra as pendências.
+
 > Use **Backup → Exportar backup (JSON)** de tempos em tempos. Se você limpar os dados do navegador ou trocar de computador, é esse arquivo que recupera os modelos e as análises (**Backup → Importar arquivo JSON**).
 
 ## Recursos
