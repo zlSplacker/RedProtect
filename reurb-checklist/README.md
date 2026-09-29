@@ -9,6 +9,18 @@ Ferramenta de checklist para consultoria jurídica em processos de Regularizaç�
 
 Abra `index.html` no navegador (Chrome, Edge ou Firefox). Não precisa instalar nada nem estar online. Os dados ficam salvos no próprio navegador.
 
+### Área de trabalho e janelas
+
+Ao abrir, o sistema mostra só a barra de menus e, abaixo dela, a área de trabalho azul. Cada opção do menu abre uma **janela** sobre essa área, e dá para trabalhar em várias ao mesmo tempo — por exemplo, o cadastro de um imóvel e o de uma pessoa lado a lado:
+
+- arraste pela barra de título para mover; puxe as bordas ou os cantos para mudar o tamanho (o conteúdo se reorganiza conforme a largura da janela);
+- os botões do canto minimizam, maximizam (ou duplo clique no título) e fecham;
+- a barra de baixo lista as janelas abertas e só aparece quando há alguma: clique para trazer a janela para a frente ou, se ela já estiver na frente, minimizá-la. O botão **Lado a lado** divide a área entre todas as janelas abertas;
+- numa janela de pesquisa, clicar num item abre o registro na própria janela (*Voltar à lista* volta). Um link para outro registro — como o botão *Protocolo 0001/2026* numa pessoa — abre esse registro em outra janela ou traz para a frente a janela dele, se já estiver aberta;
+- o que se altera numa janela aparece nas outras; um formulário ainda não enviado numa janela não se perde.
+
+No celular, cada janela ocupa a tela inteira e a barra de baixo alterna entre elas.
+
 A barra de menus do topo segue o S.R.I.:
 
 - **Cadastros → Modelos de checklist**: passe o mouse sobre *Cadastros* (no celular, toque) e escolha a opção para criar e editar os modelos. Os próximos cadastros do sistema entram neste mesmo menu.
@@ -30,10 +42,10 @@ A barra de menus do topo segue o S.R.I.:
 
 ### O protocolo é o centro do trabalho
 
-Tudo começa na **Recepção de Título**, que cria o protocolo. No topo da ficha fica a barra de botões, como no S.R.I.; cada botão abre uma **janela à frente** da página:
+Tudo começa na **Recepção de Título**, que cria o protocolo. No topo da ficha fica a barra de botões, como no S.R.I.; cada botão abre um quadro à frente, dentro da janela do protocolo (fecha no X, no Esc ou clicando fora):
 
 - **Exigência**: registro das exigências do protocolo (texto e data de emissão), com marcação de cumprida e cópia das pendentes em texto. O botão mostra quantas estão pendentes, e cada registro ou cumprimento entra nos andamentos.
-- **Dados**: os indicadores do protocolo — **Indicador Real** (imóveis) e **Indicador Pessoal** (partes, com sua qualidade, e as pessoas que vêm pelos imóveis). Dá para vincular cadastros existentes ou cadastrar novos já ligados ao protocolo; ao voltar da ficha do imóvel ou da pessoa, a janela reabre.
+- **Dados**: os indicadores do protocolo — **Indicador Real** (imóveis) e **Indicador Pessoal** (partes, com sua qualidade, e as pessoas que vêm pelos imóveis). Dá para vincular cadastros existentes ou cadastrar novos já ligados ao protocolo; o cadastro novo abre em outra janela, e os Dados do protocolo se atualizam sozinhos.
 
 Na página, abaixo da barra, fica a linha de abas **Dados Protocolo**, **Andamentos**, **Financeiro** e **Checklists**. Cada aba mostra só o seu conteúdo, e o protocolo abre em *Dados Protocolo*:
 
@@ -44,7 +56,7 @@ Na página, abaixo da barra, fica a linha de abas **Dados Protocolo**, **Andamen
 | **Financeiro** | Honorários contratados e lançamentos (recebimentos e despesas, com data, descrição e valor), com o resumo de recebido, a receber, despesas e saldo. |
 | **Checklists** | Análises aplicadas ao protocolo, com progresso e pendências, e o botão *Aplicar checklist*. |
 
-Imóveis, pessoas e análises mostram um botão *Protocolo 0000/AAAA* para voltar ao protocolo de origem.
+Imóveis, pessoas e análises mostram um botão *Protocolo 0000/AAAA*, que abre (ou traz para a frente) a janela do protocolo de origem.
 
 ### Protocolos (Recepção)
 

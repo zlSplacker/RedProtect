@@ -22,6 +22,7 @@
   --f-ui:"Public Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
   --f-serif:"Source Serif 4",Georgia,"Times New Roman",serif;
   --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --mesa:#1D5A73;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
@@ -35,6 +36,7 @@
     --aviso:#E5B35B;--aviso-suave:#33270F;
     --veu:rgba(0,0,0,.6);
     --sombra:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25);
+    --mesa:#123C4D;
   }
 }
 :root[data-theme="dark"]{
@@ -48,10 +50,11 @@
   --aviso:#E5B35B;--aviso-suave:#33270F;
   --veu:rgba(0,0,0,.6);
   --sombra:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25);
+  --mesa:#123C4D;
 }
 *,*::before,*::after{box-sizing:border-box}
 html{height:100%}
-body{min-height:100%;margin:0;background:var(--chao);color:var(--tinta);font:14px/1.5 var(--f-ui);-webkit-font-smoothing:antialiased}
+body{height:100%;height:100dvh;display:flex;flex-direction:column;overflow:hidden;margin:0;background:var(--chao);color:var(--tinta);font:14px/1.5 var(--f-ui);-webkit-font-smoothing:antialiased}
 [hidden]{display:none!important}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
@@ -61,7 +64,7 @@ h1,h2,h3{text-wrap:balance}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 
 /* topo */
-.topo{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--sup);border-bottom:1px solid var(--linha)}
+.topo{position:relative;flex:none;padding-top:env(safe-area-inset-top,0px);z-index:20;background:var(--sup);border-bottom:1px solid var(--linha)}
 .topo-in{max-width:1440px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;flex-wrap:wrap;gap:10px 20px}
 .marca{display:flex;align-items:center;gap:10px;font:600 19px/1.1 var(--f-serif);letter-spacing:-.01em;margin:0}
 .marca img{width:32px;height:32px;flex:none;display:block}
@@ -113,24 +116,54 @@ h1,h2,h3{text-wrap:balance}
 .menu-pop button:hover{background:var(--sup2)}
 .menu-pop p{margin:4px 10px 6px;font-size:12px;color:var(--tinta3);max-width:32ch}
 
-/* estrutura */
-/* uma tela por vez: a lista (pesquisa) ou a ficha aberta, sem coluna lateral */
-.corpo{max-width:1440px;margin:0 auto}
-.lateral{max-width:980px;margin:0 auto;padding:28px clamp(16px,3vw,40px) 56px;display:flex;flex-direction:column;gap:14px}
+/* área de trabalho: abaixo da barra de menus fica só o azul do sistema; cada tela abre numa janela */
+.area{flex:1;min-height:0;position:relative;z-index:0;overflow:hidden;background:var(--mesa)}
+.jan{position:absolute;display:flex;flex-direction:column;background:var(--chao);border:1px solid rgba(0,0,0,.28);border-radius:8px;box-shadow:0 14px 44px rgba(0,0,0,.34),0 2px 6px rgba(0,0,0,.18);overflow:hidden;container-type:inline-size;outline:none}
+.jan.max{left:0!important;top:0!important;width:100%!important;height:100%!important;border-radius:0;border:0}
+.jan-cab{flex:none;display:flex;align-items:center;gap:8px;height:36px;padding:0 4px 0 12px;background:var(--sup2);color:var(--tinta2);border-bottom:1px solid var(--linha);user-select:none;touch-action:none}
+.jan.ativa .jan-cab{background:var(--acento-forte);color:var(--sobre-acento);border-bottom-color:transparent}
+.jan-tit{flex:1;min-width:0;margin:0;font:600 13px/1.2 var(--f-ui);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jan-bts{display:flex;gap:2px}
+.jan-bt{width:32px;height:28px;display:grid;place-items:center;border:0;border-radius:5px;background:transparent;color:inherit;padding:0}
+.jan-bt svg{width:16px;height:16px}
+.jan-bt:hover{background:rgba(127,127,127,.22)}
+.jan-fechar:hover{background:#C42B1C;color:#fff}
+.area.estreita .jan-max{display:none}
+.jan-corpo{flex:1;min-height:0;overflow:auto;container-type:size;overscroll-behavior:contain}
+.jan-r{position:absolute;z-index:4}
+.jan-r.n,.jan-r.s{left:10px;right:10px;height:6px;cursor:ns-resize}
+.jan-r.n{top:0}.jan-r.s{bottom:0}
+.jan-r.e,.jan-r.w{top:10px;bottom:10px;width:6px;cursor:ew-resize}
+.jan-r.e{right:0}.jan-r.w{left:0}
+.jan-r.ne,.jan-r.nw,.jan-r.se,.jan-r.sw{width:12px;height:12px}
+.jan-r.ne{top:0;right:0;cursor:nesw-resize}.jan-r.sw{bottom:0;left:0;cursor:nesw-resize}
+.jan-r.nw{top:0;left:0;cursor:nwse-resize}.jan-r.se{bottom:0;right:0;cursor:nwse-resize}
+.jan.max .jan-r{display:none}
+body.arrastando{user-select:none}
+body.arrastando .jan-corpo{pointer-events:none}
+/* diálogos (Exigência, Dados, visualizar) cobrem só a janela de onde vieram */
+.jan .modal{position:absolute;inset:36px 0 0;z-index:6;padding:14px}
+.jan .modal-painel{max-width:none}
+.tarefas{flex:none;display:flex;align-items:center;gap:8px;padding:4px 8px calc(4px + env(safe-area-inset-bottom,0px));background:var(--sup);border-top:1px solid var(--linha)}
+.tarefas-lista{flex:1;min-width:0;display:flex;gap:4px;overflow-x:auto}
+.tarefa{flex:0 1 220px;min-width:90px;border:1px solid var(--linha);background:var(--sup2);border-radius:6px;padding:5px 10px;font-size:12.5px;font-weight:600;color:var(--tinta2);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tarefa:hover{border-color:var(--tinta3)}
+.tarefa[aria-pressed="true"]{background:var(--acento-suave);border-color:var(--acento);color:var(--acento-texto)}
+.tarefa.min{font-weight:500;font-style:italic}
+@media (max-width:560px){#lado-a-lado{display:none}}
+
+/* dentro da janela: a lista (pesquisa) ou a ficha aberta */
+.lateral{padding:14px 16px 24px;display:flex;flex-direction:column;gap:12px}
 .lat-cab{display:flex;align-items:baseline;gap:10px}
-.lat-tit{font:600 26px/1.2 var(--f-serif);letter-spacing:-.01em;color:var(--tinta);margin:0}
-.lat-cont{font:500 13px var(--f-mono);color:var(--tinta3)}
 .lat-acoes{display:flex;flex-wrap:wrap;gap:6px}
 .lat-acoes:empty{display:none}
-.lateral.larga{max-width:1240px}
-.detalhe{max-width:1280px;margin:0 auto;padding:24px clamp(16px,3vw,40px) 72px;min-width:0}
-body.ver-detalhe .lateral{display:none}
-body:not(.ver-detalhe) .detalhe{display:none}
-@media (max-width:860px){
-  .lateral{padding-inline:16px}
-  .detalhe{padding-inline:16px}
-  .topo{position:static}
-  .q{scroll-margin-top:16px}
+.detalhe{padding:14px 18px 28px;min-width:0}
+.jan.ver-detalhe .lateral{display:none}
+.jan:not(.ver-detalhe) .detalhe{display:none}
+/* o título da janela já diz o que ela mostra */
+.cab-txt>.sobre,.cab-txt>.titulo{display:none}
+@container (max-width:860px){
+  .lateral,.detalhe{padding-inline:12px}
 }
 
 /* botões e campos */
@@ -156,7 +189,7 @@ textarea.inp{resize:vertical;min-height:38px;display:block}
 .linha-ordem .campo-situacao .inp{width:200px;max-width:100%}
 .linha-dir{margin-left:auto;display:flex;flex-wrap:wrap;gap:12px;align-items:end}
 .linha-dir .inp{width:185px;max-width:100%}
-@media (max-width:640px){.linha-dir{margin-left:0}}
+@container (max-width:640px){.linha-dir{margin-left:0}}
 .linha-3{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;align-items:end}
 .campo-curto .inp{max-width:140px;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 .inp[readonly]:hover,.inp[readonly]:focus{border-color:var(--linha);box-shadow:none}
@@ -192,7 +225,7 @@ select.inp{padding-right:28px}
 .prot-campo b{font-weight:600}
 .prot-campo .item-num{font-size:13.5px;margin:0}
 .item-prot > .chip{justify-self:end;margin-left:12px}
-@media (max-width:560px){
+@container (max-width:560px){
   .item.item-prot{grid-template-columns:minmax(0,1fr) auto;align-items:start;row-gap:2px}
   .prot-campo{grid-column:1;white-space:normal;overflow-wrap:anywhere}
   .prot-campo + .prot-campo{border-left:0;margin-left:0;padding-left:0}
@@ -217,7 +250,7 @@ select.inp{padding-right:28px}
 .ident{min-width:0;display:grid;align-items:end;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;padding:16px;background:var(--sup);border:1px solid var(--linha);border-radius:10px;margin:0 0 22px}
 .ident legend{float:left;grid-column:1/-1;width:100%;padding:0;margin-bottom:2px;font:600 15px/1.3 var(--f-serif)}
 .an-grade{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:28px;align-items:start}
-.resumo{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--topo-h,58px) + 16px);display:grid;gap:12px;background:var(--sup);border:1px solid var(--linha);border-radius:10px;padding:16px;max-height:calc(100vh - var(--topo-h,58px) - 32px);overflow:auto}
+.resumo{position:sticky;top:12px;display:grid;gap:12px;background:var(--sup);border:1px solid var(--linha);border-radius:10px;padding:16px;max-height:calc(100cqh - 24px);overflow:auto}
 .res-prog{display:flex;align-items:baseline;gap:8px}
 .res-num{font:600 26px/1 var(--f-mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .res-rot{color:var(--tinta2)}
@@ -227,7 +260,7 @@ select.inp{padding-right:28px}
 .res-item{width:100%;display:grid;grid-template-columns:auto 1fr;gap:8px;text-align:left;border:0;background:transparent;border-radius:7px;padding:7px 8px;font-size:13px;line-height:1.35}
 .res-item:hover{background:var(--pend-suave)}
 .res-item .q-num{color:var(--pend)}
-@media (max-width:1180px){.an-grade{grid-template-columns:minmax(0,1fr)}.resumo{position:static;max-height:none;order:-1}}
+@container (max-width:1180px){.an-grade{grid-template-columns:minmax(0,1fr)}.resumo{position:static;max-height:none;order:-1}}
 .filtro-q{display:inline-flex;gap:3px;background:var(--sup2);border:1px solid var(--linha2);border-radius:9px;padding:3px;margin-bottom:14px;flex-wrap:wrap}
 .filtro-q button{border:0;background:transparent;border-radius:6px;padding:5px 12px;font-size:13px;font-weight:600;color:var(--tinta2)}
 .filtro-q button[aria-pressed="true"]{background:var(--sup);color:var(--tinta);box-shadow:var(--sombra)}
@@ -239,7 +272,7 @@ select.inp{padding-right:28px}
 .q-sec-cab{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px;padding-bottom:7px;border-bottom:1px solid var(--linha)}
 .q-sec-tit{font:600 19px/1.3 var(--f-serif);margin:0}
 .q-sec-ref{font:12px/1.4 var(--f-mono);color:var(--tinta3)}
-.q{background:var(--sup);border:1px solid var(--linha2);border-radius:10px;padding:14px 16px;display:grid;gap:10px;scroll-margin-top:calc(var(--topo-h,58px) + 24px);transition:border-color .2s,box-shadow .2s}
+.q{background:var(--sup);border:1px solid var(--linha2);border-radius:10px;padding:14px 16px;display:grid;gap:10px;scroll-margin-top:16px;transition:border-color .2s,box-shadow .2s}
 .q .q{background:var(--sup2);padding:12px 14px}
 .q.pendente{border-color:color-mix(in srgb,var(--pend) 50%,var(--linha2))}
 .q.destaque{box-shadow:0 0 0 3px var(--acento-suave);border-color:var(--acento)}
@@ -271,7 +304,7 @@ select.inp{padding-right:28px}
 .q-filhos{display:grid;gap:8px;padding-left:14px;border-left:2px dotted var(--linha);margin-left:4px}
 .q.compacto>.q-corpo{display:none}
 .q.compacto>.q-cab{opacity:.62}
-@media (max-width:640px){.q-corpo{padding-left:0}.q{padding:12px}.q .q{padding:10px 12px}.q-filhos{padding-left:10px;margin-left:0}}
+@container (max-width:640px){.q-corpo{padding-left:0}.q{padding:12px}.q .q{padding:10px 12px}.q-filhos{padding-left:10px;margin-left:0}}
 
 /* editor de modelo */
 .ed-nome{width:100%;font:600 26px/1.25 var(--f-serif);letter-spacing:-.01em;border:1px solid transparent;background:transparent;border-radius:8px;padding:4px 8px;margin-left:-9px}
@@ -319,7 +352,7 @@ select.inp{padding-right:28px}
 .modal-cab{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 20px;background:var(--sup);border-bottom:1px solid var(--linha)}
 .modal-cab h2{margin:2px 0 0;font:600 20px/1.25 var(--f-serif)}
 .modal-corpo{padding:20px;display:grid;gap:14px}
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--tinta);color:var(--chao);padding:10px 16px;border-radius:9px;font-weight:500;z-index:60;box-shadow:var(--sombra);max-width:calc(100% - 32px);width:max-content}
+.toast{position:fixed;left:50%;bottom:calc(56px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--tinta);color:var(--chao);padding:10px 16px;border-radius:9px;font-weight:500;z-index:60;box-shadow:var(--sombra);max-width:calc(100% - 32px);width:max-content}
 .carregando{color:var(--tinta3);padding:40px 0}
 
 /* protocolos */
@@ -327,7 +360,7 @@ select.inp{padding-right:28px}
 .situacao{display:flex;align-items:center;gap:8px}
 .situacao .inp{width:auto;min-width:200px}
 .pr-grade{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start}
-@media (max-width:1180px){.pr-grade{grid-template-columns:minmax(0,1fr)}}
+@container (max-width:1180px){.pr-grade{grid-template-columns:minmax(0,1fr)}}
 .bloco{background:var(--sup);border:1px solid var(--linha);border-radius:10px;padding:16px;display:grid;gap:14px;align-content:start;min-width:0}
 .bloco-tit{margin:0;font:600 15px/1.3 var(--f-serif)}
 .and-form{display:flex;gap:8px;flex-wrap:wrap}
@@ -354,7 +387,7 @@ select.inp{padding-right:28px}
 .fin-valor.pos{color:var(--ok)}.fin-valor.neg{color:var(--pend)}.fin-valor.alerta{color:var(--aviso)}
 .fin-tile .inp.fin-valor{padding:2px 8px;margin:0 -8px;width:calc(100% + 16px);background:var(--sup);border-color:var(--linha)}
 .fin-form{display:grid;grid-template-columns:150px 160px minmax(0,1fr) 150px auto;gap:8px;align-items:end}
-@media (max-width:900px){.fin-form{grid-template-columns:1fr 1fr}.fin-form .fin-desc{grid-column:1/-1}}
+@container (max-width:900px){.fin-form{grid-template-columns:1fr 1fr}.fin-form .fin-desc{grid-column:1/-1}}
 .tab-rolagem{overflow-x:auto}
 .fin-tab{width:100%;border-collapse:collapse;font-size:14px}
 .fin-tab th{text-align:left;font:600 11px/1 var(--f-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--tinta3);padding:8px;border-bottom:1px solid var(--linha)}
@@ -382,7 +415,7 @@ select.inp{padding-right:28px}
 .exig-acoes{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
 .exig-form{display:grid;gap:8px}
 .exig-form .linha{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-@media (max-width:640px){.exig{grid-template-columns:auto minmax(0,1fr)}.exig-acoes{grid-column:1/-1;justify-content:flex-start}}
+@container (max-width:640px){.exig{grid-template-columns:auto minmax(0,1fr)}.exig-acoes{grid-column:1/-1;justify-content:flex-start}}
 .ident textarea.inp{grid-column:1/-1}
 /* indicadores pessoal e real */
 .reg-pilha{display:grid;gap:20px}
@@ -410,9 +443,9 @@ select.inp{padding-right:28px}
 .grade12>*{grid-column:span 12}
 .grade12>.s2{grid-column:span 2}.grade12>.s3{grid-column:span 3}.grade12>.s4{grid-column:span 4}
 .grade12>.s5{grid-column:span 5}.grade12>.s6{grid-column:span 6}.grade12>.s8{grid-column:span 8}
-@media (max-width:1100px){.grade12>.s2,.grade12>.s3{grid-column:span 4}.grade12>.s4,.grade12>.s5,.grade12>.s6{grid-column:span 6}.grade12>.s8{grid-column:span 12}}
-@media (max-width:640px){.grade12>.s2,.grade12>.s3,.grade12>.s4,.grade12>.s5{grid-column:span 6}.grade12>.s6,.grade12>.s8{grid-column:span 12}}
-@media (max-width:420px){.grade12>*{grid-column:span 12!important}}
+@container (max-width:1100px){.grade12>.s2,.grade12>.s3{grid-column:span 4}.grade12>.s4,.grade12>.s5,.grade12>.s6{grid-column:span 6}.grade12>.s8{grid-column:span 12}}
+@container (max-width:640px){.grade12>.s2,.grade12>.s3,.grade12>.s4,.grade12>.s5{grid-column:span 6}.grade12>.s6,.grade12>.s8{grid-column:span 12}}
+@container (max-width:420px){.grade12>*{grid-column:span 12!important}}
 .linha-inp{display:flex;gap:6px;align-items:center}
 .linha-inp>.inp{flex:1 1 auto}
 .aviso-campo{color:var(--pend);margin-left:4px}
@@ -430,8 +463,8 @@ select.inp{padding-right:28px}
 .vinc-add{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .vinc-add select,.vinc-add .inp{flex:1 1 200px;width:auto}
 .vinc-linha.tab-linha{grid-template-columns:minmax(0,1fr) 170px auto}
-@media (max-width:640px){.vinc-linha.tab-linha{grid-template-columns:minmax(0,1fr) auto}.vinc-linha.tab-linha>.inp{grid-column:1/-1}}
-@media (max-width:640px){.vinc-linha{grid-template-columns:minmax(0,1fr) auto}.vinc-linha select{grid-column:1/-1;grid-row:2}}
+@container (max-width:640px){.vinc-linha.tab-linha{grid-template-columns:minmax(0,1fr) auto}.vinc-linha.tab-linha>.inp{grid-column:1/-1}}
+@container (max-width:640px){.vinc-linha{grid-template-columns:minmax(0,1fr) auto}.vinc-linha select{grid-column:1/-1;grid-row:2}}
 .ident .largo{grid-column:1/-1}
 </style>
 </head>
@@ -489,7 +522,7 @@ select.inp{padding-right:28px}
           </div>
         </div>
       </div>
-      <div class="mb-item"><button type="button" class="mb-btn" id="mb-analises" data-aba="analises" aria-current="page">Análises</button></div>
+      <div class="mb-item"><button type="button" class="mb-btn" id="mb-analises" data-aba="analises">Análises</button></div>
     </nav>
     <div class="topo-dir">
       <span class="salvo" id="salvo" data-estado="carregando">Carregando…</span>
@@ -504,18 +537,11 @@ select.inp{padding-right:28px}
     </div>
   </div>
 </header>
-<main class="corpo">
-  <aside class="lateral" aria-label="Lista">
-    <div class="lat-cab"><h2 class="lat-tit" id="lat-tit">Análises</h2><span class="lat-cont" id="lat-cont"></span></div>
-    <div class="lat-acoes" id="lat-acoes"></div>
-    <label class="busca"><span class="rot" hidden>Filtrar</span>
-      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 16l4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      <input class="inp" id="filtro" type="search" placeholder="Filtrar" autocomplete="off">
-    </label>
-    <ul class="itens" id="itens"></ul>
-  </aside>
-  <section class="detalhe" id="detalhe" aria-live="polite"><p class="carregando">Carregando dados…</p></section>
-</main>
+<main class="area" id="area" aria-label="Área de trabalho"></main>
+<nav class="tarefas" id="tarefas" aria-label="Janelas abertas" hidden>
+  <div class="tarefas-lista" id="tarefas-lista"></div>
+  <button type="button" class="btn btn-fant btn-sm" id="lado-a-lado" title="Organizar as janelas lado a lado">Lado a lado</button>
+</nav>
 <input type="file" id="arquivo" accept=".json,application/json" hidden>
 <div class="toast" id="toast" role="status" hidden></div>
 <datalist id="lista-nacionalidades"></datalist>
@@ -526,22 +552,32 @@ select.inp{padding-right:28px}
 'use strict';
 
 /* ---------- utilidades ---------- */
-const $ = (s, r = document) => r.querySelector(s);
+/* Cada janela tem os próprios elementos: os ids ganham o prefixo da janela (j1-, j2-…) e
+   $('#id') procura primeiro na janela em uso. */
+let J = null;   // janela em uso: os desenhos e os eventos agem dentro dela
+let ui = null;  // estado da janela em uso
+const idJ = ids => J ? String(ids).split(' ').map(x => J.pref + x).join(' ') : ids;
+const $ = (s, r) => {
+  if (r) return r.querySelector(s);
+  if (J) { const e = J.el.querySelector(s.replace(/#([A-Za-z][\w-]*)/g, (m, id) => '#' + J.pref + id)); if (e) return e; }
+  const e = document.querySelector(s);
+  return e && !e.closest('.jan') ? e : null;
+};
 const BIB = JSON.parse($('#biblioteca').textContent);
 const LS_DADOS = 'checklist-reurb:dados:v1';
-const LS_UI = 'checklist-reurb:ui:v1';
 const reduzMov = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+const ATTR_ID = ['id', 'for', 'aria-controls', 'aria-labelledby', 'aria-describedby'];
 function h(tag, attrs, ...kids) {
   const el = document.createElement(tag);
   let valor;
-  if (attrs) for (const [k, v] of Object.entries(attrs)) {
+  if (attrs) for (let [k, v] of Object.entries(attrs)) {
     if (v == null || v === false) continue;
     if (k === 'class') el.className = v;
     else if (k === 'value') valor = v;
     else if (k.startsWith('on') && typeof v === 'function') el.addEventListener(k.slice(2), v);
     else if (v === true) el.setAttribute(k, '');
-    else el.setAttribute(k, v);
+    else el.setAttribute(k, ATTR_ID.includes(k) ? idJ(v) : v);
   }
   for (const k of kids.flat(Infinity)) {
     if (k == null || k === false) continue;
@@ -595,8 +631,13 @@ const ICONES = {
   dados: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>',
   lupa: '<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/>',
   livro: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5z"/><path d="M4 19a2 2 0 0 1 2-2h13"/>',
-  pasta: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/>'
+  pasta: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/>',
+  minimizar: '<path d="M6 17h12"/>',
+  maximizar: '<rect x="6" y="6" width="12" height="12" rx="1"/>',
+  restaurar: '<rect x="5" y="9" width="10" height="10" rx="1"/><path d="M9 9V6a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-3"/>',
+  ladoALado: '<rect x="3" y="5" width="8" height="14" rx="1"/><rect x="13" y="5" width="8" height="14" rx="1"/>'
 };
+const rolarTopo = () => { if (J) J.corpo.scrollTop = 0; };
 function ico(nome) {
   const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   s.setAttribute('viewBox', '0 0 24 24'); s.setAttribute('aria-hidden', 'true');
@@ -1063,6 +1104,7 @@ const Store = {
   put(col, obj, atraso = 700) {
     obj.atualizadoEm = agora();
     this.dados[col][obj.id] = obj;
+    if (this.aoMudar) this.aoMudar(col);
     const chave = col + '/' + obj.id;
     this.pendentes.add(chave);
     clearTimeout(this.timers[chave]);
@@ -1105,6 +1147,7 @@ const Store = {
     clearTimeout(this.timers[chave]);
     this.timers[chave] = null;
     delete this.dados[col][id];
+    if (this.aoMudar) this.aoMudar(col);
     if (this.modo === 'db') {
       try { await (this.cadeias[chave] || Promise.resolve()); await this.db.collection(col).doc(id).delete(); }
       catch (e) { this.erro(e); }
@@ -1139,22 +1182,12 @@ const Store = {
   }
 };
 
-/* ---------- estado da interface ---------- */
-const ui = (() => {
-  let u = null;
-  try { u = JSON.parse(localStorage.getItem(LS_UI) || 'null'); } catch (e) { u = null; }
-  u = Object.assign({ aba: 'analises', sel: {}, filtro: {}, filtroQ: 'todas' }, u || {});
-  u.sel = Object.assign({ analises: null, modelos: null, protocolos: null, pessoas: null, imoveis: null }, u.sel);
-  u.filtro = Object.assign({ analises: '', modelos: '', protocolos: '', pessoas: '', imoveis: '' }, u.filtro);
-  const ABAS = ['modelos', 'analises', 'protocolos', 'pessoas', 'imoveis', 'tabelas'];
-  if (ABAS.includes(location.hash.slice(1))) u.aba = location.hash.slice(1);
-  if (!ABAS.includes(u.aba)) u.aba = 'analises';
-  u.criando = false;
-  return u;
-})();
-function salvarUI() {
-  try { localStorage.setItem(LS_UI, JSON.stringify({ aba: ui.aba, sel: ui.sel, filtro: ui.filtro, filtroQ: ui.filtroQ, abaProt: ui.abaProt, abaDados: ui.abaDados, abaEnd: ui.abaEnd, tabela: ui.tabela })); } catch (e) { /* conveniência apenas */ }
-}
+/* ---------- estado de cada janela ---------- */
+const novoUI = aba => ({
+  aba, filtroQ: 'todas', criando: false, rascunho: null, dialogo: null,
+  sel: { analises: null, modelos: null, protocolos: null, pessoas: null, imoveis: null },
+  filtro: { analises: '', modelos: '', protocolos: '', pessoas: '', imoveis: '' }
+});
 const D = () => Store.dados;
 const analisesOrdenadas = () => Object.values(D().analises).sort((a, b) => String(b.atualizadoEm).localeCompare(String(a.atualizadoEm)));
 const modelosOrdenados = () => Object.values(D().modelos).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
@@ -1163,18 +1196,17 @@ const analisesDoProtocolo = id => analisesOrdenadas().filter(a => a.protocoloId 
 const numNat = (a, b) => String(a).localeCompare(String(b), 'pt-BR', { numeric: true, sensitivity: 'base' });
 const pessoasOrdenadas = () => Object.values(D().pessoas).sort((a, b) => numNat(a.nome, b.nome));
 const imoveisOrdenados = () => Object.values(D().imoveis).sort((a, b) => numNat(tituloImovel(a), tituloImovel(b)) || numNat(a.matricula, b.matricula));
-/* registro novo ainda não salvo: só entra no armazenamento quando algo é digitado */
-let rascunho = null;
+/* registro novo ainda não salvo (um por janela): só entra no armazenamento quando algo é digitado */
 function registroSel(col) {
-  const id = ui.sel[col];
-  return D()[col][id] || (rascunho && rascunho.col === col && rascunho.obj.id === id ? rascunho.obj : null);
+  const id = ui.sel[col], r = ui.rascunho;
+  return D()[col][id] || (r && r.col === col && r.obj.id === id ? r.obj : null);
 }
 function gravarRegistro(col, obj) {
   Store.put(col, obj);
-  if (rascunho && rascunho.obj === obj) {
-    const aoSalvar = rascunho.aoSalvar;
-    rascunho = null;
-    if (aoSalvar) aoSalvar(obj);
+  const r = ui.rascunho;
+  if (r && r.obj === obj) {
+    ui.rascunho = null;
+    if (r.aoSalvar) r.aoSalvar(obj);
   }
 }
 function garantirSelecao() {
@@ -1184,83 +1216,80 @@ function garantirSelecao() {
   if (!D().analises[ui.sel.analises]) ui.sel.analises = (analisesOrdenadas()[0] || {}).id || null;
   if (!D().modelos[ui.sel.modelos]) ui.sel.modelos = (modelosOrdenados()[0] || {}).id || null;
 }
-function mostrarDetalhe(sim) { document.body.classList.toggle('ver-detalhe', !!sim); }
+/* dentro da janela: a lista (pesquisa) ou a ficha aberta */
+function mostrarDetalhe(sim) { J.el.classList.toggle('ver-detalhe', !!sim); }
+const emDetalhe = () => J.el.classList.contains('ver-detalhe');
 function voltarBtn() {
-  return btn('Voltar à lista', { icone: 'voltar', fant: true, sm: true, onclick: () => { mostrarDetalhe(false); renderItens(); window.scrollTo(0, 0); } });
+  return btn('Voltar à lista', { icone: 'voltar', fant: true, sm: true, onclick: () => { J.direto = false; ui.criando = false; mostrarDetalhe(false); renderItens(); rolarTopo(); } });
 }
-
-/* ---------- casca: abas, lista lateral, backup ---------- */
-function trocarAba(aba, criando) {
-  ui.aba = aba; ui.criando = !!criando;
-  salvarUI();
-  try { history.replaceState(null, '', '#' + aba); } catch (e) { /* sem histórico no quadro */ }
-  mostrarDetalhe(!!criando);
+// Cancelar: a janela aberta direto no formulário fecha; a que veio da lista volta para ela
+function cancelar() {
+  ui.criando = false;
+  if (J.direto) { fecharJanela(J); return; }
+  mostrarDetalhe(false);
   renderTudo();
-  if (criando) window.scrollTo(0, 0);
 }
-/* janela à frente da página; fecha no X, no Esc ou clicando fora */
-let janelaAberta = null;
-function fecharJanela(semRender) {
-  if (!janelaAberta) return;
-  const j = janelaAberta; janelaAberta = null;
-  j.el.remove();
-  document.removeEventListener('keydown', j.esc);
-  if (j.aoFechar && !semRender) j.aoFechar();
-  // a página pode ter sido redesenhada: devolve o foco ao botão que abriu a janela
-  const alvo = j.volta && j.volta.isConnected ? j.volta : (j.voltaId && document.getElementById(j.voltaId));
+/* diálogo à frente da janela (Exigência, Dados); fecha no X, no Esc ou clicando fora */
+function fecharDialogo(semRender) {
+  const dl = ui && ui.dialogo;
+  if (!dl) return;
+  ui.dialogo = null;
+  dl.el.remove();
+  if (dl.aoFechar && !semRender) dl.aoFechar();
+  // a janela pode ter sido redesenhada: devolve o foco ao botão que abriu o diálogo
+  const alvo = dl.volta && dl.volta.isConnected ? dl.volta : (dl.voltaId && document.getElementById(dl.voltaId));
   if (alvo && !semRender) alvo.focus();
 }
-function abrirJanela({ sobre, titulo, conteudo, aoFechar, largura }) {
-  fecharJanela(true);
+function abrirDialogo({ titulo, conteudo, aoFechar, atualizar, largura }) {
+  fecharDialogo(true);
   const id = uid('jt');
-  const bFechar = btn('Fechar', { icone: 'x', onclick: () => fecharJanela() });
+  const bFechar = btn('Fechar', { icone: 'x', onclick: () => fecharDialogo() });
   const el = h('div', { class: 'modal janela', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': id },
     h('div', { class: 'modal-painel', style: largura ? 'max-width:' + largura : null },
-      h('div', { class: 'modal-cab' }, h('div', null, sobre ? h('span', { class: 'sobre' }, sobre) : null, h('h2', { id }, titulo)), bFechar),
+      h('div', { class: 'modal-cab' }, h('h2', { id }, titulo), bFechar),
       h('div', { class: 'modal-corpo' }, conteudo)));
-  el.addEventListener('click', ev => { if (ev.target === el) fecharJanela(); });
-  const esc = ev => { if (ev.key === 'Escape') fecharJanela(); };
-  document.addEventListener('keydown', esc);
-  janelaAberta = { el, esc, aoFechar, volta: document.activeElement, voltaId: document.activeElement && document.activeElement.id };
-  document.body.append(el);
+  el.addEventListener('click', ev => { if (ev.target === el) fecharDialogo(); });
+  el._fechar = () => fecharDialogo();
+  ui.dialogo = { el, aoFechar, atualizar, volta: document.activeElement, voltaId: document.activeElement && document.activeElement.id };
+  J.el.append(el);
   bFechar.focus();
 }
+// abre o registro numa janela; se ele já estiver aberto, traz a janela para a frente
 function irPara(aba, id) {
-  fecharJanela(true);
-  ui.sel[aba] = id;
-  trocarAba(aba);
-  mostrarDetalhe(true);
-  window.scrollTo(0, 0);
+  const j = janelas.find(x => x.ui.aba === aba && x.ui.sel[aba] === id && !x.ui.criando && x.el.classList.contains('ver-detalhe'));
+  if (j) { ativar(j); focarJanela(j); }
+  else abrirJanela({ aba, sel: id });
 }
-function renderAbas() {
-  const marcar = (el, sim) => { if (sim) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current'); };
-  marcar($('#mb-analises'), ui.aba === 'analises');
-  marcar($('#mb-modelos'), ui.aba === 'modelos');
-  marcar($('#mb-cadastros-btn'), ui.aba === 'modelos' || ui.aba === 'tabelas');
-  marcar($('#mb-cad-indicadores-btn'), ui.aba === 'tabelas');
-  for (const id of Object.keys(TABELAS)) marcar($('#mb-tab-' + id), ui.aba === 'tabelas' && ui.tabela === id);
-  marcar($('#mb-recepcao-btn'), ui.aba === 'protocolos' && ui.criando);
-  marcar($('#mb-protocolo-btn'), ui.aba === 'protocolos' && !ui.criando);
-  marcar($('#mb-abrir-protocolo'), ui.aba === 'protocolos' && ui.criando);
-  marcar($('#mb-protocolos'), ui.aba === 'protocolos' && !ui.criando);
-  marcar($('#mb-pessoal-btn'), ui.aba === 'pessoas');
-  marcar($('#mb-real-btn'), ui.aba === 'imoveis');
-  marcar($('#mb-indicadores-btn'), ui.aba === 'pessoas' || ui.aba === 'imoveis');
+/* o menu do topo marca a seção da janela ativa */
+function marcarMenu() {
+  const a = janelas.find(x => x.el.classList.contains('ativa'));
+  const u = a ? a.ui : {};
+  const marcar = (id, sim) => { const el = document.getElementById(id); if (sim) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current'); };
+  marcar('mb-analises', u.aba === 'analises');
+  marcar('mb-modelos', u.aba === 'modelos');
+  marcar('mb-cadastros-btn', u.aba === 'modelos' || u.aba === 'tabelas');
+  marcar('mb-cad-indicadores-btn', u.aba === 'tabelas');
+  for (const id of Object.keys(TABELAS)) marcar('mb-tab-' + id, u.aba === 'tabelas' && u.tabela === id);
+  marcar('mb-recepcao-btn', u.aba === 'protocolos' && u.criando);
+  marcar('mb-protocolo-btn', u.aba === 'protocolos' && !u.criando);
+  marcar('mb-abrir-protocolo', u.aba === 'protocolos' && u.criando);
+  marcar('mb-protocolos', u.aba === 'protocolos' && !u.criando);
+  marcar('mb-pessoal-btn', u.aba === 'pessoas');
+  marcar('mb-real-btn', u.aba === 'imoveis');
+  marcar('mb-indicadores-btn', u.aba === 'pessoas' || u.aba === 'imoveis');
 }
 function renderLateral() {
   const aba = ui.aba;
-  $('#lat-tit').textContent = { analises: 'Análises', modelos: 'Modelos de checklist', protocolos: 'Protocolos', pessoas: 'Indicador Pessoal', imoveis: 'Indicador Real', tabelas: 'Tabelas de indicadores' }[aba];
   const f = $('#filtro');
   if (document.activeElement !== f) f.value = ui.filtro[aba] || '';
   f.placeholder = { analises: 'Filtrar por núcleo, município ou processo', modelos: 'Filtrar modelos', protocolos: 'Filtrar por protocolo, município ou interessado', pessoas: 'Filtrar por nome, CPF/CNPJ, RG, passaporte ou e-mail', imoveis: 'Filtrar por matrícula, endereço, denominação, condomínio ou pessoa', tabelas: 'Filtrar tabelas' }[aba];
-  $('.lateral').classList.toggle('larga', aba === 'protocolos');
   const acoes = $('#lat-acoes');
   if (aba === 'protocolos' || aba === 'tabelas') {
     acoes.replaceChildren();
   } else if (aba === 'pessoas') {
-    acoes.replaceChildren(btn('Nova pessoa', { icone: 'mais', prim: true, onclick: () => novoRegistro('pessoas') }));
+    acoes.replaceChildren(btn('Nova pessoa', { icone: 'mais', prim: true, onclick: () => novoRegistro('pessoas', null, null, true) }));
   } else if (aba === 'imoveis') {
-    acoes.replaceChildren(btn('Novo imóvel', { icone: 'mais', prim: true, onclick: () => novoRegistro('imoveis') }));
+    acoes.replaceChildren(btn('Novo imóvel', { icone: 'mais', prim: true, onclick: () => novoRegistro('imoveis', null, null, true) }));
   } else if (aba === 'analises') {
     acoes.replaceChildren(btn('Nova análise', { icone: 'mais', prim: true, onclick: () => abrirNovaAnalise() }));
   } else {
@@ -1275,17 +1304,15 @@ function renderItens() {
   const aba = ui.aba, termo = norm(ui.filtro[aba]);
   const lista = $('#itens');
   const itens = [];
-  if (Store.modo === 'carregando') { lista.replaceChildren(); $('#lat-cont').textContent = ''; return; }
-  const abrirItem = (col, id) => () => { ui.sel[col] = id; ui.criando = false; salvarUI(); mostrarDetalhe(true); renderItens(); renderDetalhe(); window.scrollTo(0, 0); };
+  if (Store.modo === 'carregando') { lista.replaceChildren(); atualizarTitulo(); return; }
+  const abrirItem = (col, id) => () => { ui.sel[col] = id; ui.criando = false; mostrarDetalhe(true); renderItens(); renderDetalhe(); rolarTopo(); };
   if (aba === 'tabelas') {
-    $('#lat-cont').textContent = String(Object.keys(TABELAS).length);
     for (const id of Object.keys(TABELAS)) itens.push(h('li', null, h('button', { type: 'button', class: 'item', onclick: () => abrirTabela(id) },
       h('span', { class: 'item-tit' }, TABELAS[id].nome), h('span', { class: 'item-meta' }, plural(tabela(id).itens.length, 'opção', 'opções')))));
   } else if (aba === 'pessoas') {
     const todas = pessoasOrdenadas();
     const vis = todas.filter(p => !termo || norm([p.nome, p.nomeSocial, p.documento, p.rg, p.passaporte, p.cnh, p.email].join(' ')).includes(termo)
       || (termo.replace(/\D/g, '') && String(p.documento).replace(/\D/g, '').includes(termo.replace(/\D/g, ''))));
-    $('#lat-cont').textContent = String(todas.length);
     for (const p of vis) {
       const n = imoveisDaPessoa(p.id).length;
       itens.push(h('li', null, h('button', { type: 'button', class: 'item', 'aria-current': String(p.id === ui.sel.pessoas), onclick: abrirItem('pessoas', p.id) },
@@ -1300,7 +1327,6 @@ function renderItens() {
     const vis = todos.filter(i => !termo || norm([TIPOS_IMOVEL[i.tipo], i.matricula, i.nucleo, 'quadra ' + i.quadra, 'lote ' + i.lote, i.logradouro, i.municipio,
       i.denominacao, i.localidade, i.ccir, i.nirf, i.car, i.condominio, 'unidade ' + i.unidade, 'bloco ' + i.bloco,
       ...i.vinculos.map(v => (D().pessoas[v.pessoaId] || {}).nome)].join(' ')).includes(termo));
-    $('#lat-cont').textContent = String(todos.length);
     for (const i of vis) {
       const prot = D().protocolos[i.protocoloId];
       itens.push(h('li', null, h('button', { type: 'button', class: 'item', 'aria-current': String(i.id === ui.sel.imoveis), onclick: abrirItem('imoveis', i.id) },
@@ -1317,13 +1343,12 @@ function renderItens() {
   } else if (aba === 'protocolos') {
     const todos = protocolosOrdenados();
     const vis = todos.filter(p => !termo || norm([p.numero, p.municipio, p.interessado].join(' ')).includes(termo));
-    $('#lat-cont').textContent = '';
     for (const p of vis) {
       const [sitRot, sitCls] = SITUACOES[p.situacao];
       const campo = (rot, valor) => h('span', { class: 'prot-campo', title: rot + ': ' + valor.textContent }, h('span', { class: 'rot-in' }, rot + ':'), valor);
       itens.push(h('li', null, h('button', {
         type: 'button', class: 'item item-prot', 'aria-current': String(!ui.criando && p.id === ui.sel.protocolos),
-        onclick: () => { ui.sel.protocolos = p.id; ui.criando = false; salvarUI(); mostrarDetalhe(true); renderAbas(); renderItens(); renderDetalhe(); window.scrollTo(0, 0); }
+        onclick: () => { ui.sel.protocolos = p.id; ui.criando = false; mostrarDetalhe(true); renderItens(); renderDetalhe(); rolarTopo(); }
       },
         campo('Protocolo', h('span', { class: 'item-num' }, p.numero)),
         campo('Município', h('b', null, p.municipio || '—')),
@@ -1336,14 +1361,13 @@ function renderItens() {
   } else if (aba === 'analises') {
     const todas = analisesOrdenadas();
     const vis = todas.filter(a => !termo || norm([a.ident.nucleo, a.ident.municipio, a.ident.processo, a.modelo.nome].join(' ')).includes(termo));
-    $('#lat-cont').textContent = String(todas.length);
     for (const a of vis) {
       const est = estatisticas(a.modelo, a.respostas);
       const pct = est.total ? Math.round(est.feitas * 100 / est.total) : 0;
       const sub = [a.ident.municipio, a.ident.processo && ('Proc. ' + a.ident.processo)].filter(Boolean).join(' · ');
       itens.push(h('li', null, h('button', {
         type: 'button', class: 'item', 'aria-current': String(!ui.criando && a.id === ui.sel.analises),
-        onclick: () => { ui.sel.analises = a.id; ui.criando = false; salvarUI(); mostrarDetalhe(true); renderItens(); renderDetalhe(); window.scrollTo(0, 0); }
+        onclick: () => { ui.sel.analises = a.id; ui.criando = false; mostrarDetalhe(true); renderItens(); renderDetalhe(); rolarTopo(); }
       },
         h('span', { class: 'item-tit' }, a.ident.nucleo || 'Núcleo sem nome'),
         sub ? h('span', { class: 'item-sub' }, sub) : null,
@@ -1361,12 +1385,11 @@ function renderItens() {
   } else {
     const todos = modelosOrdenados();
     const vis = todos.filter(m => !termo || norm(m.nome + ' ' + m.descricao).includes(termo));
-    $('#lat-cont').textContent = String(todos.length);
     for (const m of vis) {
       const c = contarPerguntas(m.perguntas);
       itens.push(h('li', null, h('button', {
         type: 'button', class: 'item', 'aria-current': String(m.id === ui.sel.modelos),
-        onclick: () => { ui.sel.modelos = m.id; salvarUI(); mostrarDetalhe(true); renderItens(); renderDetalhe(); window.scrollTo(0, 0); }
+        onclick: () => { ui.sel.modelos = m.id; mostrarDetalhe(true); renderItens(); renderDetalhe(); rolarTopo(); }
       },
         h('span', { class: 'item-tit' }, m.nome),
         h('span', { class: 'item-meta' }, plural(c.n, 'pergunta', 'perguntas') + (c.s ? ' · ' + plural(c.s, 'seção', 'seções') : ''), ' · ', fmtQuando(m.atualizadoEm))
@@ -1376,32 +1399,33 @@ function renderItens() {
     else if (!vis.length) itens.push(h('li', { class: 'lat-vazio' }, 'Nenhum modelo corresponde ao filtro.'));
   }
   lista.replaceChildren(...itens);
+  atualizarTitulo();
 }
 function renderTudo() {
-  renderAbas();
   renderLateral();
   renderDetalhe();
 }
-let rerenderAdiado = false;
 function renderDetalhe() {
-  rerenderAdiado = false;
   const d = $('#detalhe');
-  if (Store.modo === 'carregando') { d.replaceChildren(h('p', { class: 'carregando' }, 'Carregando dados…')); return; }
-  if (ui.aba === 'tabelas') return renderTabela(TABELAS[ui.tabela] ? ui.tabela : 'estadoCivil');
-  if (ui.aba === 'pessoas') { const pe = registroSel('pessoas'); return pe ? renderPessoa(pe) : renderVazioIndicador('pessoas'); }
-  if (ui.aba === 'imoveis') { const im = registroSel('imoveis'); return im ? renderImovel(im) : renderVazioIndicador('imoveis'); }
-  if (ui.aba === 'protocolos') {
-    if (ui.criando) return renderNovoProtocolo();
-    const p = D().protocolos[ui.sel.protocolos];
-    return p ? renderProtocolo(p) : renderVazioProtocolos();
+  J.adiado = false;
+  if (!emDetalhe()) { d.replaceChildren(); atualizarTitulo(); return; }
+  if (Store.modo === 'carregando') { d.replaceChildren(h('p', { class: 'carregando' }, 'Carregando dados…')); atualizarTitulo(); return; }
+  // registro que não existe mais (excluído em outra janela): a janela volta para a lista
+  const semRegistro = () => { mostrarDetalhe(false); d.replaceChildren(); renderItens(); };
+  const aba = ui.aba;
+  if (aba === 'tabelas') renderTabela(TABELAS[ui.tabela] ? ui.tabela : 'estadoCivil');
+  else if (aba === 'pessoas' || aba === 'imoveis') {
+    const r = registroSel(aba);
+    if (!r) return semRegistro();
+    if (aba === 'pessoas') renderPessoa(r); else renderImovel(r);
+  } else if (aba === 'protocolos' && ui.criando) renderNovoProtocolo();
+  else if (aba === 'analises' && ui.criando) renderNovaAnalise();
+  else {
+    const r = D()[aba][ui.sel[aba]];
+    if (!r) return semRegistro();
+    ({ protocolos: renderProtocolo, analises: renderAnalise, modelos: renderModelo })[aba](r);
   }
-  if (ui.aba === 'analises') {
-    if (ui.criando) return renderNovaAnalise();
-    const a = D().analises[ui.sel.analises];
-    return a ? renderAnalise(a) : renderVazioAnalises();
-  }
-  const m = D().modelos[ui.sel.modelos];
-  return m ? renderModelo(m) : renderVazioModelos();
+  atualizarTitulo();
 }
 
 /* ---------- questionário (usado na análise e na visualização) ---------- */
@@ -1464,7 +1488,7 @@ function montarQuestionario(modelo, resp, aoMudar) {
     if (q.ajuda) {
       ajuda = h('p', { class: 'q-ajuda', hidden: true, id: 'qa-' + q.id }, q.ajuda);
       const b = btn('Orientação', { icone: 'info', fant: true, sm: true });
-      b.setAttribute('aria-expanded', 'false'); b.setAttribute('aria-controls', 'qa-' + q.id);
+      b.setAttribute('aria-expanded', 'false'); b.setAttribute('aria-controls', idJ('qa-' + q.id));
       b.onclick = () => { ajuda.hidden = !ajuda.hidden; b.setAttribute('aria-expanded', String(!ajuda.hidden)); };
       extra.append(b);
     }
@@ -1628,7 +1652,7 @@ function renderAnalise(a) {
     filtros.map(([k, rot]) => h('button', {
       type: 'button', 'aria-pressed': String(ui.filtroQ === k), 'data-f': k,
       onclick: ev => {
-        ui.filtroQ = k; salvarUI();
+        ui.filtroQ = k;
         for (const b of barraFiltro.children) b.setAttribute('aria-pressed', String(b.dataset.f === k));
         quest.atualizar(k);
       }
@@ -1638,21 +1662,12 @@ function renderAnalise(a) {
   blocos.push(h('div', { class: 'an-grade' }, h('div', null, barraFiltro, quest.el), resumo));
   d.replaceChildren(...blocos);
 }
-function renderVazioAnalises() {
-  const temModelo = modelosOrdenados().length > 0;
-  $('#detalhe').replaceChildren(h('div', { class: 'vazio' },
-    h('h2', null, 'Nenhuma análise aberta'),
-    h('p', null, 'Uma análise aplica um modelo de checklist a um núcleo urbano informal: você responde às perguntas, anota observações e o checklist aponta as pendências com a providência e a fundamentação legal de cada uma.'),
-    temModelo
-      ? btn('Nova análise', { icone: 'mais', prim: true, onclick: () => abrirNovaAnalise() })
-      : btn('Adicionar modelo REURB', { icone: 'livro', prim: true, onclick: () => { adicionarDaBiblioteca(); } })
-  ));
-}
 function abrirNovaAnalise(modeloId, protocoloId) {
-  ui.aba = 'analises'; ui.criando = true; ui.modeloNovo = modeloId || null; ui.protocoloNovo = protocoloId || null;
+  if (!J || ui.aba !== 'analises') { abrirJanela({ aba: 'analises', criando: true, modeloNovo: modeloId, protocoloNovo: protocoloId }); return; }
+  ui.criando = true; ui.modeloNovo = modeloId || null; ui.protocoloNovo = protocoloId || null;
   mostrarDetalhe(true);
   renderTudo();
-  window.scrollTo(0, 0);
+  rolarTopo();
 }
 function renderNovaAnalise() {
   const d = $('#detalhe');
@@ -1673,8 +1688,8 @@ function renderNovaAnalise() {
   const preencher = () => {
     const p = D().protocolos[selProt.value];
     if (!p) return;
-    form.querySelector('#na-municipio').value = p.municipio;
-    form.querySelector('#na-processo').value = p.numero;
+    $('#na-municipio').value = p.municipio;
+    $('#na-processo').value = p.numero;
   };
   selProt.addEventListener('change', preencher);
   const form = h('form', { class: 'form-nova' },
@@ -1687,7 +1702,7 @@ function renderNovaAnalise() {
     campo('na-inicio', 'Início da análise', { type: 'date', value: hoje() }),
     h('div', { class: 'acoes largo' },
       h('button', { type: 'submit', class: 'btn btn-prim' }, ico('check'), 'Iniciar análise'),
-      btn('Cancelar', { fant: true, onclick: () => { ui.criando = false; mostrarDetalhe(false); renderTudo(); } }))
+      btn('Cancelar', { fant: true, onclick: cancelar }))
   );
   form.addEventListener('submit', ev => {
     ev.preventDefault();
@@ -1698,7 +1713,7 @@ function renderNovaAnalise() {
     const a = novaAnalise(m, { nucleo: v('na-nucleo'), municipio: v('na-municipio'), processo: v('na-processo'), responsavel: v('na-responsavel'), inicio: $('#na-inicio').value }, p ? p.id : '');
     Store.put('analises', a, 0);
     if (p) { registrarAndamento(p, `Checklist “${m.nome}” aplicado.`); Store.put('protocolos', p, 0); }
-    ui.sel.analises = a.id; ui.criando = false; ui.filtroQ = 'todas'; salvarUI();
+    ui.sel.analises = a.id; ui.criando = false; ui.filtroQ = 'todas';
     renderTudo();
     toast('Análise iniciada.');
   });
@@ -1728,7 +1743,7 @@ function protocolosDaPessoa(id) {
 }
 function botoesProtocolo(prots) {
   if (!prots.length) return null;
-  return h('div', { class: 'link-prots' }, prots.map(pr => btn('Protocolo ' + pr.numero, { icone: 'pasta', fant: true, sm: true, cls: 'link-prot', onclick: () => { ui.reabrirDados = pr.id; irPara('protocolos', pr.id); } })));
+  return h('div', { class: 'link-prots' }, prots.map(pr => btn('Protocolo ' + pr.numero, { icone: 'pasta', fant: true, sm: true, cls: 'link-prot', onclick: () => irPara('protocolos', pr.id) })));
 }
 
 /* ---------- protocolos: abrir, consultar, andamentos ---------- */
@@ -1774,7 +1789,7 @@ function renderProtocolo(p) {
   // os botões da barra abrem janelas à frente da página
   const botaoJanela = (k, rot, icone, abrir, extra) => h('button', { type: 'button', class: 'bp', id: 'pr-bt-' + k, 'aria-haspopup': 'dialog', onclick: abrir }, ico(icone), rot, extra);
   const bExig = botaoJanela('exigencia', 'Exigência', 'exigencia',
-    () => abrirJanela({ sobre: 'Protocolo ' + p.numero, titulo: 'Exigências', conteudo: blocoExigencias(p, bExig), aoFechar: renderDetalhe, largura: '900px' }),
+    () => abrirDialogo({ titulo: 'Exigências', conteudo: blocoExigencias(p, bExig), aoFechar: renderDetalhe, largura: '900px' }),
     h('span', { class: 'cont', hidden: !pendentesExig }, String(pendentesExig)));
   const barraProt = h('div', { class: 'barra-prot', role: 'toolbar', 'aria-label': 'Protocolo ' + p.numero },
     bExig,
@@ -1830,18 +1845,18 @@ function renderProtocolo(p) {
   const painelDados = h('div', { id: 'pr-painel-dados', role: 'tabpanel' });
   // janela Dados: indicadores real e pessoal do protocolo
   const abrirDados = () => {
-    abrirJanela({ sobre: 'Protocolo ' + p.numero, titulo: 'Dados', conteudo: h('div', { class: 'dados-sub' }, barraDados, painelDados), aoFechar: renderDetalhe, largura: '1000px' });
+    abrirDialogo({ titulo: 'Dados', conteudo: h('div', { class: 'dados-sub' }, barraDados, painelDados), aoFechar: renderDetalhe, atualizar: () => { desenharAbas(); desenharPainel(); }, largura: '1000px' });
     desenharAbas(); desenharPainel();
   };
   const contagem = k => ({ imoveis: imoveisDoProtocolo(p.id).length, pessoas: pessoasDoProtocolo(p).total })[k];
   const desenharAbas = () => {
     barraAbas.replaceChildren(...ABAS_PROT.map(([k, rot]) => h('button', {
       type: 'button', class: 'pr-aba', role: 'tab', id: 'pr-aba-' + k, 'aria-controls': 'pr-painel', 'aria-selected': String(ui.abaProt === k),
-      onclick: () => { ui.abaProt = k; salvarUI(); desenharAbas(); desenharPainel(); }
+      onclick: () => { ui.abaProt = k; desenharAbas(); desenharPainel(); }
     }, rot)));
     barraDados.replaceChildren(...ABAS_DADOS.map(([k, rot]) => h('button', {
       type: 'button', class: 'pr-aba', role: 'tab', id: 'pr-aba-' + k, 'aria-controls': 'pr-painel-dados', 'aria-selected': String(ui.abaDados === k),
-      onclick: () => { ui.abaDados = k; salvarUI(); desenharAbas(); desenharPainel(); }
+      onclick: () => { ui.abaDados = k; desenharAbas(); desenharPainel(); }
     }, rot, h('span', { class: 'n' }, String(contagem(k))))));
   };
   const atualizarContagens = () => { desenharAbas(); renderItens(); };
@@ -1965,9 +1980,9 @@ function renderProtocolo(p) {
   };
 
   const desenharPainel = () => {
-    painel.setAttribute('aria-labelledby', 'pr-aba-' + ui.abaProt);
+    painel.setAttribute('aria-labelledby', idJ('pr-aba-' + ui.abaProt));
     painel.replaceChildren({ dados: () => quadroDados, andamentos: () => blocoAnd, financeiro: () => blocoFinanceiro(p, atualizarContagens), checklists: () => blocoVinc }[ui.abaProt]());
-    painelDados.setAttribute('aria-labelledby', 'pr-aba-' + ui.abaDados);
+    painelDados.setAttribute('aria-labelledby', idJ('pr-aba-' + ui.abaDados));
     painelDados.replaceChildren(ui.abaDados === 'pessoas' ? blocoPessoas() : blocoImoveis());
   };
   desenharAbas();
@@ -1975,8 +1990,6 @@ function renderProtocolo(p) {
   // o quadro Dados do protocolo aparece só na aba Dados Protocolo
   blocos.splice(blocos.indexOf(quadroDados), 1, barraAbas, painel);
   d.replaceChildren(...blocos);
-  // ao voltar de um imóvel ou pessoa, a janela Dados reabre
-  if (ui.reabrirDados === p.id) { ui.reabrirDados = null; abrirDados(); }
 }
 function blocoFinanceiro(p, aoMudar) {
   const f = p.financeiro;
@@ -2085,11 +2098,6 @@ function blocoExigencias(p, botao) {
     h('div', { class: 'lat-cab', style: 'justify-content:space-between;flex-wrap:wrap' }, resumo, copiarBtn),
     lista, form);
 }
-function renderVazioProtocolos() {
-  $('#detalhe').replaceChildren(h('div', { class: 'vazio' },
-    h('h2', null, 'Nenhum protocolo aberto'),
-    btn('Recepção de Título', { icone: 'mais', prim: true, onclick: () => trocarAba('protocolos', true) })));
-}
 function renderNovoProtocolo() {
   const d = $('#detalhe');
   const anoAtual = () => Number(hoje().slice(0, 4));
@@ -2106,10 +2114,10 @@ function renderNovoProtocolo() {
       h('textarea', { class: 'inp', id: 'np-descricao', rows: '3' })),
     h('div', { class: 'acoes largo' },
       h('button', { type: 'submit', class: 'btn btn-prim' }, ico('check'), 'Recepção de Título'),
-      btn('Cancelar', { fant: true, onclick: () => { ui.criando = false; mostrarDetalhe(false); renderTudo(); } })));
+      btn('Cancelar', { fant: true, onclick: cancelar })));
   form.addEventListener('submit', ev => {
     ev.preventDefault();
-    const v = id => form.querySelector('#' + id).value.trim();
+    const v = id => $('#' + id).value.trim();
     // data e hora da abertura vêm do clique, sem edição
     const ano = anoAtual(), abertura = hoje(), abertoEm = agora();
     const p = normalizarProtocolo({
@@ -2119,20 +2127,22 @@ function renderNovoProtocolo() {
       andamentos: [{ id: uid('n'), data: abertura, texto: 'Protocolo aberto.', em: abertoEm }]
     });
     Store.put('protocolos', p, 0);
-    ui.sel.protocolos = p.id; ui.criando = false; ui.abaProt = 'dados'; salvarUI();
+    ui.sel.protocolos = p.id; ui.criando = false; ui.abaProt = 'dados';
+    J.direto = false;
     renderTudo();
     toast(`Protocolo ${p.numero} aberto.`);
   });
   d.replaceChildren(h('div', { class: 'cab' }, h('div', { class: 'cab-txt' }, voltarBtn(), h('span', { class: 'sobre' }, 'Recepção'), h('h1', { class: 'titulo' }, 'Recepção de Título'))), form);
-  form.querySelector('#np-interessado').focus();
+  $('#np-interessado').focus();
 }
 
 /* ---------- Cadastros → Indicadores: tabelas auxiliares ---------- */
 function abrirTabela(id) {
+  if (!J || ui.aba !== 'tabelas') { abrirJanela({ aba: 'tabelas', tabela: id }); return; }
   ui.tabela = id;
-  trocarAba('tabelas');
   mostrarDetalhe(true);
-  window.scrollTo(0, 0);
+  renderTudo();
+  rolarTopo();
 }
 function renderTabela(id) {
   const def = TABELAS[id];
@@ -2254,28 +2264,23 @@ function campoCheck(obj, prefixo, k, rot, aoMudar) {
 }
 const validarCpf = v => (String(v).replace(/\D/g, '').length === 11 && !cpfValido(v) ? 'inválido' : '');
 const validarCnpj = v => (String(v).replace(/\D/g, '').length === 14 && !cnpjValido(v) ? 'inválido' : '');
-function novoRegistro(col, base, aoSalvar) {
-  fecharJanela(true);
+// novo cadastro: na própria janela quando vem da lista dela; nos outros casos, numa janela nova
+function novoRegistro(col, base, aoSalvar, naMesma) {
   const obj = col === 'pessoas' ? normalizarPessoa(base || {}) : normalizarImovel(base || {});
-  rascunho = { col, obj, aoSalvar };
-  ui.aba = col; ui.criando = false; ui.sel[col] = obj.id; salvarUI();
-  try { history.replaceState(null, '', '#' + col); } catch (e) { /* sem histórico no quadro */ }
+  if (!(naMesma && J && ui.aba === col)) abrirJanela({ aba: col });
+  ui.rascunho = { col, obj, aoSalvar };
+  ui.criando = false; ui.sel[col] = obj.id;
   mostrarDetalhe(true);
   renderTudo();
-  window.scrollTo(0, 0);
-  requestAnimationFrame(() => { const f = $(col === 'pessoas' ? '#pe-nome' : '#im-matricula'); if (f) f.focus(); });
+  rolarTopo();
+  const j = J;
+  requestAnimationFrame(() => { usar(j); const f = $(col === 'pessoas' ? '#pe-nome' : '#im-matricula'); if (f) f.focus(); });
 }
 function excluirRegistro(col, obj, msg) {
   if (D()[col][obj.id]) Store.remover(col, obj.id);
-  if (rascunho && rascunho.obj === obj) rascunho = null;
+  if (ui.rascunho && ui.rascunho.obj === obj) ui.rascunho = null;
   ui.sel[col] = null; garantirSelecao(); mostrarDetalhe(false); renderTudo();
   toast(msg);
-}
-function renderVazioIndicador(col) {
-  const pes = col === 'pessoas';
-  $('#detalhe').replaceChildren(h('div', { class: 'vazio' },
-    h('h2', null, pes ? 'Nenhuma pessoa cadastrada' : 'Nenhum imóvel cadastrado'),
-    btn(pes ? 'Nova pessoa' : 'Novo imóvel', { icone: 'mais', prim: true, onclick: () => novoRegistro(col) })));
 }
 function renderPessoa(pe) {
   const d = $('#detalhe');
@@ -2343,9 +2348,9 @@ function renderPessoa(pe) {
   const desenharEnd = () => {
     barraEnd.replaceChildren(...abasEnd.map(([k, rot]) => h('button', {
       type: 'button', class: 'pr-aba', role: 'tab', id: 'pe-aba-' + k, 'aria-controls': 'pe-painel-end', 'aria-selected': String(ui.abaEnd === k),
-      onclick: () => { ui.abaEnd = k; salvarUI(); desenharEnd(); }
+      onclick: () => { ui.abaEnd = k; desenharEnd(); }
     }, rot)));
-    painelEnd.setAttribute('aria-labelledby', 'pe-aba-' + ui.abaEnd);
+    painelEnd.setAttribute('aria-labelledby', idJ('pe-aba-' + ui.abaEnd));
     painelEnd.replaceChildren(...(ui.abaEnd === 'filiacao'
       ? [c('pai', 'Pai', 6), c('mae', 'Mãe', 6)]
       : camposEndereco(ui.abaEnd === 'profissional' ? pe.enderecoProfissional : pe.enderecoResidencial, 'pe-' + ui.abaEnd)));
@@ -2389,6 +2394,7 @@ function renderPessoa(pe) {
 }
 /* consulta de CEP (ViaCEP); só no arquivo aberto no navegador, a página publicada não acessa outros sites */
 async function buscarCep(end, pref, cep, depois) {
+  const jan = J;
   const d = String(cep).replace(/\D/g, '');
   if (d.length !== 8) { toast('Digite os 8 números do CEP.'); return; }
   try {
@@ -2402,6 +2408,8 @@ async function buscarCep(end, pref, cep, depois) {
       bairro: j.bairro || end.bairro, municipio: j.localidade ? j.localidade + '/' + j.uf : end.municipio,
       complemento: end.complemento || j.complemento || ''
     });
+    if (!jan.el.isConnected) return;
+    usar(jan);
     depois();
     toast('Endereço preenchido pelo CEP.');
   } catch (e) { toast('Não foi possível consultar o CEP agora. Preencha o endereço manualmente.'); }
@@ -2540,10 +2548,12 @@ function renderArvore(m, focoId) {
   const idx = indexar(m.perguntas);
   arv.replaceChildren(...m.perguntas.map(no => noEditor(m, idx, no, m.perguntas, null)));
   if (!m.perguntas.length) arv.append(h('p', { class: 'lat-vazio' }, 'Nenhuma pergunta ainda. Adicione a primeira pergunta ou uma seção para agrupar perguntas.'));
+  const j = J;
   requestAnimationFrame(() => {
     for (const t of arv.querySelectorAll('textarea.auto')) autoAltura(t);
     if (focoId) {
-      const el = document.getElementById(focoId.startsWith('#') ? focoId.slice(1) : 'e-' + focoId + '-texto');
+      usar(j);
+      const el = $('#' + (focoId.startsWith('#') ? focoId.slice(1) : 'e-' + focoId + '-texto'));
       if (el) { el.focus({ preventScroll: true }); el.scrollIntoView({ block: 'center', behavior: reduzMov ? 'auto' : 'smooth' }); }
     }
   });
@@ -2668,15 +2678,22 @@ function limparModelo(m) {
 function criarModelo() {
   const m = normalizarModelo({ id: uid('m'), nome: 'Novo checklist', perguntas: [novaPergunta()] });
   Store.put('modelos', m, 0);
-  ui.aba = 'modelos'; ui.sel.modelos = m.id; salvarUI();
+  mostrarModelo(m);
+  const j = J;
+  requestAnimationFrame(() => { usar(j); const n = $('#ed-nome'); if (n) { n.focus(); n.select(); } });
+}
+// na janela de modelos troca a tela; de outro lugar abre uma janela
+function mostrarModelo(m) {
+  if (!J || ui.aba !== 'modelos') { abrirJanela({ aba: 'modelos', sel: m.id }); return; }
+  ui.sel.modelos = m.id;
   mostrarDetalhe(true);
   renderTudo();
-  requestAnimationFrame(() => { const n = $('#ed-nome'); if (n) { n.focus(); n.select(); } });
+  rolarTopo();
 }
 function clonarModelo(m) {
   const c = normalizarModelo(Object.assign(limparModelo(m), { id: uid('m'), nome: 'Cópia de ' + m.nome, criadoEm: null, atualizadoEm: null }));
   Store.put('modelos', c, 0);
-  ui.sel.modelos = c.id; salvarUI();
+  ui.sel.modelos = c.id;
   renderTudo();
   toast('Modelo clonado.');
 }
@@ -2688,10 +2705,7 @@ function adicionarModelo(bruto) {
   return m;
 }
 function adicionarDaBiblioteca() {
-  const m = adicionarModelo(BIB.modelos[0]);
-  ui.aba = 'modelos'; ui.sel.modelos = m.id; salvarUI();
-  mostrarDetalhe(true);
-  renderTudo();
+  mostrarModelo(adicionarModelo(BIB.modelos[0]));
   toast('Modelo REURB adicionado.');
 }
 
@@ -2706,8 +2720,7 @@ function visualizar(m) {
   };
   quest = montarQuestionario(m, resp, atualizarCont);
   atualizarCont();
-  const fechar = () => { modal.remove(); document.removeEventListener('keydown', esc_); if (voltaFoco) voltaFoco.focus(); };
-  const esc_ = ev => { if (ev.key === 'Escape') fechar(); };
+  const fechar = () => { modal.remove(); if (voltaFoco && voltaFoco.isConnected) voltaFoco.focus(); };
   const voltaFoco = document.activeElement;
   const bFechar = btn('Fechar', { icone: 'x', onclick: fechar });
   const modal = h('div', { class: 'modal', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'vis-tit' },
@@ -2715,8 +2728,8 @@ function visualizar(m) {
       h('div', { class: 'modal-cab' }, h('div', null, h('span', { class: 'sobre' }, 'Visualizar checklist · modo de teste'), h('h2', { id: 'vis-tit' }, m.nome), cont), bFechar),
       h('div', { class: 'modal-corpo' }, h('p', { class: 'nota nota-info', style: 'margin:0' }, ico('info'), h('span', null, 'Teste as respostas e as sub-perguntas condicionais. Nada do que você marcar aqui é salvo.')), quest.el)));
   modal.addEventListener('click', ev => { if (ev.target === modal) fechar(); });
-  document.addEventListener('keydown', esc_);
-  document.body.append(modal);
+  modal._fechar = fechar;
+  (J ? J.el : document.body).append(modal);
   bFechar.focus();
 }
 
@@ -2796,7 +2809,8 @@ function mostrarTexto(titulo, texto, dica) {
       h('div', { class: 'modal-cab' }, h('div', null, h('h2', { id: 'txt-tit' }, titulo)), btn('Fechar', { icone: 'x', onclick: fechar })),
       h('div', { class: 'modal-corpo' }, h('p', { class: 'dica' }, dica), ta)));
   modal.addEventListener('click', ev => { if (ev.target === modal) fechar(); });
-  document.body.append(modal);
+  modal._fechar = fechar;
+  (J ? J.el : document.body).append(modal);
   ta.focus(); ta.select();
 }
 function copiar(texto, msg = 'Pendências copiadas.', titulo = 'Copiar pendências') {
@@ -2854,10 +2868,275 @@ async function importarArquivo(arq) {
   else if (obj && obj.formato === 'checklist-biblioteca' && Array.isArray(obj.modelos)) { for (const m of obj.modelos) { ultimo = adicionarModelo(m); nm++; } }
   else if (obj && Array.isArray(obj.perguntas)) { ultimo = adicionarModelo(obj); nm = 1; }
   else { toast('Arquivo não reconhecido: use um modelo ou backup exportado por este checklist.'); return; }
-  if (ultimo) { ui.aba = 'modelos'; ui.sel.modelos = ultimo.id; }
-  garantirSelecao(); salvarUI();
-  renderTudo();
+  atualizarJanelas();
+  if (ultimo) irPara('modelos', ultimo.id);
   toast('Importado: ' + [np && plural(np, 'protocolo', 'protocolos'), npe && plural(npe, 'pessoa', 'pessoas'), nim && plural(nim, 'imóvel', 'imóveis'), plural(nm, 'modelo', 'modelos'), na && plural(na, 'análise', 'análises')].filter(Boolean).join(', ') + '.');
+}
+
+/* ---------- área de trabalho: janelas soltas sobre o azul do sistema ---------- */
+const area = document.getElementById('area'), tarefas = document.getElementById('tarefas');
+const janelas = [];
+let seqJanela = 0, zTopo = 1;
+function usar(j) { J = j; ui = j ? j.ui : null; }
+const compacta = () => area.clientWidth < 720;
+const TAMANHOS = { protocolos: [1120, 720], pessoas: [1120, 760], imoveis: [1060, 720], analises: [1200, 780], modelos: [1100, 760], tabelas: [720, 560] };
+const MIN_L = 340, MIN_A = 220;
+// op: { aba, sel, criando, tabela, modeloNovo, protocoloNovo }
+function abrirJanela(op) {
+  const j = { id: ++seqJanela, pref: 'j' + seqJanela + '-', ui: novoUI(op.aba), titulo: '', min: false, direto: false, adiado: false };
+  janelas.push(j);
+  usar(j);
+  const filtro = h('input', { class: 'inp', id: 'filtro', type: 'search', placeholder: 'Filtrar', autocomplete: 'off' });
+  filtro.addEventListener('input', () => { ui.filtro[ui.aba] = filtro.value; renderItens(); });
+  const corpo = h('div', { class: 'jan-corpo' },
+    h('aside', { class: 'lateral', 'aria-label': 'Lista' },
+      h('div', { class: 'lat-acoes', id: 'lat-acoes' }),
+      h('label', { class: 'busca' }, h('span', { class: 'rot', hidden: true }, 'Filtrar'), ico('lupa'), filtro),
+      h('ul', { class: 'itens', id: 'itens' })),
+    h('section', { class: 'detalhe', id: 'detalhe' }));
+  const botao = (rot, icone, acao, cls) => h('button', { type: 'button', class: 'jan-bt' + (cls ? ' ' + cls : ''), title: rot, 'aria-label': rot, onclick: acao }, ico(icone));
+  const bMax = botao('Maximizar', 'maximizar', () => alternarMax(j), 'jan-max');
+  const cab = h('div', { class: 'jan-cab' }, h('h2', { class: 'jan-tit', id: 'jan-tit' }),
+    h('div', { class: 'jan-bts' }, botao('Minimizar', 'minimizar', () => minimizar(j)), bMax, botao('Fechar', 'x', () => fecharJanela(j), 'jan-fechar')));
+  const bordas = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'].map(dir => {
+    const b = h('div', { class: 'jan-r ' + dir, 'aria-hidden': 'true' });
+    b.addEventListener('pointerdown', ev => redimensionar(j, ev, dir));
+    return b;
+  });
+  const el = h('section', { class: 'jan', tabindex: '-1', 'aria-labelledby': 'jan-tit' }, cab, corpo, bordas);
+  Object.assign(j, { el, corpo, cab, bMax });
+  // os eventos dentro da janela agem sobre ela
+  for (const tipo of ['pointerdown', 'mousedown', 'click', 'dblclick', 'input', 'change', 'keydown', 'keyup', 'focus', 'blur', 'focusin', 'focusout', 'submit', 'paste', 'cut', 'toggle', 'invalid'])
+    el.addEventListener(tipo, () => usar(j), true);
+  el.addEventListener('pointerdown', () => ativar(j), true);
+  el.addEventListener('focusin', () => ativar(j));
+  // dados que mudaram enquanto se digitava aqui: redesenha ao sair da janela
+  el.addEventListener('focusout', ev => { if (j.adiado && !(ev.relatedTarget && el.contains(ev.relatedTarget))) redesenhar(j); });
+  cab.addEventListener('pointerdown', ev => arrastar(j, ev));
+  cab.addEventListener('dblclick', ev => { if (!ev.target.closest('.jan-bt')) alternarMax(j); });
+  // posição em cascata, dentro da área
+  const a = area.getBoundingClientRect();
+  const [pl, pa] = TAMANHOS[op.aba] || [1000, 700];
+  const w = Math.max(MIN_L, Math.min(pl, a.width - 32)), alt = Math.max(MIN_A, Math.min(pa, a.height - 24));
+  const k = (janelas.length - 1) % 8;
+  Object.assign(el.style, {
+    left: Math.max(0, Math.min(16 + k * 28, a.width - w)) + 'px', top: Math.max(0, Math.min(12 + k * 28, a.height - alt)) + 'px',
+    width: w + 'px', height: alt + 'px'
+  });
+  if (compacta()) el.classList.add('max');
+  area.append(el);
+  if (op.sel) ui.sel[op.aba] = op.sel;
+  if (op.tabela) ui.tabela = op.tabela;
+  if (op.criando) { ui.criando = true; ui.modeloNovo = op.modeloNovo || null; ui.protocoloNovo = op.protocoloNovo || null; }
+  j.direto = !!(op.sel || op.tabela || op.criando);
+  mostrarDetalhe(j.direto);
+  renderTudo();
+  ativar(j);
+  if (!j.direto) filtro.focus();
+  else if (!el.contains(document.activeElement)) el.focus({ preventScroll: true });
+  return j;
+}
+const topoVisivel = () => janelas.filter(x => !x.min).sort((a, b) => b.el.style.zIndex - a.el.style.zIndex)[0];
+function ativar(j) {
+  usar(j);
+  if (j.el.classList.contains('ativa') && !j.min && +j.el.style.zIndex === zTopo) return;
+  if (j.min) { j.min = false; j.el.hidden = false; }
+  j.el.style.zIndex = ++zTopo;
+  for (const x of janelas) x.el.classList.toggle('ativa', x === j);
+  marcarMenu();
+  desenharTarefas();
+}
+function semJanelaAtiva() {
+  const prox = topoVisivel();
+  if (prox) { ativar(prox); return; }
+  usar(null);
+  marcarMenu();
+  desenharTarefas();
+}
+function minimizar(j) {
+  j.min = true;
+  j.el.hidden = true;
+  j.el.classList.remove('ativa');
+  semJanelaAtiva();
+}
+function fecharJanela(j) {
+  j.el.remove();
+  janelas.splice(janelas.indexOf(j), 1);
+  semJanelaAtiva();
+  if (J) focarJanela(J);
+}
+// foco no diálogo aberto da janela ou na própria janela
+function focarJanela(j) {
+  const m = [...j.el.querySelectorAll(':scope > .modal')].pop();
+  const alvo = m && m.querySelector('.modal-cab button');
+  (alvo || j.el).focus({ preventScroll: true });
+}
+function alternarMax(j) {
+  if (compacta()) return;
+  const max = !j.el.classList.contains('max');
+  j.el.classList.toggle('max', max);
+  j.bMax.replaceChildren(ico(max ? 'restaurar' : 'maximizar'));
+  j.bMax.title = max ? 'Restaurar' : 'Maximizar';
+  j.bMax.setAttribute('aria-label', j.bMax.title);
+}
+// mover e redimensionar com o ponteiro (mouse, caneta ou toque)
+function acompanhar(alvo, ev, mover) {
+  alvo.setPointerCapture(ev.pointerId);
+  document.body.classList.add('arrastando');
+  const fim = () => {
+    alvo.removeEventListener('pointermove', mover);
+    alvo.removeEventListener('pointerup', fim);
+    alvo.removeEventListener('pointercancel', fim);
+    document.body.classList.remove('arrastando');
+  };
+  alvo.addEventListener('pointermove', mover);
+  alvo.addEventListener('pointerup', fim);
+  alvo.addEventListener('pointercancel', fim);
+}
+function arrastar(j, ev) {
+  if (ev.button !== 0 || ev.target.closest('.jan-bt') || compacta()) return;
+  ev.preventDefault();
+  const el = j.el, a = area.getBoundingClientRect();
+  if (el.classList.contains('max')) {
+    // sai do maximizado com a barra de título sob o ponteiro
+    const w = parseFloat(el.style.width), prop = (ev.clientX - a.left) / a.width;
+    alternarMax(j);
+    el.style.left = (ev.clientX - a.left - prop * w) + 'px';
+    el.style.top = '0px';
+  }
+  const r = el.getBoundingClientRect(), dx = ev.clientX - r.left, dy = ev.clientY - r.top;
+  acompanhar(j.cab, ev, e => {
+    el.style.left = Math.min(Math.max(e.clientX - a.left - dx, 80 - r.width), a.width - 80) + 'px';
+    el.style.top = Math.min(Math.max(e.clientY - a.top - dy, 0), a.height - 36) + 'px';
+  });
+}
+function redimensionar(j, ev, dir) {
+  if (ev.button !== 0) return;
+  ev.preventDefault();
+  const el = j.el, a = area.getBoundingClientRect(), r = el.getBoundingClientRect();
+  const L0 = r.left - a.left, T0 = r.top - a.top, W0 = r.width, H0 = r.height, x0 = ev.clientX, y0 = ev.clientY;
+  acompanhar(ev.currentTarget, ev, e => {
+    const dx = e.clientX - x0, dy = e.clientY - y0;
+    let L = L0, T = T0, W = W0, H = H0;
+    if (dir.includes('e')) W = Math.min(Math.max(W0 + dx, MIN_L), a.width - L0);
+    if (dir.includes('s')) H = Math.min(Math.max(H0 + dy, MIN_A), a.height - T0);
+    if (dir.includes('w')) { W = Math.min(Math.max(W0 - dx, MIN_L), L0 + W0); L = L0 + W0 - W; }
+    if (dir.includes('n')) { H = Math.min(Math.max(H0 - dy, MIN_A), T0 + H0); T = T0 + H0 - H; }
+    Object.assign(el.style, { left: L + 'px', top: T + 'px', width: W + 'px', height: H + 'px' });
+  });
+}
+// divide a área entre as janelas abertas
+function ladoALado() {
+  const vis = janelas.filter(j => !j.min);
+  if (!vis.length || compacta()) return;
+  const a = area.getBoundingClientRect(), n = vis.length;
+  const cols = n <= 3 ? n : Math.ceil(Math.sqrt(n)), linhas = Math.ceil(n / cols);
+  const w = a.width / cols, alt = a.height / linhas;
+  vis.forEach((j, i) => {
+    if (j.el.classList.contains('max')) alternarMax(j);
+    Object.assign(j.el.style, { left: (i % cols) * w + 'px', top: Math.floor(i / cols) * alt + 'px', width: w + 'px', height: alt + 'px' });
+  });
+}
+function ajustarJanelas() {
+  const a = area.getBoundingClientRect(), estreita = compacta();
+  area.classList.toggle('estreita', estreita);
+  for (const j of janelas) {
+    if (estreita) { j.el.classList.add('max'); continue; }
+    if (parseFloat(j.el.style.top) > a.height - 36) j.el.style.top = Math.max(0, a.height - 36) + 'px';
+    if (parseFloat(j.el.style.left) > a.width - 80) j.el.style.left = Math.max(0, a.width - 80) + 'px';
+  }
+}
+/* barra de tarefas: aparece só com janelas abertas */
+function desenharTarefas() {
+  tarefas.hidden = !janelas.length;
+  document.getElementById('tarefas-lista').replaceChildren(...janelas.map(j => h('button', {
+    type: 'button', class: 'tarefa' + (j.min ? ' min' : ''), title: j.titulo, 'aria-pressed': String(j.el.classList.contains('ativa') && !j.min),
+    onclick: () => {
+      if (j.el.classList.contains('ativa') && !j.min) minimizar(j);
+      else { ativar(j); focarJanela(j); }
+    }
+  }, j.titulo || '…')));
+}
+function tituloJanela() {
+  const det = emDetalhe(), aba = ui.aba;
+  if (aba === 'protocolos') {
+    if (ui.criando) return 'Recepção de Título';
+    const p = det && D().protocolos[ui.sel.protocolos];
+    return p ? 'Protocolo ' + p.numero : 'Consultar Protocolos';
+  }
+  if (aba === 'pessoas') {
+    const pe = det && registroSel('pessoas');
+    if (!pe) return 'Indicador Pessoal';
+    return (pe.tipo === 'juridica' ? 'Pessoa Jurídica' : 'Pessoa Física') + (pe.nome ? ' · ' + pe.nome : '');
+  }
+  if (aba === 'imoveis') {
+    const im = det && registroSel('imoveis');
+    if (!im) return 'Indicador Real';
+    const t = tituloImovel(im);
+    return { urbano: 'Imóvel Urbano', rural: 'Imóvel Rural', condominio: 'Condomínio' }[im.tipo] + (t.startsWith('Novo imóvel') ? '' : ' · ' + t);
+  }
+  if (aba === 'analises') {
+    if (ui.criando) return 'Nova análise';
+    const a = det && D().analises[ui.sel.analises];
+    return a ? 'Análise · ' + (a.ident.nucleo || 'Núcleo sem nome') : 'Análises';
+  }
+  if (aba === 'modelos') {
+    const m = det && D().modelos[ui.sel.modelos];
+    return m ? 'Modelo · ' + (m.nome || 'Sem nome') : 'Modelos de checklist';
+  }
+  return det && TABELAS[ui.tabela] ? TABELAS[ui.tabela].nome : 'Tabelas de indicadores';
+}
+function atualizarTitulo() {
+  if (!J) return;
+  const t = tituloJanela();
+  if (t !== J.titulo) { J.titulo = t; $('#jan-tit').textContent = t; desenharTarefas(); }
+  marcarMenu();
+}
+/* uma mudança feita numa janela aparece nas outras que mostram os mesmos dados */
+const DEPENDE = {
+  protocolos: ['protocolos', 'imoveis', 'pessoas', 'analises'], pessoas: ['pessoas', 'imoveis', 'protocolos', 'tabelas'],
+  imoveis: ['imoveis', 'pessoas', 'protocolos'], analises: ['analises', 'protocolos', 'modelos'],
+  modelos: ['modelos', 'analises'], tabelas: ['tabelas', 'pessoas']
+};
+const mudados = new Set();
+let tAtualizar = null;
+Store.aoMudar = col => { mudados.add(col); clearTimeout(tAtualizar); tAtualizar = setTimeout(atualizarOutras, 250); };
+// campos de formulário ainda não enviados (recepção, andamento, lançamento…) sobrevivem ao redesenho
+const camposForm = raiz => [...raiz.querySelectorAll('form input, form textarea, form select')].filter(c => !c.readOnly && !['file', 'hidden', 'submit', 'button'].includes(c.type));
+const chaveCampo = c => [c.tagName, c.type, c.id, c.name, c.closest('form').className].join('|');
+function redesenhar(j) {
+  usar(j);
+  j.adiado = false;
+  const dl = j.ui.dialogo;
+  if (dl) { renderItens(); if (dl.atualizar) dl.atualizar(); return; }
+  const y = j.corpo.scrollTop;
+  const antes = camposForm(j.corpo).map(c => [chaveCampo(c), c.type === 'checkbox' ? c.checked : c.value]);
+  renderLateral();
+  renderDetalhe();
+  const depois = camposForm(j.corpo);
+  if (depois.length === antes.length) depois.forEach((c, i) => {
+    const [k, v] = antes[i];
+    if (chaveCampo(c) !== k) return;
+    if (typeof v === 'boolean') c.checked = v; else c.value = v;
+  });
+  j.corpo.scrollTop = y;
+}
+// quem está com o foco num campo ou botão da janela não perde o que está fazendo: ela espera o foco sair
+const emUso = j => { const a = document.activeElement; return j.el.contains(a) && /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(a.tagName); };
+function atualizarOutras() {
+  const cols = [...mudados];
+  mudados.clear();
+  atualizarJanelas(cols);
+}
+// sem cols: todas as janelas (carga inicial, importação, alterações vindas de outro aparelho)
+function atualizarJanelas(cols) {
+  const antes = J;
+  for (const j of janelas) {
+    if (cols && !DEPENDE[j.ui.aba].some(c => cols.includes(c))) continue;
+    if (emUso(j)) { usar(j); renderItens(); j.adiado = true; }
+    else redesenhar(j);
+  }
+  usar(antes && antes.el.isConnected ? antes : null);
 }
 
 /* ---------- ligação inicial ---------- */
@@ -2922,14 +3201,25 @@ document.addEventListener('click', ev => { for (const it of menusTopo) if (!it.c
 for (const b of document.querySelectorAll('[data-aba]')) b.addEventListener('click', () => {
   fecharMenus();
   if (b.classList.contains('mb-op')) { b.blur(); b.closest('.mb-item').classList.add('suprimir'); }
+  usar(null);
   const acao = b.dataset.acao;
   if (acao === 'fisica' || acao === 'juridica') { novoRegistro('pessoas', { tipo: acao }); return; }
   if (TIPOS_IMOVEL[acao]) { novoRegistro('imoveis', { tipo: acao }); return; }
   if (acao && acao.startsWith('tabela:')) { abrirTabela(acao.slice(7)); return; }
-  trocarAba(b.dataset.aba, !!b.dataset.novo);
-  if (acao === 'pesquisar') { const f = $('#filtro'); f.focus(); f.select(); }
+  abrirJanela({ aba: b.dataset.aba, criando: !!b.dataset.novo });
 });
-$('#filtro').addEventListener('input', ev => { ui.filtro[ui.aba] = ev.target.value; salvarUI(); renderItens(); });
+// Esc fecha o diálogo mais à frente: o da janela em uso ou, fora das janelas, o da página
+document.addEventListener('keydown', ev => {
+  if (ev.key !== 'Escape') return;
+  const dono = ev.target.closest && ev.target.closest('.jan');
+  const m = [...(dono ? dono.querySelectorAll(':scope > .modal') : document.querySelectorAll('body > .modal'))].pop();
+  if (m && m._fechar) { ev.preventDefault(); m._fechar(); }
+});
+const bLado = document.getElementById('lado-a-lado');
+bLado.prepend(ico('ladoALado'));
+bLado.addEventListener('click', ladoALado);
+if ('ResizeObserver' in window) new ResizeObserver(ajustarJanelas).observe(area);
+else addEventListener('resize', ajustarJanelas);
 const menu = $('#menu-backup');
 $('#bk-exportar').append(ico('baixar'), 'Exportar backup (JSON)');
 $('#bk-importar').append(ico('enviar'), 'Importar arquivo JSON');
@@ -2937,33 +3227,15 @@ $('#bk-exportar').addEventListener('click', () => { menu.open = false; exportarB
 $('#bk-importar').addEventListener('click', () => { menu.open = false; $('#arquivo').click(); });
 document.addEventListener('click', ev => { if (menu.open && !menu.contains(ev.target)) menu.open = false; });
 $('#arquivo').addEventListener('change', ev => { const f = ev.target.files && ev.target.files[0]; ev.target.value = ''; if (f) importarArquivo(f); });
-const topo = $('#topo');
-const medirTopo = () => document.documentElement.style.setProperty('--topo-h', topo.offsetHeight + 'px');
-medirTopo();
-if ('ResizeObserver' in window) new ResizeObserver(medirTopo).observe(topo);
 Store.aoStatus = (estado, txt) => { const s = $('#salvo'); s.dataset.estado = estado; s.textContent = txt; };
-Store.aoRemoto = (col, ids) => {
-  const antes = ui.sel[col];
-  garantirSelecao();
-  renderItens();
-  if (ui.aba !== col || ui.criando) return;
-  if (ui.sel[col] === antes && !ids.includes(antes)) return;
-  const det = $('#detalhe');
-  if (det.contains(document.activeElement) && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) rerenderAdiado = true;
-  else renderDetalhe();
-};
-$('#detalhe').addEventListener('focusout', ev => {
-  if (rerenderAdiado && !(ev.relatedTarget && $('#detalhe').contains(ev.relatedTarget))) renderDetalhe();
-});
+Store.aoRemoto = () => atualizarJanelas();
 addEventListener('pagehide', () => Store.descarregar());
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') Store.descarregar(); });
 
-renderTudo();
+ajustarJanelas();
+marcarMenu();
 Store.status();
-Store.iniciar().then(() => {
-  garantirSelecao();
-  renderTudo();
-});
+Store.iniciar().then(atualizarJanelas);
 })();
 </script>
 </body>
