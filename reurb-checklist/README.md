@@ -18,7 +18,14 @@ A barra de menus do topo segue o S.R.I.:
   - *Urbano*: núcleo ou loteamento, quadra, lote, logradouro, área (m²);
   - *Rural*: denominação, localidade, área (ha), CCIR, NIRF/CIB, CAR e certificação SIGEF;
   - *Condomínio*: condomínio, unidade, bloco, vaga, fração ideal, área privativa e área total.
-- **Indicadores → Pessoal → Pesquisar / Pessoa Física / Pessoa Jurídica**: pesquisa e cadastro das pessoas (ocupantes, beneficiários, proprietários), com a qualificação que a CRF exige dos ocupantes (art. 41, VI): CPF, RG, estado civil, profissão e filiação.
+- **Indicadores → Pessoal → Pesquisar / Pessoa Física / Pessoa Jurídica**: pesquisa e cadastro das pessoas, no mesmo formato do S.R.I.:
+  - *Dados pessoais*: nome, nome social, nascimento, óbito, CPF (com conferência dos dígitos), RG, passaporte, sexo, telefone, celular, e-mail, CNH, profissão, estado civil, nacionalidade, naturalidade e certidão de nascimento;
+  - *Casamento*: regime, data, cônjuge (ligado ao cadastro do outro cônjuge), pacto antenupcial e certidão;
+  - *Endereço Residencial*, *Endereço Profissional* (CEP, tipo, logradouro, número, complemento, bairro, município) e *Filiação* (pai e mãe);
+  - *Outras informações*: estrangeiro, via CNIB, outros, bens indisponíveis, conferido;
+  - *Observação*, com a opção de mostrar um aviso sempre que o cadastro for consultado.
+  
+  No arquivo aberto no navegador, a lupa do CEP preenche o endereço automaticamente (ViaCEP).
 - **Análises**: aplica os modelos aos núcleos e mostra as pendências.
 
 ### O protocolo é o centro do trabalho
