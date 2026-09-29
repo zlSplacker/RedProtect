@@ -473,6 +473,8 @@ select.inp{padding-right:28px}
 .dl-linha small{color:var(--tinta3);font-size:12.5px}
 .dl-linha .chip{margin-left:auto}
 .dl-bts{display:flex;gap:8px;padding-top:12px}
+.dl-arquivos{border-radius:8px;outline:2px dashed transparent;outline-offset:6px}
+.dl-arquivos.soltar{outline-color:var(--acento)}
 .vinc-linha.tab-linha{grid-template-columns:minmax(0,1fr) 170px auto}
 @container (max-width:640px){.vinc-linha.tab-linha{grid-template-columns:minmax(0,1fr) auto}.vinc-linha.tab-linha>.inp{grid-column:1/-1}}
 @container (max-width:640px){.vinc-linha{grid-template-columns:minmax(0,1fr) auto}.vinc-linha select{grid-column:1/-1;grid-row:2}}
@@ -646,6 +648,7 @@ const ICONES = {
   minimizar: '<path d="M6 17h12"/>',
   maximizar: '<rect x="6" y="6" width="12" height="12" rx="1"/>',
   restaurar: '<rect x="5" y="9" width="10" height="10" rx="1"/><path d="M9 9V6a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-3"/>',
+  anexo: '<path d="M20.5 11.5l-8.2 8.2a5 5 0 0 1-7.1-7.1l8.6-8.6a3.4 3.4 0 0 1 4.8 4.8l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4l7.9-7.9"/>',
   ladoALado: '<rect x="3" y="5" width="8" height="14" rx="1"/><rect x="13" y="5" width="8" height="14" rx="1"/>'
 };
 const rolarTopo = () => { if (J) J.corpo.scrollTop = 0; };
@@ -912,6 +915,9 @@ function normalizarProtocolo(p) {
     financeiro: normalizarFinanceiro(p.financeiro),
     exigencias: Array.isArray(p.exigencias) ? p.exigencias.filter(x => x && String(x.texto || '').trim()).map(x => ({ id: String(x.id || uid('ex')), texto: String(x.texto), emitidaEm: String(x.emitidaEm || ''), cumpridaEm: String(x.cumpridaEm || '') })) : [],
     partes: Array.isArray(p.partes) ? p.partes.filter(x => x && x.pessoaId).map(x => ({ pessoaId: String(x.pessoaId), qualidade: String(x.qualidade || 'Beneficiário') })) : [],
+    arquivos: Array.isArray(p.arquivos) ? p.arquivos.filter(x => x && x.ref).map(x => ({
+      id: String(x.id || uid('a')), nome: String(x.nome || 'arquivo'), tamanho: Number(x.tamanho) || 0, tipo: String(x.tipo || ''),
+      em: String(x.em || ''), ref: String(x.ref), via: x.via === 'asset' ? 'asset' : 'local', embrulhado: !!x.embrulhado })) : [],
     exemplo: !!p.exemplo,
     criadoEm: p.criadoEm || agora(),
     atualizadoEm: p.atualizadoEm || agora()
@@ -1806,6 +1812,7 @@ function renderProtocolo(p) {
     btn('Aplicar checklist', { icone: 'check', prim: true, onclick: () => abrirNovaAnalise(null, p.id) }),
     btn('Excluir protocolo', { icone: 'lixo', fant: true, perigo: true, onclick: ev => armar(ev.currentTarget, () => {
       for (const i of imoveisDoProtocolo(p.id)) { i.protocoloId = ''; Store.put('imoveis', i, 0); }
+      for (const a of p.arquivos) Arquivos.apagar(a).catch(() => {});
       Store.remover('protocolos', p.id); ui.sel.protocolos = null; garantirSelecao(); mostrarDetalhe(false); renderTudo();
       toast('Protocolo excluído. Checklists, imóveis e pessoas continuam cadastrados.');
     }) }));
@@ -1817,7 +1824,11 @@ function renderProtocolo(p) {
     h('span', { class: 'cont', hidden: !pendentesExig }, String(pendentesExig)));
   const barraProt = h('div', { class: 'barra-prot', role: 'toolbar', 'aria-label': 'Protocolo ' + p.numero },
     bExig,
-    botaoJanela('dados', 'Dados', 'dados', () => abrirDados()));
+    botaoJanela('dados', 'Dados', 'dados', () => abrirDados()),
+    botaoJanela('arquivos', 'Arquivos', 'anexo', () => {
+      const b = blocoArquivos(p);
+      abrirDialogo({ titulo: 'Arquivos', conteudo: b.el, aoFechar: renderDetalhe, atualizar: b.desenhar, largura: '900px' });
+    }));
   const cab = h('div', { class: 'cab' },
     h('div', { class: 'cab-txt' }, voltarBtn(), chips), acoes);
   const notaEx = p.exemplo ? h('p', { class: 'nota nota-info' }, ico('info'), h('span', null, 'Protocolo de exemplo, com dados fictícios. Exclua-o quando não precisar mais.')) : null;
@@ -1982,6 +1993,143 @@ function renderProtocolo(p) {
   // o quadro Dados do protocolo aparece só na aba Recepção
   blocos.splice(blocos.indexOf(quadroDados), 1, barraAbas, painel);
   d.replaceChildren(...blocos);
+}
+/* ---------- arquivos anexados ao protocolo ----------
+   Na página publicada o conteúdo vai para o armazenamento de arquivos da própria página (assets);
+   no index.html aberto no navegador, para o IndexedDB deste navegador. O protocolo guarda só a lista. */
+const ASSET_DIRETO = { pdf: 'application/pdf', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp', mp4: 'video/mp4', webm: 'video/webm' };
+const MB = 1024 * 1024;
+let assetsP = null;
+const assetsNs = () => {
+  if (!Store.emArtifact) return Promise.resolve(null);
+  if (!assetsP) assetsP = window.claude.use('assets').catch(() => null);
+  return assetsP;
+};
+function idbArquivos(modo, fn) {
+  return new Promise((ok, falha) => {
+    const r = indexedDB.open('rurb-arquivos', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('arquivos');
+    r.onerror = () => falha(r.error);
+    r.onsuccess = () => {
+      const tx = r.result.transaction('arquivos', modo);
+      const req = fn(tx.objectStore('arquivos'));
+      tx.oncomplete = () => { r.result.close(); ok(req.result); };
+      tx.onerror = tx.onabort = () => { r.result.close(); falha(tx.error); };
+    };
+  });
+}
+const lerBase64 = f => new Promise((ok, falha) => {
+  const fr = new FileReader();
+  fr.onload = () => ok(String(fr.result).slice(String(fr.result).indexOf(',') + 1));
+  fr.onerror = () => falha(fr.error);
+  fr.readAsDataURL(f);
+});
+const Arquivos = {
+  // PDF, imagens e vídeos vão como estão; os outros tipos (Word, Excel, ZIP…) vão dentro de um JSON
+  async guardar(f) {
+    if (Store.emArtifact) {
+      const as = await assetsNs();
+      if (!as) throw { code: 'sem_armazenamento' };
+      const direto = ASSET_DIRETO[(f.name.split('.').pop() || '').toLowerCase()];
+      if (direto) {
+        if (f.size > 20 * MB) throw { code: 'too_large' };
+        return { ref: (await as.upload(f, { type: direto })).id, via: 'asset', embrulhado: false };
+      }
+      if (f.size > 14.5 * MB) throw { code: 'too_large' };
+      const caixa = new Blob([JSON.stringify({ nome: f.name, tipo: f.type, dados: await lerBase64(f) })], { type: 'application/json' });
+      return { ref: (await as.upload(caixa, { type: 'application/json' })).id, via: 'asset', embrulhado: true };
+    }
+    if (f.size > 50 * MB) throw { code: 'too_large' };
+    const ref = uid('f');
+    await idbArquivos('readwrite', st => st.put(f, ref));
+    return { ref, via: 'local', embrulhado: false };
+  },
+  async obter(a) {
+    if (a.via === 'local') return idbArquivos('readonly', st => st.get(a.ref));
+    const r = await fetch('/_blob/' + a.ref);
+    if (!r.ok) return null;
+    if (!a.embrulhado) return r.blob();
+    const c = JSON.parse(await r.text());
+    const bin = atob(c.dados), bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new Blob([bytes], { type: c.tipo || 'application/octet-stream' });
+  },
+  async apagar(a) {
+    if (a.via === 'local') return idbArquivos('readwrite', st => st.delete(a.ref));
+    const as = await assetsNs();
+    if (!as) throw { code: 'sem_armazenamento' };
+    return as.delete(a.ref);
+  }
+};
+const tamanhoArquivo = n => n < 1024 ? n + ' B' : n < MB ? Math.round(n / 1024) + ' KB' : (n / MB).toFixed(1).replace('.', ',') + ' MB';
+function erroArquivo(e, nome) {
+  const c = e && e.code;
+  if (c === 'too_large') return `“${nome}” é grande demais para anexar.`;
+  if (c === 'sem_armazenamento' || c === 'not_granted' || c === 'capability_disabled') return 'Esta visualização não permite guardar arquivos.';
+  if (c === 'quota_or_state') return 'O espaço para arquivos está cheio. Exclua arquivos que não precisa mais.';
+  if (c === 'rate_limited') return 'Muitos envios seguidos. Aguarde um pouco e tente de novo.';
+  return `Não foi possível anexar “${nome}”.`;
+}
+async function abrirArquivo(a) {
+  let blob = null;
+  try { blob = await Arquivos.obter(a); } catch (e) { blob = null; }
+  if (!blob) { toast(a.via === 'local' ? 'Este arquivo foi anexado em outro navegador ou computador.' : 'Não foi possível abrir o arquivo.'); return; }
+  if (Store.emArtifact) { baixar(a.nome, blob); return; }
+  const url = URL.createObjectURL(blob);
+  // PDF, imagem, vídeo e texto abrem numa aba; os outros tipos são baixados
+  if (/^(application\/pdf|image\/|video\/|text\/plain)/.test(blob.type) && window.open(url, '_blank')) { setTimeout(() => URL.revokeObjectURL(url), 60000); return; }
+  const l = h('a', { href: url, download: a.nome });
+  document.body.append(l); l.click(); l.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+// janela Arquivos: a lista, uma linha e os botões Adicionar e Excluir; também aceita arquivos arrastados
+function blocoArquivos(p) {
+  const raiz = h('section', { class: 'dl dl-arquivos' });
+  const entrada = h('input', { type: 'file', multiple: true, hidden: true });
+  let sel = null, enviando = 0;
+  const desenhar = () => {
+    if (!p.arquivos.some(a => a.id === sel)) sel = null;
+    const linhas = p.arquivos.map(a => h('button', {
+      type: 'button', class: 'dl-linha', 'aria-pressed': String(a.id === sel), title: 'Duplo clique abre o arquivo',
+      onclick: ev => { sel = a.id; for (const b of linhas) b.setAttribute('aria-pressed', String(b === ev.currentTarget)); bExcluir.disabled = false; },
+      ondblclick: () => abrirArquivo(a),
+      onkeydown: ev => { if (ev.key === 'Enter') { ev.preventDefault(); abrirArquivo(a); } }
+    }, h('span', { class: 'dl-nome' }, a.nome), h('small', null, [tamanhoArquivo(a.tamanho), fmtData(a.em)].filter(Boolean).join(' · '))));
+    const bAdd = btn(enviando ? 'Enviando…' : 'Adicionar', { icone: 'mais', prim: true, disabled: enviando > 0, onclick: () => entrada.click() });
+    const bExcluir = btn('Excluir', { icone: 'lixo', perigo: true, disabled: !sel || enviando > 0, onclick: ev => armar(ev.currentTarget, async () => {
+      const a = p.arquivos.find(x => x.id === sel);
+      if (!a) return;
+      try { await Arquivos.apagar(a); } catch (e) { toast('Não foi possível excluir o arquivo agora.'); return; }
+      p.arquivos = p.arquivos.filter(x => x !== a);
+      registrarAndamento(p, `Arquivo “${a.nome}” excluído.`);
+      Store.put('protocolos', p, 0);
+      sel = null;
+      desenhar();
+    }) });
+    raiz.replaceChildren(h('div', { class: 'dl-lista' }, linhas.length ? linhas : h('p', { class: 'dica' }, 'Nenhum arquivo.')),
+      h('div', { class: 'dl-bts' }, bAdd, bExcluir), entrada);
+  };
+  const enviar = async fs => {
+    if (!fs.length || enviando) return;
+    enviando = fs.length; desenhar();
+    for (const f of fs) {
+      try {
+        const r = await Arquivos.guardar(f);
+        const a = Object.assign({ id: uid('a'), nome: f.name, tamanho: f.size, tipo: f.type, em: agora() }, r);
+        p.arquivos.push(a);
+        registrarAndamento(p, `Arquivo “${f.name}” anexado.`);
+        Store.put('protocolos', p, 0);
+        sel = a.id;
+      } catch (e) { toast(erroArquivo(e, f.name)); }
+      enviando--; desenhar();
+    }
+  };
+  entrada.addEventListener('change', () => { const fs = [...entrada.files]; entrada.value = ''; enviar(fs); });
+  raiz.addEventListener('dragover', ev => { if ([...ev.dataTransfer.types].includes('Files')) { ev.preventDefault(); raiz.classList.add('soltar'); } });
+  raiz.addEventListener('dragleave', ev => { if (!raiz.contains(ev.relatedTarget)) raiz.classList.remove('soltar'); });
+  raiz.addEventListener('drop', ev => { ev.preventDefault(); raiz.classList.remove('soltar'); enviar([...ev.dataTransfer.files]); });
+  desenhar();
+  return { el: raiz, desenhar };
 }
 function blocoFinanceiro(p, aoMudar) {
   const f = p.financeiro;
@@ -2838,10 +2986,12 @@ async function baixar(nome, conteudo) {
       catch (e) {
         if (e && e.code === 'declined') return;
         if (e && e.code === 'rate_limited') { toast('Já há um download aguardando confirmação.'); return; }
+        if (conteudo instanceof Blob) { toast(e && e.code === 'rejected_extension' ? 'Este tipo de arquivo não pode ser baixado nesta visualização.' : 'Não foi possível baixar o arquivo.'); return; }
         mostrarTexto(nome, conteudo, 'Não foi possível baixar o arquivo aqui. Copie o conteúdo abaixo e salve-o com o nome ' + nome + '.');
       }
       return;
     }
+    if (conteudo instanceof Blob) { toast('Downloads não estão disponíveis nesta visualização.'); return; }
     mostrarTexto(nome, conteudo, 'Downloads não estão disponíveis nesta visualização. Copie o conteúdo abaixo e salve-o com o nome ' + nome + '.');
     return;
   }
@@ -3226,7 +3376,9 @@ for (const b of document.querySelectorAll('[data-aba]')) b.addEventListener('cli
 // Esc fecha o diálogo mais à frente: o da janela em uso ou, fora das janelas, o da página
 document.addEventListener('keydown', ev => {
   if (ev.key !== 'Escape') return;
-  const dono = ev.target.closest && ev.target.closest('.jan');
+  // sem foco em lugar nenhum (o botão clicado saiu da tela), vale a janela ativa
+  const ativa = janelas.find(x => x.el.classList.contains('ativa'));
+  const dono = (ev.target.closest && ev.target.closest('.jan')) || (ev.target === document.body && ativa ? ativa.el : null);
   const m = [...(dono ? dono.querySelectorAll(':scope > .modal') : document.querySelectorAll('body > .modal'))].pop();
   if (m && m._fechar) { ev.preventDefault(); m._fechar(); }
 });
