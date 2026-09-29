@@ -1640,9 +1640,11 @@ function renderProtocolo(p) {
   const titulo = h('h1', { class: 'titulo' }, nomeProtocolo(p));
   const sub = h('p', { class: 'subt' }, subtituloProtocolo(p));
   const chips = h('div', { class: 'cab-chips' });
+  // no alto fica só o alerta de prazo; número, interessado, situação e datas já estão nos campos
   const atualizarChips = () => {
-    const [rot, cls] = SITUACOES[p.situacao], prazo = prazoInfo(p);
-    chips.replaceChildren(...[h('span', { class: 'chip ' + cls }, rot), prazo && h('span', { class: 'chip ' + prazo[1] }, prazo[0])].filter(Boolean));
+    const prazo = prazoInfo(p), alerta = prazo && prazo[1];
+    chips.replaceChildren(...(alerta ? [h('span', { class: 'chip ' + prazo[1] }, prazo[0])] : []));
+    chips.hidden = !alerta;
   };
   atualizarChips();
   const selSit = h('select', { class: 'inp', id: 'pr-situacao' },
@@ -1673,7 +1675,7 @@ function renderProtocolo(p) {
     bExig,
     botaoVisao('dados', 'Dados', 'dados'));
   const cab = h('div', { class: 'cab' },
-    h('div', { class: 'cab-txt' }, voltarBtn(), h('span', { class: 'sobre' }, 'Protocolo ' + p.numero), titulo, sub, chips), acoes);
+    h('div', { class: 'cab-txt' }, voltarBtn(), chips), acoes);
   const notaEx = p.exemplo ? h('p', { class: 'nota nota-info' }, ico('info'), h('span', null, 'Protocolo de exemplo, com dados fictícios. Exclua-o quando não precisar mais.')) : null;
   if (visao === 'exigencia') { d.replaceChildren(...[cab, notaEx, barraProt, blocoExigencias(p, bExig)].filter(Boolean)); return; }
   const blocos = [cab, notaEx, barraProt].filter(Boolean);
