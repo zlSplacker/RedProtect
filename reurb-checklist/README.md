@@ -36,10 +36,11 @@ Tudo começa na **Recepção de Título**, que cria o protocolo. No topo da fich
 - **Exigência**: registro das exigências do protocolo (texto e data de emissão), com marcação de cumprida e cópia das pendentes em texto. O botão mostra quantas estão pendentes, e cada registro ou cumprimento entra nos andamentos.
 - **Dados**: os indicadores do protocolo — **Indicador Real** (imóveis) e **Indicador Pessoal** (partes, com sua qualidade, e as pessoas que vêm pelos imóveis). Dá para vincular cadastros existentes ou cadastrar novos já ligados ao protocolo; ao voltar da ficha do imóvel ou da pessoa, a janela reabre.
 
-Na página, abaixo da barra, ficam as abas **Andamentos**, **Financeiro** e **Checklists** e, em seguida, o quadro *Dados do protocolo* com os campos: na primeira linha, ordem de protocolo e situação à esquerda e abertura e prazo estimado à direita; depois município, interessado e contato; e a descrição do pedido:
+Na página, abaixo da barra, fica a linha de abas **Dados Protocolo**, **Andamentos**, **Financeiro** e **Checklists**. Cada aba mostra só o seu conteúdo, e o protocolo abre em *Dados Protocolo*:
 
 | Aba | O que tem |
 | --- | --- |
+| **Dados Protocolo** | O quadro *Dados do protocolo*: na primeira linha, ordem de protocolo e situação à esquerda e abertura e prazo estimado à direita; depois município, interessado e contato; e a descrição do pedido. |
 | **Andamentos** | Histórico datado; registra sozinho a abertura, as mudanças de situação e os checklists aplicados. |
 | **Financeiro** | Honorários contratados e lançamentos (recebimentos e despesas, com data, descrição e valor), com o resumo de recebido, a receber, despesas e saldo. |
 | **Checklists** | Análises aplicadas ao protocolo, com progresso e pendências, e o botão *Aplicar checklist*. |
