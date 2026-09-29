@@ -121,6 +121,7 @@ h1,h2,h3{text-wrap:balance}
 .lat-tit{font:600 26px/1.2 var(--f-serif);letter-spacing:-.01em;color:var(--tinta);margin:0}
 .lat-cont{font:500 13px var(--f-mono);color:var(--tinta3)}
 .lat-acoes{display:flex;flex-wrap:wrap;gap:6px}
+.lat-acoes:empty{display:none}
 .detalhe{max-width:1280px;margin:0 auto;padding:24px clamp(16px,3vw,40px) 72px;min-width:0}
 body.ver-detalhe .lateral{display:none}
 body:not(.ver-detalhe) .detalhe{display:none}
@@ -1221,9 +1222,7 @@ function renderLateral() {
   if (document.activeElement !== f) f.value = ui.filtro[aba] || '';
   f.placeholder = { analises: 'Filtrar por núcleo, município ou processo', modelos: 'Filtrar modelos', protocolos: 'Filtrar por número, interessado, contato ou município', pessoas: 'Filtrar por nome, CPF/CNPJ, RG, passaporte ou e-mail', imoveis: 'Filtrar por matrícula, endereço, denominação, condomínio ou pessoa', tabelas: 'Filtrar tabelas' }[aba];
   const acoes = $('#lat-acoes');
-  if (aba === 'protocolos') {
-    acoes.replaceChildren(btn('Recepção de Título', { icone: 'mais', prim: true, onclick: () => trocarAba('protocolos', true) }));
-  } else if (aba === 'tabelas') {
+  if (aba === 'protocolos' || aba === 'tabelas') {
     acoes.replaceChildren();
   } else if (aba === 'pessoas') {
     acoes.replaceChildren(btn('Nova pessoa', { icone: 'mais', prim: true, onclick: () => novoRegistro('pessoas') }));
@@ -1285,7 +1284,7 @@ function renderItens() {
   } else if (aba === 'protocolos') {
     const todos = protocolosOrdenados();
     const vis = todos.filter(p => !termo || norm([p.numero, p.interessado, p.contato, p.municipio].join(' ')).includes(termo));
-    $('#lat-cont').textContent = String(todos.length);
+    $('#lat-cont').textContent = '';
     for (const p of vis) {
       const [sitRot, sitCls] = SITUACOES[p.situacao];
       const prazo = prazoInfo(p);
