@@ -14,8 +14,20 @@ A barra de menus do topo segue o S.R.I.:
 - **Cadastros → Modelos de checklist**: passe o mouse sobre *Cadastros* (no celular, toque) e escolha a opção para criar e editar os modelos. Os próximos cadastros do sistema entram neste mesmo menu.
 - **Recepção → Abrir protocolo**: cadastra um novo protocolo para cada processo acompanhado (veja abaixo).
 - **Protocolo → Consultar protocolos**: lista, filtra e abre os protocolos para acompanhar situação, prazo e andamentos.
-- **Indicador Pessoal**: cadastro das pessoas (ocupantes, beneficiários, proprietários), com a qualificação que a CRF exige dos ocupantes (art. 41, VI): CPF, RG, estado civil, profissão e filiação. Aceita pessoa física ou jurídica.
-- **Indicador Real**: cadastro dos imóveis (matrícula ou transcrição, núcleo, quadra, lote, logradouro, área, descrição e confrontações), com vínculo ao protocolo e às pessoas do Indicador Pessoal, cada uma com sua qualidade (ocupante, proprietário, beneficiário…).
+- **Indicadores → Pessoal**: cadastro das pessoas (ocupantes, beneficiários, proprietários), com a qualificação que a CRF exige dos ocupantes (art. 41, VI): CPF, RG, estado civil, profissão e filiação. Aceita pessoa física ou jurídica.
+- **Análises** (aplicação): você escolhe um modelo, identifica o núcleo e o processo e responde. O checklist marca as pendências e monta o relatório.
+
+## Como usar
+
+Abra `index.html` no navegador (Chrome, Edge ou Firefox). Não precisa instalar nada nem estar online. Os dados ficam salvos no próprio navegador.
+
+A barra de menus do topo segue o S.R.I.:
+
+- **Cadastros → Modelos de checklist**: passe o mouse sobre *Cadastros* (no celular, toque) e escolha a opção para criar e editar os modelos. Os próximos cadastros do sistema entram neste mesmo menu.
+- **Recepção → Abrir protocolo**: cadastra um novo protocolo para cada processo acompanhado (veja abaixo).
+- **Protocolo → Consultar protocolos**: lista, filtra e abre os protocolos para acompanhar situação, prazo e andamentos.
+- **Indicadores → Pessoal**: cadastro das pessoas (ocupantes, beneficiários, proprietários), com a qualificação que a CRF exige dos ocupantes (art. 41, VI): CPF, RG, estado civil, profissão e filiação. Aceita pessoa física ou jurídica.
+- **Indicadores → Real**: cadastro dos imóveis (matrícula ou transcrição, núcleo, quadra, lote, logradouro, área, descrição e confrontações), com vínculo ao protocolo e às pessoas do Indicador Pessoal, cada uma com sua qualidade (ocupante, proprietário, beneficiário…).
 - **Análises**: aplica os modelos aos núcleos e mostra as pendências.
 
 ### Protocolos (Recepção)

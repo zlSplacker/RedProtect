@@ -346,8 +346,13 @@ select.inp{padding-right:28px}
           <button type="button" class="mb-op" role="menuitem" id="mb-protocolos" data-aba="protocolos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span>Consultar protocolos</span></button>
         </div>
       </div>
-      <div class="mb-item"><button type="button" class="mb-btn" id="mb-pessoas" data-aba="pessoas">Indicador Pessoal</button></div>
-      <div class="mb-item"><button type="button" class="mb-btn" id="mb-imoveis" data-aba="imoveis">Indicador Real</button></div>
+      <div class="mb-item" id="mb-indicadores">
+        <button type="button" class="mb-btn" id="mb-indicadores-btn" aria-haspopup="true" aria-expanded="false" aria-controls="mb-indicadores-sub">Indicadores<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="mb-sub" id="mb-indicadores-sub" role="menu" aria-labelledby="mb-indicadores-btn">
+          <button type="button" class="mb-op" role="menuitem" id="mb-imoveis" data-aba="imoveis"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7 M5 9.5V20h14V9.5 M10 20v-5h4v5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Real</span></button>
+          <button type="button" class="mb-op" role="menuitem" id="mb-pessoas" data-aba="pessoas"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c0-3.9 3.1-6.5 7-6.5s7 2.6 7 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Pessoal</span></button>
+        </div>
+      </div>
       <div class="mb-item"><button type="button" class="mb-btn" id="mb-analises" data-aba="analises" aria-current="page">Análises</button></div>
     </nav>
     <div class="topo-dir">
@@ -959,6 +964,7 @@ function renderAbas() {
   marcar($('#mb-protocolos'), ui.aba === 'protocolos' && !ui.criando);
   marcar($('#mb-pessoas'), ui.aba === 'pessoas');
   marcar($('#mb-imoveis'), ui.aba === 'imoveis');
+  marcar($('#mb-indicadores-btn'), ui.aba === 'pessoas' || ui.aba === 'imoveis');
 }
 function renderLateral() {
   const aba = ui.aba;
