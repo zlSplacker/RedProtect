@@ -929,7 +929,6 @@ function normalizarPessoa(p) {
     enderecoResidencial: normEndereco(p.enderecoResidencial || (p.endereco ? { logradouro: p.endereco } : null)),
     enderecoProfissional: normEndereco(p.enderecoProfissional),
     pai: txt(pai), mae: txt(mae),
-    estrangeiro: !!p.estrangeiro, viaCnib: !!p.viaCnib, outros: !!p.outros, bensIndisponiveis: !!p.bensIndisponiveis, conferido: !!p.conferido,
     observacoes: txt(p.observacoes), avisoObservacao: !!p.avisoObservacao,
     criadoEm: p.criadoEm || agora(), atualizadoEm: p.atualizadoEm || agora()
   };
@@ -2336,15 +2335,10 @@ function renderPessoa(pe) {
   desenharEnd();
   blocos.push(h('section', { class: 'bloco' }, barraEnd, painelEnd));
 
-  // outras informações e observação
-  const outras = pj
-    ? [ck('viaCnib', 'Via CNIB'), ck('bensIndisponiveis', 'Bens indisponíveis'), ck('outros', 'Outros'), ck('conferido', 'Conferido')]
-    : [ck('estrangeiro', 'Estrangeiro'), ck('viaCnib', 'Via CNIB'), ck('outros', 'Outros'), ck('bensIndisponiveis', 'Bens indisponíveis'), ck('conferido', 'Conferido')];
-  blocos.push(h('div', { class: 'grade12' },
-    h('fieldset', { class: 'ident grade12 s4', style: 'margin:0;align-self:stretch;align-content:start' }, h('legend', null, 'Outras informações'), h('div', { class: 'checks', style: 'grid-column:1/-1' }, outras)),
-    h('fieldset', { class: 'ident grade12 s8', style: 'margin:0;align-self:stretch;align-content:start' }, h('legend', null, 'Observação'),
-      c('observacoes', 'Observação', 12, 'textarea'),
-      h('div', { style: 'grid-column:1/-1' }, ck('avisoObservacao', 'Mostrar aviso com observação quando consultado?')))));
+  // observação
+  blocos.push(h('fieldset', { class: 'ident grade12' }, h('legend', null, 'Observação'),
+    c('observacoes', 'Observação', 12, 'textarea'),
+    h('div', { style: 'grid-column:1/-1' }, ck('avisoObservacao', 'Mostrar aviso com observação quando consultado?'))));
 
   // imóveis vinculados
   const vinc = imoveisDaPessoa(pe.id);

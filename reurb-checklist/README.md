@@ -23,7 +23,6 @@ A barra de menus do topo segue o S.R.I.:
   - *Dados pessoais*: nome, nome social, nascimento, óbito, CPF (com conferência dos dígitos), RG, passaporte, sexo, telefone, celular, e-mail, CNH, profissão, estado civil, nacionalidade, naturalidade e certidão de nascimento;
   - *Casamento*: regime, data, cônjuge (ligado ao cadastro do outro cônjuge), pacto antenupcial e certidão;
   - *Endereço Residencial*, *Endereço Profissional* (CEP, tipo, logradouro, número, complemento, bairro, município) e *Filiação* (pai e mãe);
-  - *Outras informações*: estrangeiro, via CNIB, outros, bens indisponíveis, conferido;
   - *Observação*, com a opção de mostrar um aviso sempre que o cadastro for consultado.
   
   No arquivo aberto no navegador, a lupa do CEP preenche o endereço automaticamente (ViaCEP).
