@@ -2501,7 +2501,8 @@ function renderImovel(im) {
   d.replaceChildren(
     h('div', { class: 'cab' },
       h('div', { class: 'cab-txt' }, voltarBtn(), h('span', { class: 'sobre' }, 'Indicador Real · ' + TIPOS_IMOVEL[im.tipo]), titulo, sub, linksProt),
-      h('div', { class: 'acoes' }, btn('Excluir imóvel', { icone: 'lixo', fant: true, perigo: true, onclick: ev => armar(ev.currentTarget, () => excluirRegistro('imoveis', im, 'Imóvel excluído.')) }))),
+      // imóvel novo ainda não existe (só é gravado no Salvar): não há o que excluir
+      D().imoveis[im.id] ? h('div', { class: 'acoes' }, btn('Excluir imóvel', { icone: 'lixo', fant: true, perigo: true, onclick: ev => armar(ev.currentTarget, () => excluirRegistro('imoveis', im, 'Imóvel excluído.')) })) : null),
     h('div', { class: 'reg-pilha' },
       h('fieldset', { class: 'ident' }, h('legend', null, 'Identificação do imóvel'), campos)),
     h('div', { class: 'reg-rodape' }, btn('Salvar', { icone: 'check', prim: true, onclick: () => salvarRegistro('imoveis', im, 'Imóvel salvo.') })));
