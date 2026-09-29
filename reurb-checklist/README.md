@@ -45,7 +45,7 @@ A barra de menus do topo segue o S.R.I.:
 Tudo começa na **Recepção de Título**, que cria o protocolo. No topo da ficha fica a barra de botões, como no S.R.I.; cada botão abre um quadro à frente, dentro da janela do protocolo (fecha no X, no Esc ou clicando fora):
 
 - **Exigência**: registro das exigências do protocolo (texto e data de emissão), com marcação de cumprida e cópia das pendentes em texto. O botão mostra quantas estão pendentes, e cada registro ou cumprimento entra nos andamentos.
-- **Dados**: os indicadores do protocolo — **Indicador Real** (imóveis) e **Indicador Pessoal** (partes, com sua qualidade, e as pessoas que vêm pelos imóveis). Dá para vincular cadastros existentes ou cadastrar novos já ligados ao protocolo; o cadastro novo abre em outra janela, e os Dados do protocolo se atualizam sozinhos.
+- **Dados**: as abas **Indicador Real** (imóveis) e **Indicador Pessoal** (pessoas, com sua qualidade). Abaixo das abas fica só a lista do que foi adicionado ao protocolo e, depois de uma linha, os botões **Adicionar** e **Excluir**. *Adicionar* abre a escolha de um cadastro existente (e, para pessoas, a qualidade) ou o cadastro de um novo, que abre em outra janela já ligado ao protocolo. Para excluir, clique na linha e depois em *Excluir* (confirmando no segundo clique). Um duplo clique na linha abre o cadastro.
 
 Na página, abaixo da barra, fica a linha de abas **Dados Protocolo**, **Andamentos**, **Financeiro** e **Checklists**. Cada aba mostra só o seu conteúdo, e o protocolo abre em *Dados Protocolo*:
 

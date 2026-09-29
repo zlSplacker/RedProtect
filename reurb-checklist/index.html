@@ -462,6 +462,17 @@ select.inp{padding-right:28px}
 .vinc-nome small{display:block;font:12px/1.5 var(--f-mono);color:var(--tinta3);font-weight:400}
 .vinc-add{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .vinc-add select,.vinc-add .inp{flex:1 1 200px;width:auto}
+/* janela Dados: lista do que foi adicionado, uma linha, e os botões Adicionar e Excluir */
+.dl{display:grid}
+.dl-lista{display:grid;gap:4px;padding-bottom:12px;border-bottom:1px solid var(--linha)}
+.dl-linha{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:1px solid var(--linha2);background:var(--sup);border-radius:7px;padding:8px 12px}
+.dl-linha:hover{border-color:var(--tinta3)}
+.dl-linha[aria-pressed="true"]{background:var(--acento-suave);border-color:var(--acento)}
+.dl-nome{font-weight:600;min-width:0;overflow-wrap:anywhere}
+.dl-linha small{color:var(--tinta3);font-size:12.5px}
+.dl-linha .chip{margin-left:auto}
+.dl-bts{display:flex;gap:8px;padding-top:12px}
+.dl-add{margin-top:12px}
 .vinc-linha.tab-linha{grid-template-columns:minmax(0,1fr) 170px auto}
 @container (max-width:640px){.vinc-linha.tab-linha{grid-template-columns:minmax(0,1fr) auto}.vinc-linha.tab-linha>.inp{grid-column:1/-1}}
 @container (max-width:640px){.vinc-linha{grid-template-columns:minmax(0,1fr) auto}.vinc-linha select{grid-column:1/-1;grid-row:2}}
@@ -1847,7 +1858,7 @@ function renderProtocolo(p) {
     abrirDialogo({ titulo: 'Dados', conteudo: h('div', { class: 'dados-sub' }, barraDados, painelDados), aoFechar: renderDetalhe, atualizar: () => { desenharAbas(); desenharPainel(); }, largura: '1000px' });
     desenharAbas(); desenharPainel();
   };
-  const contagem = k => ({ imoveis: imoveisDoProtocolo(p.id).length, pessoas: pessoasDoProtocolo(p).total })[k];
+  const contagem = k => ({ imoveis: imoveisDoProtocolo(p.id).length, pessoas: p.partes.filter(x => D().pessoas[x.pessoaId]).length })[k];
   const desenharAbas = () => {
     barraAbas.replaceChildren(...ABAS_PROT.map(([k, rot]) => h('button', {
       type: 'button', class: 'pr-aba', role: 'tab', id: 'pr-aba-' + k, 'aria-controls': 'pr-painel', 'aria-selected': String(ui.abaProt === k),
@@ -1855,7 +1866,7 @@ function renderProtocolo(p) {
     }, rot)));
     barraDados.replaceChildren(...ABAS_DADOS.map(([k, rot]) => h('button', {
       type: 'button', class: 'pr-aba', role: 'tab', id: 'pr-aba-' + k, 'aria-controls': 'pr-painel-dados', 'aria-selected': String(ui.abaDados === k),
-      onclick: () => { ui.abaDados = k; desenharAbas(); desenharPainel(); }
+      onclick: () => { ui.abaDados = k; adicionando = false; desenharAbas(); desenharPainel(); }
     }, rot, h('span', { class: 'n' }, String(contagem(k))))));
   };
   const atualizarContagens = () => { desenharAbas(); renderItens(); };
@@ -1904,79 +1915,87 @@ function renderProtocolo(p) {
     })) : h('p', { class: 'dica' }, 'Nenhum checklist aplicado.'),
     h('div', null, btn('Aplicar checklist', { icone: 'mais', sm: true, onclick: () => abrirNovaAnalise(null, p.id) })));
 
-  // imóveis do protocolo
-  const blocoImoveis = () => {
-    const doProt = imoveisDoProtocolo(p.id);
-    const linhas = doProt.map(i => h('div', { class: 'vinc-linha', style: 'grid-template-columns:minmax(0,1fr) auto auto' },
-      h('button', { type: 'button', class: 'vinc-nome', onclick: () => irPara('imoveis', i.id) },
-        tituloImovel(i), h('small', null, [TIPOS_IMOVEL[i.tipo], i.matricula && 'Mat. ' + i.matricula, subImovel(i), i.vinculos.length && plural(i.vinculos.length, 'pessoa', 'pessoas')].filter(Boolean).join(' · '))),
-      h('span', { class: 'chip' + (i.tipo === 'urbano' ? '' : ' chip-acento') }, TIPOS_IMOVEL[i.tipo]),
-      btn('Desvincular imóvel', { icone: 'x', soIcone: true, fant: true, onclick: ev => armar(ev.currentTarget, () => {
-        i.protocoloId = ''; Store.put('imoveis', i, 0); desenharPainel(); atualizarContagens();
-      }) })));
-    const livres = imoveisOrdenados().filter(i => i.protocoloId !== p.id);
-    const add = h('div', { class: 'vinc-add' });
-    if (livres.length) {
-      const sel = h('select', { class: 'inp', id: 'pr-add-imovel', 'aria-label': 'Imóvel já cadastrado' }, livres.map(i => {
-        const outro = D().protocolos[i.protocoloId];
-        return h('option', { value: i.id }, tituloImovel(i) + (i.matricula ? ' · Mat. ' + i.matricula : '') + (outro ? ' (no protocolo ' + outro.numero + ')' : ''));
-      }));
-      add.append(sel, btn('Vincular', { icone: 'mais', prim: true, onclick: () => {
-        const i = D().imoveis[sel.value]; if (!i) return;
-        i.protocoloId = p.id; Store.put('imoveis', i, 0); desenharPainel(); atualizarContagens();
-      } }));
-    }
-    const novo = tipo => () => novoRegistro('imoveis', { tipo, protocoloId: p.id });
-    return h('section', { class: 'bloco' },
-      linhas.length ? h('div', { class: 'vinc' }, linhas) : h('p', { class: 'dica' }, 'Nenhum imóvel neste protocolo.'),
-      add.childNodes.length ? add : null,
-      h('div', { class: 'vinc-add' }, h('span', { class: 'rot' }, 'Cadastrar imóvel'),
-        btn('Urbano', { icone: 'mais', sm: true, onclick: novo('urbano') }),
-        btn('Rural', { icone: 'mais', sm: true, onclick: novo('rural') }),
-        btn('Condomínio', { icone: 'mais', sm: true, onclick: novo('condominio') })));
+  // janela Dados: abaixo das abas fica só o que foi adicionado; depois, uma linha com Adicionar e Excluir
+  const selDados = { imoveis: null, pessoas: null };
+  let adicionando = false;
+  const listaDados = (aba, linhas, vazio, formAdd, excluir) => {
+    if (!linhas.some(l => l.id === selDados[aba])) selDados[aba] = null;
+    const botoes = linhas.map(l => h('button', {
+      type: 'button', class: 'dl-linha', 'aria-pressed': String(l.id === selDados[aba]), title: 'Duplo clique abre o cadastro',
+      onclick: () => {
+        selDados[aba] = l.id;
+        for (const b of botoes) b.setAttribute('aria-pressed', String(b === botoes[linhas.indexOf(l)]));
+        bExcluir.disabled = false;
+      },
+      ondblclick: l.abrir
+    }, h('span', { class: 'dl-nome' }, l.nome), l.info ? h('small', null, l.info) : null, l.chip ? h('span', { class: 'chip chip-acento' }, l.chip) : null));
+    const bExcluir = btn('Excluir', { icone: 'lixo', perigo: true, disabled: !selDados[aba], onclick: ev => armar(ev.currentTarget, () => {
+      excluir(selDados[aba]); selDados[aba] = null; desenharPainel(); atualizarContagens();
+    }) });
+    return h('section', { class: 'dl' },
+      h('div', { class: 'dl-lista' }, botoes.length ? botoes : h('p', { class: 'dica' }, vazio)),
+      h('div', { class: 'dl-bts' },
+        btn('Adicionar', { icone: 'mais', prim: true, onclick: () => { adicionando = !adicionando; desenharPainel(); } }),
+        bExcluir),
+      adicionando ? formAdd() : null);
   };
 
+  // imóveis do protocolo
+  const blocoImoveis = () => listaDados('imoveis',
+    imoveisDoProtocolo(p.id).map(i => ({ id: i.id, nome: tituloImovel(i), info: [TIPOS_IMOVEL[i.tipo], i.matricula && 'Mat. ' + i.matricula].filter(Boolean).join(' · '), abrir: () => irPara('imoveis', i.id) })),
+    'Nenhum imóvel adicionado.',
+    () => {
+      const livres = imoveisOrdenados().filter(i => i.protocoloId !== p.id);
+      const add = h('div', { class: 'vinc-add dl-add' });
+      if (livres.length) {
+        const sel = h('select', { class: 'inp', id: 'pr-add-imovel', 'aria-label': 'Imóvel já cadastrado' }, livres.map(i => {
+          const outro = D().protocolos[i.protocoloId];
+          return h('option', { value: i.id }, tituloImovel(i) + (i.matricula ? ' · Mat. ' + i.matricula : '') + (outro ? ' (no protocolo ' + outro.numero + ')' : ''));
+        }));
+        add.append(sel, btn('Confirmar', { icone: 'check', prim: true, onclick: () => {
+          const i = D().imoveis[sel.value]; if (!i) return;
+          i.protocoloId = p.id; Store.put('imoveis', i, 0);
+          selDados.imoveis = i.id; adicionando = false; desenharPainel(); atualizarContagens();
+        } }));
+      }
+      const novo = tipo => () => novoRegistro('imoveis', { tipo, protocoloId: p.id });
+      add.append(h('span', { class: 'rot' }, livres.length ? 'ou cadastre' : 'Cadastre'),
+        btn('Urbano', { icone: 'mais', sm: true, onclick: novo('urbano') }),
+        btn('Rural', { icone: 'mais', sm: true, onclick: novo('rural') }),
+        btn('Condomínio', { icone: 'mais', sm: true, onclick: novo('condominio') }));
+      return add;
+    },
+    id => { const i = D().imoveis[id]; if (i) { i.protocoloId = ''; Store.put('imoveis', i, 0); } });
+
   // pessoas do protocolo
-  const blocoPessoas = () => {
-    const { diretas, pelosImoveis } = pessoasDoProtocolo(p);
-    const linhas = p.partes.map((x, k) => {
+  const pid = p.id;
+  const blocoPessoas = () => listaDados('pessoas',
+    p.partes.map(x => {
       const pe = D().pessoas[x.pessoaId];
-      if (!pe) return null;
-      const qual = h('select', { class: 'inp', 'aria-label': 'Qualidade' }, QUALIDADES_PROT.map(q => h('option', { value: q, selected: q === x.qualidade }, q)));
-      qual.addEventListener('change', () => { x.qualidade = qual.value; Store.put('protocolos', p); });
-      return h('div', { class: 'vinc-linha' },
-        h('button', { type: 'button', class: 'vinc-nome', onclick: () => irPara('pessoas', pe.id) }, pe.nome || 'Sem nome', pe.documento ? h('small', null, pe.documento) : null),
-        qual,
-        btn('Desvincular pessoa', { icone: 'x', soIcone: true, fant: true, onclick: ev => armar(ev.currentTarget, () => {
-          p.partes.splice(k, 1); Store.put('protocolos', p, 0); desenharPainel(); atualizarContagens();
-        }) }));
-    }).filter(Boolean);
-    const livres = pessoasOrdenadas().filter(pe => !p.partes.some(x => x.pessoaId === pe.id));
-    const add = h('div', { class: 'vinc-add' });
-    if (livres.length) {
-      const selP = h('select', { class: 'inp', id: 'pr-add-pessoa', 'aria-label': 'Pessoa já cadastrada' }, livres.map(pe => h('option', { value: pe.id }, (pe.nome || 'Sem nome') + (pe.documento ? ' · ' + pe.documento : ''))));
-      const selQ = h('select', { class: 'inp', id: 'pr-add-qualidade', 'aria-label': 'Qualidade', style: 'flex:0 1 200px' }, QUALIDADES_PROT.map(q => h('option', { value: q, selected: q === 'Beneficiário' }, q)));
-      add.append(selP, selQ, btn('Vincular', { icone: 'mais', prim: true, onclick: () => {
-        p.partes.push({ pessoaId: selP.value, qualidade: selQ.value }); Store.put('protocolos', p, 0); desenharPainel(); atualizarContagens();
-      } }));
-    }
-    const pid = p.id;
-    const nova = tipo => () => novoRegistro('pessoas', { tipo }, pe => {
-      const pr = D().protocolos[pid];
-      if (pr && !pr.partes.some(x => x.pessoaId === pe.id)) { pr.partes.push({ pessoaId: pe.id, qualidade: 'Beneficiário' }); Store.put('protocolos', pr, 0); }
-    });
-    return h('section', { class: 'bloco' },
-      linhas.length ? h('div', { class: 'vinc' }, linhas) : h('p', { class: 'dica' }, diretas.length || pelosImoveis.length ? 'Nenhuma parte vinculada diretamente.' : 'Nenhuma pessoa neste protocolo.'),
-      add.childNodes.length ? add : null,
-      h('div', { class: 'vinc-add' }, h('span', { class: 'rot' }, 'Cadastrar pessoa'),
+      return pe && { id: pe.id, nome: pe.nome || 'Sem nome', info: pe.documento, chip: x.qualidade, abrir: () => irPara('pessoas', pe.id) };
+    }).filter(Boolean),
+    'Nenhuma pessoa adicionada.',
+    () => {
+      const livres = pessoasOrdenadas().filter(pe => !p.partes.some(x => x.pessoaId === pe.id));
+      const add = h('div', { class: 'vinc-add dl-add' });
+      if (livres.length) {
+        const selP = h('select', { class: 'inp', id: 'pr-add-pessoa', 'aria-label': 'Pessoa já cadastrada' }, livres.map(pe => h('option', { value: pe.id }, (pe.nome || 'Sem nome') + (pe.documento ? ' · ' + pe.documento : ''))));
+        const selQ = h('select', { class: 'inp', id: 'pr-add-qualidade', 'aria-label': 'Qualidade', style: 'flex:0 1 200px' }, QUALIDADES_PROT.map(q => h('option', { value: q, selected: q === 'Beneficiário' }, q)));
+        add.append(selP, selQ, btn('Confirmar', { icone: 'check', prim: true, onclick: () => {
+          p.partes.push({ pessoaId: selP.value, qualidade: selQ.value }); Store.put('protocolos', p, 0);
+          selDados.pessoas = selP.value; adicionando = false; desenharPainel(); atualizarContagens();
+        } }));
+      }
+      const nova = tipo => () => novoRegistro('pessoas', { tipo }, pe => {
+        const pr = D().protocolos[pid];
+        if (pr && !pr.partes.some(x => x.pessoaId === pe.id)) { pr.partes.push({ pessoaId: pe.id, qualidade: 'Beneficiário' }); Store.put('protocolos', pr, 0); }
+      });
+      add.append(h('span', { class: 'rot' }, livres.length ? 'ou cadastre' : 'Cadastre'),
         btn('Pessoa Física', { icone: 'mais', sm: true, onclick: nova('fisica') }),
-        btn('Pessoa Jurídica', { icone: 'mais', sm: true, onclick: nova('juridica') })),
-      pelosImoveis.length ? h('p', { class: 'pr-sub' }, 'Pelos imóveis do protocolo') : null,
-      pelosImoveis.length ? h('ul', { class: 'vinc' }, pelosImoveis.map(x => h('li', null,
-        h('button', { type: 'button', class: 'item', onclick: () => irPara('pessoas', x.pessoa.id) },
-          h('span', { class: 'item-tit' }, x.pessoa.nome || 'Sem nome'),
-          h('span', { class: 'item-meta' }, h('span', { class: 'chip chip-acento' }, x.qualidade), tituloImovel(x.imovel)))))) : null);
-  };
+        btn('Pessoa Jurídica', { icone: 'mais', sm: true, onclick: nova('juridica') }));
+      return add;
+    },
+    id => { p.partes = p.partes.filter(x => x.pessoaId !== id); Store.put('protocolos', p, 0); });
 
   const desenharPainel = () => {
     painel.setAttribute('aria-labelledby', idJ('pr-aba-' + ui.abaProt));
