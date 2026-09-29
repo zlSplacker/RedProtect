@@ -34,7 +34,7 @@ A barra de menus do topo segue o S.R.I.:
 Tudo começa na **Recepção de Título**, que cria o protocolo. No topo da ficha fica a barra de botões, como no S.R.I.:
 
 - **Exigência**: registro das exigências do protocolo (texto e data de emissão), com marcação de cumprida e cópia das pendentes em texto. O botão mostra quantas estão pendentes, e cada registro ou cumprimento entra nos andamentos.
-- **Dados**: a ficha do protocolo. O quadro *Dados do protocolo* traz os campos e, logo abaixo deles, as abas **Imóveis** e **Pessoas**; embaixo do quadro ficam **Andamentos** e **Checklists**:
+- **Dados**: a ficha do protocolo. Logo abaixo da barra ficam **Andamentos** e **Checklists**; em seguida, o quadro *Dados do protocolo*, com os campos e as abas **Imóveis** e **Pessoas**:
 
 | Aba | O que tem |
 | --- | --- |

@@ -1704,7 +1704,7 @@ function renderProtocolo(p) {
   requestAnimationFrame(() => { const t = $('#pr-descricao'); if (t) autoAltura(t); });
 
   // abas do protocolo: tudo o que é feito no processo fica aqui
-  const painel = h('div', { id: 'pr-painel', role: 'tabpanel' });
+  const painel = h('div', { id: 'pr-painel', role: 'tabpanel', style: 'margin-bottom:18px' });
   const barraAbas = h('div', { class: 'pr-abas', role: 'tablist', 'aria-label': 'Conteúdo do protocolo' });
   const ABAS_PROT = [['andamentos', 'Andamentos'], ['checklists', 'Checklists']];
   // imóveis e pessoas ficam dentro do quadro Dados do protocolo
@@ -1857,7 +1857,8 @@ function renderProtocolo(p) {
   };
   desenharAbas();
   desenharPainel();
-  blocos.push(barraAbas, painel);
+  // andamentos e checklists ficam entre a barra Exigência/Dados e o quadro Dados do protocolo
+  blocos.splice(blocos.indexOf(quadroDados), 0, barraAbas, painel);
   d.replaceChildren(...blocos);
 }
 /* exigências do protocolo: o que o interessado ou o município ainda precisa apresentar */
