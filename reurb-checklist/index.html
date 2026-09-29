@@ -122,6 +122,7 @@ h1,h2,h3{text-wrap:balance}
 .lat-cont{font:500 13px var(--f-mono);color:var(--tinta3)}
 .lat-acoes{display:flex;flex-wrap:wrap;gap:6px}
 .lat-acoes:empty{display:none}
+.lateral.larga{max-width:1240px}
 .detalhe{max-width:1280px;margin:0 auto;padding:24px clamp(16px,3vw,40px) 72px;min-width:0}
 body.ver-detalhe .lateral{display:none}
 body:not(.ver-detalhe) .detalhe{display:none}
@@ -183,6 +184,20 @@ select.inp{padding-right:28px}
 .chip-ex{background:var(--aviso-suave);color:var(--aviso);border-color:transparent}
 .chip-acento{background:var(--acento-suave);color:var(--acento-texto);border-color:transparent}
 .item-num{font:500 12.5px var(--f-mono);color:var(--acento-texto);margin-right:6px}
+/* linha da consulta de protocolos: Protocolo | Município | Interessado ... Situação (colunas alinhadas entre as linhas) */
+.item.item-prot{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1fr) 12rem;align-items:center;gap:0;font-size:14px}
+.prot-campo{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.prot-campo + .prot-campo{border-left:1px solid var(--linha);margin-left:12px;padding-left:12px}
+.prot-campo .rot-in{color:var(--tinta3);font-size:12.5px;font-weight:600;margin-right:5px}
+.prot-campo b{font-weight:600}
+.prot-campo .item-num{font-size:13.5px;margin:0}
+.item-prot > .chip{justify-self:end;margin-left:12px}
+@media (max-width:560px){
+  .item.item-prot{grid-template-columns:minmax(0,1fr) auto;align-items:start;row-gap:2px}
+  .prot-campo{grid-column:1;white-space:normal;overflow-wrap:anywhere}
+  .prot-campo + .prot-campo{border-left:0;margin-left:0;padding-left:0}
+  .item-prot > .chip{grid-column:2;grid-row:1}
+}
 .lat-vazio{padding:12px;border:1px dashed var(--linha);border-radius:9px;color:var(--tinta3);font-size:13px}
 
 /* cabeçalho do detalhe */
@@ -1220,7 +1235,8 @@ function renderLateral() {
   $('#lat-tit').textContent = { analises: 'Análises', modelos: 'Modelos de checklist', protocolos: 'Protocolos', pessoas: 'Indicador Pessoal', imoveis: 'Indicador Real', tabelas: 'Tabelas de indicadores' }[aba];
   const f = $('#filtro');
   if (document.activeElement !== f) f.value = ui.filtro[aba] || '';
-  f.placeholder = { analises: 'Filtrar por núcleo, município ou processo', modelos: 'Filtrar modelos', protocolos: 'Filtrar por número, interessado, contato ou município', pessoas: 'Filtrar por nome, CPF/CNPJ, RG, passaporte ou e-mail', imoveis: 'Filtrar por matrícula, endereço, denominação, condomínio ou pessoa', tabelas: 'Filtrar tabelas' }[aba];
+  f.placeholder = { analises: 'Filtrar por núcleo, município ou processo', modelos: 'Filtrar modelos', protocolos: 'Filtrar por protocolo, município ou interessado', pessoas: 'Filtrar por nome, CPF/CNPJ, RG, passaporte ou e-mail', imoveis: 'Filtrar por matrícula, endereço, denominação, condomínio ou pessoa', tabelas: 'Filtrar tabelas' }[aba];
+  $('.lateral').classList.toggle('larga', aba === 'protocolos');
   const acoes = $('#lat-acoes');
   if (aba === 'protocolos' || aba === 'tabelas') {
     acoes.replaceChildren();
@@ -1283,27 +1299,19 @@ function renderItens() {
     else if (!vis.length) itens.push(h('li', { class: 'lat-vazio' }, 'Nenhum imóvel corresponde ao filtro.'));
   } else if (aba === 'protocolos') {
     const todos = protocolosOrdenados();
-    const vis = todos.filter(p => !termo || norm([p.numero, p.interessado, p.contato, p.municipio].join(' ')).includes(termo));
+    const vis = todos.filter(p => !termo || norm([p.numero, p.municipio, p.interessado].join(' ')).includes(termo));
     $('#lat-cont').textContent = '';
     for (const p of vis) {
       const [sitRot, sitCls] = SITUACOES[p.situacao];
-      const prazo = prazoInfo(p);
-      const nChk = analisesDoProtocolo(p.id).length;
-      const sub = [p.interessado && p.municipio, p.contato].filter(Boolean).join(' · ');
+      const campo = (rot, valor) => h('span', { class: 'prot-campo', title: rot + ': ' + valor.textContent }, h('span', { class: 'rot-in' }, rot + ':'), valor);
       itens.push(h('li', null, h('button', {
-        type: 'button', class: 'item', 'aria-current': String(!ui.criando && p.id === ui.sel.protocolos),
+        type: 'button', class: 'item item-prot', 'aria-current': String(!ui.criando && p.id === ui.sel.protocolos),
         onclick: () => { ui.sel.protocolos = p.id; ui.criando = false; salvarUI(); mostrarDetalhe(true); renderAbas(); renderItens(); renderDetalhe(); window.scrollTo(0, 0); }
       },
-        h('span', { class: 'item-tit' }, h('span', { class: 'item-num' }, p.numero), nomeProtocolo(p)),
-        sub ? h('span', { class: 'item-sub' }, sub) : null,
-        h('span', { class: 'item-meta' },
-          h('span', { class: 'chip ' + sitCls }, sitRot),
-          p.exigencias.some(x => !x.cumpridaEm) ? h('span', { class: 'chip chip-pend' }, plural(p.exigencias.filter(x => !x.cumpridaEm).length, 'exigência', 'exigências')) : null,
-          prazo ? h('span', { class: 'chip ' + prazo[1] }, prazo[0]) : null,
-          nChk ? h('span', null, plural(nChk, 'checklist', 'checklists')) : null,
-          imoveisDoProtocolo(p.id).length ? h('span', null, plural(imoveisDoProtocolo(p.id).length, 'imóvel', 'imóveis')) : null,
-          p.exemplo ? h('span', { class: 'chip chip-ex' }, 'Exemplo') : null
-        )
+        campo('Protocolo', h('span', { class: 'item-num' }, p.numero)),
+        campo('Município', h('b', null, p.municipio || '—')),
+        campo('Interessado', h('b', null, p.interessado || '—')),
+        h('span', { class: 'chip ' + sitCls }, sitRot)
       )));
     }
     if (!todos.length) itens.push(h('li', { class: 'lat-vazio' }, 'Nenhum protocolo aberto.'));

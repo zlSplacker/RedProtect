@@ -14,7 +14,7 @@ A barra de menus do topo segue o S.R.I.:
 - **Cadastros → Modelos de checklist**: passe o mouse sobre *Cadastros* (no celular, toque) e escolha a opção para criar e editar os modelos. Os próximos cadastros do sistema entram neste mesmo menu.
 - **Cadastros → Indicadores → Estado Civil**: tabela das opções que aparecem no campo *Estado civil* do Indicador Pessoal. Vem com os estados civis da legislação (solteiro, casado, separado judicialmente, separado extrajudicialmente, divorciado, viúvo); dá para incluir, renomear (os cadastros que usavam o nome antigo são atualizados), reordenar e excluir.
 - **Recepção → Recepção de Título**: cadastra um novo protocolo para cada processo acompanhado (veja abaixo).
-- **Protocolo → Consultar Protocolos**: lista, filtra e abre os protocolos para acompanhar situação, prazo e andamentos.
+- **Protocolo → Consultar Protocolos**: um protocolo por linha, no formato *Protocolo | Município | Interessado*, com a situação na ponta direita. O filtro procura por qualquer um desses três dados; clique na linha para abrir o protocolo.
 - **Indicadores → Real → Pesquisa / Urbano / Rural / Condomínio**: pesquisa e cadastro dos imóveis, com vínculo ao protocolo e às pessoas do Indicador Pessoal, cada uma com sua qualidade (ocupante, proprietário, beneficiário…). Cada tipo tem seus campos:
   - *Urbano*: núcleo ou loteamento, quadra, lote, logradouro, área (m²);
   - *Rural*: denominação, localidade, área (ha), CCIR, NIRF/CIB, CAR e certificação SIGEF;
@@ -49,7 +49,7 @@ Imóveis, pessoas e análises mostram um botão *Protocolo 0000/AAAA* para volta
 
 ### Protocolos (Recepção)
 
-- **Ordem de protocolo**: número automático por ano (`0001/2026`, `0002/2026`…), exibido acima da abertura e sem possibilidade de alteração.
+- **Ordem de protocolo**: número automático por ano (`0001/2026`, `0002/2026`…), exibido no início do quadro *Dados do protocolo* e sem possibilidade de alteração.
 - **Abertura**: data e hora registradas automaticamente no clique em *Recepção de Título*, sem possibilidade de alteração.
 - **Dados do protocolo**: interessado (quem está contratando), contato, município, prazo estimado e descrição do pedido.
 - **Situação**: aberto, em análise, aguardando documentos, concluído ou arquivado. Cada mudança fica registrada nos andamentos.
