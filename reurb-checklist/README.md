@@ -31,18 +31,18 @@ A barra de menus do topo segue o S.R.I.:
 
 ### O protocolo é o centro do trabalho
 
-Tudo começa na **Recepção de Título**, que cria o protocolo. No topo da ficha fica a barra de botões, como no S.R.I.:
+Tudo começa na **Recepção de Título**, que cria o protocolo. No topo da ficha fica a barra de botões, como no S.R.I.; cada botão abre uma **janela à frente** da página:
 
 - **Exigência**: registro das exigências do protocolo (texto e data de emissão), com marcação de cumprida e cópia das pendentes em texto. O botão mostra quantas estão pendentes, e cada registro ou cumprimento entra nos andamentos.
-- **Dados**: a ficha do protocolo. Logo abaixo da barra ficam **Andamentos**, **Financeiro** e **Checklists**; em seguida, o quadro *Dados do protocolo*, com os campos e as abas **Imóveis** e **Pessoas**:
+- **Dados**: os indicadores do protocolo — **Indicador Real** (imóveis) e **Indicador Pessoal** (partes, com sua qualidade, e as pessoas que vêm pelos imóveis). Dá para vincular cadastros existentes ou cadastrar novos já ligados ao protocolo; ao voltar da ficha do imóvel ou da pessoa, a janela reabre.
+
+Na página, abaixo da barra, ficam as abas **Andamentos**, **Financeiro** e **Checklists** e, em seguida, o quadro *Dados do protocolo* com os campos (ordem, abertura, interessado, contato, município, prazo estimado e descrição):
 
 | Aba | O que tem |
 | --- | --- |
 | **Andamentos** | Histórico datado; registra sozinho a abertura, as mudanças de situação e os checklists aplicados. |
 | **Financeiro** | Honorários contratados e lançamentos (recebimentos e despesas, com data, descrição e valor), com o resumo de recebido, a receber, despesas e saldo. |
 | **Checklists** | Análises aplicadas ao protocolo, com progresso e pendências, e o botão *Aplicar checklist*. |
-| **Imóveis** | Imóveis do protocolo; vincula um já cadastrado ou cadastra um novo (Urbano, Rural, Condomínio) já ligado ao protocolo. |
-| **Pessoas** | Partes do protocolo com sua qualidade (requerente, beneficiário, ocupante, proprietário, confrontante…), mais as pessoas que vêm pelos imóveis do protocolo. |
 
 Imóveis, pessoas e análises mostram um botão *Protocolo 0000/AAAA* para voltar ao protocolo de origem.
 

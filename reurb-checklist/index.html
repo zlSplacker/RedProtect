@@ -341,6 +341,7 @@ select.inp{padding-right:28px}
 .fin-tab .dt{font-family:var(--f-mono);white-space:nowrap;color:var(--tinta2)}
 .fin-tab tfoot td{font-weight:600;border-bottom:0}
 .dados-sub .bloco{border:0;padding:0;background:transparent}
+.exig-bloco{display:grid;gap:14px}
 .pr-sub{margin:6px 0 0;font:600 11px/1 var(--f-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--tinta3)}
 .link-prots{display:flex;flex-wrap:wrap;gap:4px}
 /* barra de botões do protocolo, como no S.R.I. */
@@ -1113,7 +1114,7 @@ const ui = (() => {
   return u;
 })();
 function salvarUI() {
-  try { localStorage.setItem(LS_UI, JSON.stringify({ aba: ui.aba, sel: ui.sel, filtro: ui.filtro, filtroQ: ui.filtroQ, abaProt: ui.abaProt, abaDados: ui.abaDados, visaoProt: ui.visaoProt, abaEnd: ui.abaEnd, tabela: ui.tabela })); } catch (e) { /* conveniência apenas */ }
+  try { localStorage.setItem(LS_UI, JSON.stringify({ aba: ui.aba, sel: ui.sel, filtro: ui.filtro, filtroQ: ui.filtroQ, abaProt: ui.abaProt, abaDados: ui.abaDados, abaEnd: ui.abaEnd, tabela: ui.tabela })); } catch (e) { /* conveniência apenas */ }
 }
 const D = () => Store.dados;
 const analisesOrdenadas = () => Object.values(D().analises).sort((a, b) => String(b.atualizadoEm).localeCompare(String(a.atualizadoEm)));
@@ -1158,7 +1159,35 @@ function trocarAba(aba, criando) {
   renderTudo();
   if (criando) window.scrollTo(0, 0);
 }
+/* janela à frente da página; fecha no X, no Esc ou clicando fora */
+let janelaAberta = null;
+function fecharJanela(semRender) {
+  if (!janelaAberta) return;
+  const j = janelaAberta; janelaAberta = null;
+  j.el.remove();
+  document.removeEventListener('keydown', j.esc);
+  if (j.aoFechar && !semRender) j.aoFechar();
+  // a página pode ter sido redesenhada: devolve o foco ao botão que abriu a janela
+  const alvo = j.volta && j.volta.isConnected ? j.volta : (j.voltaId && document.getElementById(j.voltaId));
+  if (alvo && !semRender) alvo.focus();
+}
+function abrirJanela({ sobre, titulo, conteudo, aoFechar, largura }) {
+  fecharJanela(true);
+  const id = uid('jt');
+  const bFechar = btn('Fechar', { icone: 'x', onclick: () => fecharJanela() });
+  const el = h('div', { class: 'modal janela', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': id },
+    h('div', { class: 'modal-painel', style: largura ? 'max-width:' + largura : null },
+      h('div', { class: 'modal-cab' }, h('div', null, sobre ? h('span', { class: 'sobre' }, sobre) : null, h('h2', { id }, titulo)), bFechar),
+      h('div', { class: 'modal-corpo' }, conteudo)));
+  el.addEventListener('click', ev => { if (ev.target === el) fecharJanela(); });
+  const esc = ev => { if (ev.key === 'Escape') fecharJanela(); };
+  document.addEventListener('keydown', esc);
+  janelaAberta = { el, esc, aoFechar, volta: document.activeElement, voltaId: document.activeElement && document.activeElement.id };
+  document.body.append(el);
+  bFechar.focus();
+}
 function irPara(aba, id) {
+  fecharJanela(true);
   ui.sel[aba] = id;
   trocarAba(aba);
   mostrarDetalhe(true);
@@ -1669,7 +1698,7 @@ function protocolosDaPessoa(id) {
 }
 function botoesProtocolo(prots) {
   if (!prots.length) return null;
-  return h('div', { class: 'link-prots' }, prots.map(pr => btn('Protocolo ' + pr.numero, { icone: 'pasta', fant: true, sm: true, cls: 'link-prot', onclick: () => { ui.visaoProt = 'dados'; irPara('protocolos', pr.id); } })));
+  return h('div', { class: 'link-prots' }, prots.map(pr => btn('Protocolo ' + pr.numero, { icone: 'pasta', fant: true, sm: true, cls: 'link-prot', onclick: () => { ui.reabrirDados = pr.id; irPara('protocolos', pr.id); } })));
 }
 
 /* ---------- protocolos: abrir, consultar, andamentos ---------- */
@@ -1713,20 +1742,17 @@ function renderProtocolo(p) {
       toast('Protocolo excluído. Checklists, imóveis e pessoas continuam cadastrados.');
     }) }));
   const pendentesExig = p.exigencias.filter(x => !x.cumpridaEm).length;
-  const visao = ui.visaoProt === 'exigencia' ? 'exigencia' : 'dados';
-  const botaoVisao = (k, rot, icone, extra) => h('button', {
-    type: 'button', class: 'bp', id: 'pr-bt-' + k, 'aria-pressed': String(visao === k),
-    onclick: () => { ui.visaoProt = k; salvarUI(); renderDetalhe(); }
-  }, ico(icone), rot, extra);
-  const bExig = botaoVisao('exigencia', 'Exigência', 'exigencia', h('span', { class: 'cont', hidden: !pendentesExig }, String(pendentesExig)));
-  // a barra fica logo acima do quadro, alinhada com ele
+  // os botões da barra abrem janelas à frente da página
+  const botaoJanela = (k, rot, icone, abrir, extra) => h('button', { type: 'button', class: 'bp', id: 'pr-bt-' + k, 'aria-haspopup': 'dialog', onclick: abrir }, ico(icone), rot, extra);
+  const bExig = botaoJanela('exigencia', 'Exigência', 'exigencia',
+    () => abrirJanela({ sobre: 'Protocolo ' + p.numero, titulo: 'Exigências', conteudo: blocoExigencias(p, bExig), aoFechar: renderDetalhe, largura: '900px' }),
+    h('span', { class: 'cont', hidden: !pendentesExig }, String(pendentesExig)));
   const barraProt = h('div', { class: 'barra-prot', role: 'toolbar', 'aria-label': 'Protocolo ' + p.numero },
     bExig,
-    botaoVisao('dados', 'Dados', 'dados'));
+    botaoJanela('dados', 'Dados', 'dados', () => abrirDados()));
   const cab = h('div', { class: 'cab' },
     h('div', { class: 'cab-txt' }, voltarBtn(), chips), acoes);
   const notaEx = p.exemplo ? h('p', { class: 'nota nota-info' }, ico('info'), h('span', null, 'Protocolo de exemplo, com dados fictícios. Exclua-o quando não precisar mais.')) : null;
-  if (visao === 'exigencia') { d.replaceChildren(...[cab, notaEx, barraProt, blocoExigencias(p, bExig)].filter(Boolean)); return; }
   const blocos = [cab, notaEx, barraProt].filter(Boolean);
 
   // dados do protocolo (salvos automaticamente)
@@ -1759,13 +1785,17 @@ function renderProtocolo(p) {
   const barraAbas = h('div', { class: 'pr-abas', role: 'tablist', 'aria-label': 'Conteúdo do protocolo' });
   const ABAS_PROT = [['andamentos', 'Andamentos'], ['financeiro', 'Financeiro'], ['checklists', 'Checklists']];
   // imóveis e pessoas ficam dentro do quadro Dados do protocolo
-  const ABAS_DADOS = [['imoveis', 'Imóveis'], ['pessoas', 'Pessoas']];
+  const ABAS_DADOS = [['imoveis', 'Indicador Real'], ['pessoas', 'Indicador Pessoal']];
   if (ui.abaProt === 'imoveis' || ui.abaProt === 'pessoas') { ui.abaDados = ui.abaProt; ui.abaProt = 'andamentos'; }
   if (!ABAS_PROT.some(([k]) => k === ui.abaProt)) ui.abaProt = 'andamentos';
   if (!ABAS_DADOS.some(([k]) => k === ui.abaDados)) ui.abaDados = 'imoveis';
   const barraDados = h('div', { class: 'pr-abas sub-abas', role: 'tablist', 'aria-label': 'Imóveis e pessoas do protocolo' });
   const painelDados = h('div', { id: 'pr-painel-dados', role: 'tabpanel' });
-  quadroDados.append(h('div', { class: 'dados-sub' }, barraDados, painelDados));
+  // janela Dados: indicadores real e pessoal do protocolo
+  const abrirDados = () => {
+    abrirJanela({ sobre: 'Protocolo ' + p.numero, titulo: 'Dados', conteudo: h('div', { class: 'dados-sub' }, barraDados, painelDados), aoFechar: renderDetalhe, largura: '1000px' });
+    desenharAbas(); desenharPainel();
+  };
   const contagem = k => ({
     andamentos: p.andamentos.length, financeiro: p.financeiro.lancamentos.length, checklists: analisesDoProtocolo(p.id).length,
     imoveis: imoveisDoProtocolo(p.id).length, pessoas: pessoasDoProtocolo(p).total
@@ -1911,6 +1941,8 @@ function renderProtocolo(p) {
   // andamentos e checklists ficam entre a barra Exigência/Dados e o quadro Dados do protocolo
   blocos.splice(blocos.indexOf(quadroDados), 0, barraAbas, painel);
   d.replaceChildren(...blocos);
+  // ao voltar de um imóvel ou pessoa, a janela Dados reabre
+  if (ui.reabrirDados === p.id) { ui.reabrirDados = null; abrirDados(); }
 }
 function blocoFinanceiro(p, aoMudar) {
   const f = p.financeiro;
@@ -2015,10 +2047,9 @@ function blocoExigencias(p, botao) {
     copiar(linhas.join('\n'), 'Exigências copiadas.', 'Copiar exigências');
   } });
   desenhar();
-  return h('section', { class: 'bloco', 'aria-labelledby': 'exig-tit' },
-    h('div', { class: 'lat-cab', style: 'justify-content:space-between;flex-wrap:wrap' },
-      h('h2', { class: 'bloco-tit', id: 'exig-tit' }, 'Exigências'), copiarBtn),
-    resumo, lista, form);
+  return h('section', { class: 'exig-bloco', id: 'exig-bloco' },
+    h('div', { class: 'lat-cab', style: 'justify-content:space-between;flex-wrap:wrap' }, resumo, copiarBtn),
+    lista, form);
 }
 function renderVazioProtocolos() {
   $('#detalhe').replaceChildren(h('div', { class: 'vazio' },
@@ -2054,7 +2085,7 @@ function renderNovoProtocolo() {
       andamentos: [{ id: uid('n'), data: abertura, texto: 'Protocolo aberto.', em: abertoEm }]
     });
     Store.put('protocolos', p, 0);
-    ui.sel.protocolos = p.id; ui.criando = false; ui.abaProt = 'andamentos'; ui.visaoProt = 'dados'; salvarUI();
+    ui.sel.protocolos = p.id; ui.criando = false; ui.abaProt = 'andamentos'; salvarUI();
     renderTudo();
     toast(`Protocolo ${p.numero} aberto.`);
   });
@@ -2193,6 +2224,7 @@ function campoCheck(obj, prefixo, k, rot, aoMudar) {
 const validarCpf = v => (String(v).replace(/\D/g, '').length === 11 && !cpfValido(v) ? 'inválido' : '');
 const validarCnpj = v => (String(v).replace(/\D/g, '').length === 14 && !cnpjValido(v) ? 'inválido' : '');
 function novoRegistro(col, base, aoSalvar) {
+  fecharJanela(true);
   const obj = col === 'pessoas' ? normalizarPessoa(base || {}) : normalizarImovel(base || {});
   rascunho = { col, obj, aoSalvar };
   ui.aba = col; ui.criando = false; ui.sel[col] = obj.id; salvarUI();
