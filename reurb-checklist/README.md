@@ -12,6 +12,7 @@ Abra `index.html` no navegador (Chrome, Edge ou Firefox). Não precisa instalar 
 A barra de menus do topo segue o S.R.I.:
 
 - **Cadastros → Modelos de checklist**: passe o mouse sobre *Cadastros* (no celular, toque) e escolha a opção para criar e editar os modelos. Os próximos cadastros do sistema entram neste mesmo menu.
+- **Cadastros → Indicadores → Estado Civil**: tabela das opções que aparecem no campo *Estado civil* do Indicador Pessoal. Vem com os estados civis da legislação (solteiro, casado, separado judicialmente, separado extrajudicialmente, divorciado, viúvo); dá para incluir, renomear (os cadastros que usavam o nome antigo são atualizados), reordenar e excluir.
 - **Recepção → Recepção de Título**: cadastra um novo protocolo para cada processo acompanhado (veja abaixo).
 - **Protocolo → Consultar Protocolos**: lista, filtra e abre os protocolos para acompanhar situação, prazo e andamentos.
 - **Indicadores → Real → Pesquisa / Urbano / Rural / Condomínio**: pesquisa e cadastro dos imóveis, com vínculo ao protocolo e às pessoas do Indicador Pessoal, cada uma com sua qualidade (ocupante, proprietário, beneficiário…). Cada tipo tem seus campos:

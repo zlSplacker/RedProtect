@@ -352,7 +352,9 @@ select.inp{padding-right:28px}
 .vinc-nome:hover{color:var(--acento-texto);text-decoration:underline}
 .vinc-nome small{display:block;font:12px/1.5 var(--f-mono);color:var(--tinta3);font-weight:400}
 .vinc-add{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.vinc-add select{flex:1 1 200px;width:auto}
+.vinc-add select,.vinc-add .inp{flex:1 1 200px;width:auto}
+.vinc-linha.tab-linha{grid-template-columns:minmax(0,1fr) 170px auto}
+@media (max-width:640px){.vinc-linha.tab-linha{grid-template-columns:minmax(0,1fr) auto}.vinc-linha.tab-linha>.inp{grid-column:1/-1}}
 @media (max-width:640px){.vinc-linha{grid-template-columns:minmax(0,1fr) auto}.vinc-linha select{grid-column:1/-1;grid-row:2}}
 .ident .largo{grid-column:1/-1}
 </style>
@@ -369,6 +371,12 @@ select.inp{padding-right:28px}
         <button type="button" class="mb-btn" id="mb-cadastros-btn" aria-haspopup="true" aria-expanded="false" aria-controls="mb-cadastros-sub">Cadastros<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <div class="mb-sub" id="mb-cadastros-sub" role="menu" aria-labelledby="mb-cadastros-btn">
           <button type="button" class="mb-op" role="menuitem" id="mb-modelos" data-aba="modelos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Modelos de checklist</span></button>
+          <div class="mb-grupo" id="mb-cad-indicadores">
+            <button type="button" class="mb-op mb-op-sub" role="menuitem" id="mb-cad-indicadores-btn" aria-haspopup="true" aria-expanded="false" aria-controls="mb-cad-indicadores-sub"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Indicadores</span></button>
+            <div class="mb-sub2" id="mb-cad-indicadores-sub" role="menu" aria-labelledby="mb-cad-indicadores-btn">
+              <button type="button" class="mb-op" role="menuitem" id="mb-tab-estadoCivil" data-aba="tabelas" data-acao="tabela:estadoCivil"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="15" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>Estado Civil</span></button>
+            </div>
+          </div>
         </div>
       </div>
       <div class="mb-item" id="mb-recepcao">
@@ -773,7 +781,34 @@ function prazoInfo(p) {
   return ['Prazo ' + fmtData(p.prazo), ''];
 }
 /* ---------- Indicador Pessoal (pessoas) e Indicador Real (imóveis) ---------- */
-const ESTADOS_CIVIS = ['Solteiro(a)', 'Casado(a)', 'União estável', 'Divorciado(a)', 'Separado(a) judicialmente', 'Viúvo(a)'];
+/* tabelas auxiliares cadastradas em Cadastros → Indicadores; alimentam as listas de seleção das fichas */
+const TABELAS = {
+  estadoCivil: {
+    nome: 'Estado civil', campo: 'Estado civil', usoEm: 'estadoCivil',
+    // estados civis da legislação brasileira (Código Civil, arts. 1.511 e seguintes e 1.571 a 1.582; CPC, art. 733)
+    padrao: ['Solteiro(a)', 'Casado(a)', 'Separado(a) judicialmente', 'Separado(a) extrajudicialmente', 'Divorciado(a)', 'Viúvo(a)']
+  }
+};
+function normalizarTabela(t) {
+  t = t || {};
+  return {
+    id: txt(t.id), nome: txt(t.nome),
+    itens: Array.isArray(t.itens) ? t.itens.filter(x => x && txt(x.nome).trim()).map(x => ({ id: txt(x.id) || uid('ti'), nome: txt(x.nome).trim() })) : [],
+    criadoEm: t.criadoEm || agora(), atualizadoEm: t.atualizadoEm || agora()
+  };
+}
+const tabelasPadrao = {};
+/* a tabela salva, ou a lista padrão (só é gravada quando alguém a altera) */
+function tabela(id) {
+  if (Store.dados.tabelas[id]) return Store.dados.tabelas[id];
+  if (!tabelasPadrao[id]) tabelasPadrao[id] = normalizarTabela({ id, nome: TABELAS[id].nome, itens: TABELAS[id].padrao.map(nome => ({ nome })) });
+  return tabelasPadrao[id];
+}
+/* opções de um campo de seleção; um valor antigo que não está mais na tabela continua aparecendo */
+function opcoesTabela(id, atual) {
+  const nomes = tabela(id).itens.map(x => x.nome);
+  return atual && !nomes.includes(atual) ? [...nomes, [atual, atual + ' (fora da tabela)']] : nomes;
+}
 const QUALIDADES = ['Ocupante', 'Proprietário', 'Beneficiário', 'Cônjuge ou companheiro', 'Outro'];
 const txt = v => String(v ?? '');
 const SEXOS = ['Feminino', 'Masculino'];
@@ -841,12 +876,12 @@ function normalizarImovel(i) {
     criadoEm: i.criadoEm || agora(), atualizadoEm: i.atualizadoEm || agora()
   };
 }
-const NORMALIZAR = { modelos: m => normalizarModelo(m), analises: a => normalizarAnalise(a), protocolos: p => normalizarProtocolo(p), pessoas: p => normalizarPessoa(p), imoveis: i => normalizarImovel(i) };
+const NORMALIZAR = { tabelas: t => normalizarTabela(t), modelos: m => normalizarModelo(m), analises: a => normalizarAnalise(a), protocolos: p => normalizarProtocolo(p), pessoas: p => normalizarPessoa(p), imoveis: i => normalizarImovel(i) };
 
 /* ---------- armazenamento: db do artifact quando disponível, senão este navegador ---------- */
 const Store = {
   modo: 'carregando', emArtifact: false, db: null,
-  dados: { modelos: {}, analises: {}, protocolos: {}, pessoas: {}, imoveis: {} },
+  dados: { modelos: {}, analises: {}, protocolos: {}, pessoas: {}, imoveis: {}, tabelas: {} },
   revs: {}, timers: {}, cadeias: {}, pendentes: new Set(),
   aoRemoto: null, aoStatus: null,
   async iniciar() {
@@ -869,6 +904,7 @@ const Store = {
       for (const p of Object.values(d.protocolos || {})) { const x = normalizarProtocolo(p); this.dados.protocolos[x.id] = x; }
       for (const p of Object.values(d.pessoas || {})) { const x = normalizarPessoa(p); this.dados.pessoas[x.id] = x; }
       for (const i of Object.values(d.imoveis || {})) { const x = normalizarImovel(i); this.dados.imoveis[x.id] = x; }
+      for (const t of Object.values(d.tabelas || {})) { const x = normalizarTabela(t); this.dados.tabelas[x.id] = x; }
     } else {
       semear(this.dados);
       this.salvarLocal();
@@ -881,10 +917,10 @@ const Store = {
   },
   iniciarDb() {
     return new Promise(resolve => {
-      let faltam = 5;
+      let faltam = 6;
       const pronto = () => { if (--faltam <= 0) resolve(); };
       setTimeout(resolve, 9000);
-      for (const col of ['modelos', 'analises', 'protocolos', 'pessoas', 'imoveis']) {
+      for (const col of ['modelos', 'analises', 'protocolos', 'pessoas', 'imoveis', 'tabelas']) {
         let primeira = true;
         this.db.collection(col).onSnapshot(snap => {
           this.aplicarSnap(col, snap, !primeira);
@@ -999,14 +1035,14 @@ const ui = (() => {
   u = Object.assign({ aba: 'analises', sel: {}, filtro: {}, filtroQ: 'todas' }, u || {});
   u.sel = Object.assign({ analises: null, modelos: null, protocolos: null, pessoas: null, imoveis: null }, u.sel);
   u.filtro = Object.assign({ analises: '', modelos: '', protocolos: '', pessoas: '', imoveis: '' }, u.filtro);
-  const ABAS = ['modelos', 'analises', 'protocolos', 'pessoas', 'imoveis'];
+  const ABAS = ['modelos', 'analises', 'protocolos', 'pessoas', 'imoveis', 'tabelas'];
   if (ABAS.includes(location.hash.slice(1))) u.aba = location.hash.slice(1);
   if (!ABAS.includes(u.aba)) u.aba = 'analises';
   u.criando = false;
   return u;
 })();
 function salvarUI() {
-  try { localStorage.setItem(LS_UI, JSON.stringify({ aba: ui.aba, sel: ui.sel, filtro: ui.filtro, filtroQ: ui.filtroQ, abaProt: ui.abaProt, abaEnd: ui.abaEnd })); } catch (e) { /* conveniência apenas */ }
+  try { localStorage.setItem(LS_UI, JSON.stringify({ aba: ui.aba, sel: ui.sel, filtro: ui.filtro, filtroQ: ui.filtroQ, abaProt: ui.abaProt, abaEnd: ui.abaEnd, tabela: ui.tabela })); } catch (e) { /* conveniência apenas */ }
 }
 const D = () => Store.dados;
 const analisesOrdenadas = () => Object.values(D().analises).sort((a, b) => String(b.atualizadoEm).localeCompare(String(a.atualizadoEm)));
@@ -1061,7 +1097,9 @@ function renderAbas() {
   const marcar = (el, sim) => { if (sim) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current'); };
   marcar($('#mb-analises'), ui.aba === 'analises');
   marcar($('#mb-modelos'), ui.aba === 'modelos');
-  marcar($('#mb-cadastros-btn'), ui.aba === 'modelos');
+  marcar($('#mb-cadastros-btn'), ui.aba === 'modelos' || ui.aba === 'tabelas');
+  marcar($('#mb-cad-indicadores-btn'), ui.aba === 'tabelas');
+  for (const id of Object.keys(TABELAS)) marcar($('#mb-tab-' + id), ui.aba === 'tabelas' && ui.tabela === id);
   marcar($('#mb-recepcao-btn'), ui.aba === 'protocolos' && ui.criando);
   marcar($('#mb-protocolo-btn'), ui.aba === 'protocolos' && !ui.criando);
   marcar($('#mb-abrir-protocolo'), ui.aba === 'protocolos' && ui.criando);
@@ -1072,13 +1110,15 @@ function renderAbas() {
 }
 function renderLateral() {
   const aba = ui.aba;
-  $('#lat-tit').textContent = { analises: 'Análises', modelos: 'Modelos de checklist', protocolos: 'Protocolos', pessoas: 'Indicador Pessoal', imoveis: 'Indicador Real' }[aba];
+  $('#lat-tit').textContent = { analises: 'Análises', modelos: 'Modelos de checklist', protocolos: 'Protocolos', pessoas: 'Indicador Pessoal', imoveis: 'Indicador Real', tabelas: 'Tabelas de indicadores' }[aba];
   const f = $('#filtro');
   if (document.activeElement !== f) f.value = ui.filtro[aba] || '';
-  f.placeholder = { analises: 'Filtrar por núcleo, município ou processo', modelos: 'Filtrar modelos', protocolos: 'Filtrar por número, interessado, contato ou município', pessoas: 'Filtrar por nome, CPF/CNPJ, RG, passaporte ou e-mail', imoveis: 'Filtrar por matrícula, endereço, denominação, condomínio ou pessoa' }[aba];
+  f.placeholder = { analises: 'Filtrar por núcleo, município ou processo', modelos: 'Filtrar modelos', protocolos: 'Filtrar por número, interessado, contato ou município', pessoas: 'Filtrar por nome, CPF/CNPJ, RG, passaporte ou e-mail', imoveis: 'Filtrar por matrícula, endereço, denominação, condomínio ou pessoa', tabelas: 'Filtrar tabelas' }[aba];
   const acoes = $('#lat-acoes');
   if (aba === 'protocolos') {
     acoes.replaceChildren(btn('Recepção de Título', { icone: 'mais', prim: true, onclick: () => trocarAba('protocolos', true) }));
+  } else if (aba === 'tabelas') {
+    acoes.replaceChildren();
   } else if (aba === 'pessoas') {
     acoes.replaceChildren(btn('Nova pessoa', { icone: 'mais', prim: true, onclick: () => novoRegistro('pessoas') }));
   } else if (aba === 'imoveis') {
@@ -1099,7 +1139,11 @@ function renderItens() {
   const itens = [];
   if (Store.modo === 'carregando') { lista.replaceChildren(); $('#lat-cont').textContent = ''; return; }
   const abrirItem = (col, id) => () => { ui.sel[col] = id; ui.criando = false; salvarUI(); mostrarDetalhe(true); renderItens(); renderDetalhe(); window.scrollTo(0, 0); };
-  if (aba === 'pessoas') {
+  if (aba === 'tabelas') {
+    $('#lat-cont').textContent = String(Object.keys(TABELAS).length);
+    for (const id of Object.keys(TABELAS)) itens.push(h('li', null, h('button', { type: 'button', class: 'item', onclick: () => abrirTabela(id) },
+      h('span', { class: 'item-tit' }, TABELAS[id].nome), h('span', { class: 'item-meta' }, plural(tabela(id).itens.length, 'opção', 'opções')))));
+  } else if (aba === 'pessoas') {
     const todas = pessoasOrdenadas();
     const vis = todas.filter(p => !termo || norm([p.nome, p.nomeSocial, p.documento, p.rg, p.passaporte, p.cnh, p.email].join(' ')).includes(termo)
       || (termo.replace(/\D/g, '') && String(p.documento).replace(/\D/g, '').includes(termo.replace(/\D/g, ''))));
@@ -1212,6 +1256,7 @@ function renderDetalhe() {
   rerenderAdiado = false;
   const d = $('#detalhe');
   if (Store.modo === 'carregando') { d.replaceChildren(h('p', { class: 'carregando' }, 'Carregando dados…')); return; }
+  if (ui.aba === 'tabelas') return renderTabela(TABELAS[ui.tabela] ? ui.tabela : 'estadoCivil');
   if (ui.aba === 'pessoas') { const pe = registroSel('pessoas'); return pe ? renderPessoa(pe) : renderVazioIndicador('pessoas'); }
   if (ui.aba === 'imoveis') { const im = registroSel('imoveis'); return im ? renderImovel(im) : renderVazioIndicador('imoveis'); }
   if (ui.aba === 'protocolos') {
@@ -1805,6 +1850,76 @@ function renderNovoProtocolo() {
   form.querySelector('#np-interessado').focus();
 }
 
+/* ---------- Cadastros → Indicadores: tabelas auxiliares ---------- */
+function abrirTabela(id) {
+  ui.tabela = id;
+  trocarAba('tabelas');
+  mostrarDetalhe(true);
+  window.scrollTo(0, 0);
+}
+function renderTabela(id) {
+  const def = TABELAS[id];
+  const t = tabela(id);
+  const d = $('#detalhe');
+  mostrarDetalhe(true);
+  const salvar = () => { t.id = id; t.nome = def.nome; Store.put('tabelas', t, 300); };
+  const usos = nome => Object.values(D().pessoas).filter(p => p[def.usoEm] === nome).length;
+  const lista = h('div', { class: 'vinc' });
+  const desenhar = () => {
+    lista.replaceChildren(...t.itens.map((item, k) => {
+      const inp = h('input', { class: 'inp', id: 'tab-' + item.id, value: item.nome, 'aria-label': 'Opção ' + (k + 1), autocomplete: 'off' });
+      inp.addEventListener('change', () => {
+        const novo = inp.value.trim(), antigo = item.nome;
+        if (!novo) { inp.value = antigo; toast('A opção não pode ficar em branco.'); return; }
+        if (novo === antigo) return;
+        if (t.itens.some(x => x !== item && norm(x.nome) === norm(novo))) { inp.value = antigo; toast('Essa opção já existe.'); return; }
+        item.nome = novo; salvar();
+        // quem usava o nome antigo passa a usar o novo
+        let n = 0;
+        for (const p of Object.values(D().pessoas)) if (p[def.usoEm] === antigo) { p[def.usoEm] = novo; Store.put('pessoas', p, 0); n++; }
+        desenhar();
+        toast(n ? `Opção renomeada; ${plural(n, 'cadastro atualizado', 'cadastros atualizados')}.` : 'Opção renomeada.');
+      });
+      const mover = delta => { const j = k + delta; [t.itens[k], t.itens[j]] = [t.itens[j], t.itens[k]]; salvar(); desenhar(); $('#tab-' + item.id).focus(); };
+      const n = usos(item.nome);
+      return h('div', { class: 'vinc-linha tab-linha' },
+        inp,
+        h('span', { class: 'chip', style: 'justify-self:start' }, n ? 'usado em ' + plural(n, 'cadastro', 'cadastros') : 'sem uso'),
+        h('div', { class: 'ed-acoes' },
+          btn('Mover para cima', { icone: 'cima', soIcone: true, fant: true, disabled: k === 0, onclick: () => mover(-1) }),
+          btn('Mover para baixo', { icone: 'baixo', soIcone: true, fant: true, disabled: k === t.itens.length - 1, onclick: () => mover(1) }),
+          btn('Excluir opção', { icone: 'lixo', soIcone: true, fant: true, perigo: true, onclick: ev => armar(ev.currentTarget, () => {
+            t.itens.splice(k, 1); salvar(); desenhar();
+            toast(n ? `Opção excluída. ${plural(n, 'cadastro continua', 'cadastros continuam')} com esse valor até ser alterado.` : 'Opção excluída.');
+          }) })));
+    }));
+    if (!t.itens.length) lista.append(h('p', { class: 'dica' }, 'Nenhuma opção cadastrada.'));
+    const faltando = def.padrao.filter(nome => !t.itens.some(x => norm(x.nome) === norm(nome)));
+    restaurar.hidden = !faltando.length;
+  };
+  const novo = h('input', { class: 'inp', id: 'tab-nova', placeholder: 'Nova opção', autocomplete: 'off' });
+  const form = h('form', { class: 'vinc-add' }, novo, h('button', { type: 'submit', class: 'btn btn-prim' }, ico('mais'), 'Adicionar'));
+  form.addEventListener('submit', ev => {
+    ev.preventDefault();
+    const nome = novo.value.trim();
+    if (!nome) { novo.focus(); return; }
+    if (t.itens.some(x => norm(x.nome) === norm(nome))) { toast('Essa opção já existe.'); return; }
+    t.itens.push({ id: uid('ti'), nome }); salvar();
+    novo.value = ''; desenhar(); novo.focus();
+  });
+  const restaurar = btn('Incluir as opções da legislação que faltam', { icone: 'livro', fant: true, sm: true, onclick: () => {
+    for (const nome of def.padrao) if (!t.itens.some(x => norm(x.nome) === norm(nome))) t.itens.push({ id: uid('ti'), nome });
+    salvar(); desenhar();
+  } });
+  desenhar();
+  d.replaceChildren(
+    h('div', { class: 'cab' }, h('div', { class: 'cab-txt' },
+      h('span', { class: 'sobre' }, 'Cadastros · Indicadores'),
+      h('h1', { class: 'titulo' }, def.nome),
+      h('p', { class: 'subt' }, 'Opções do campo “' + def.campo + '” no Indicador Pessoal.'))),
+    h('section', { class: 'bloco', style: 'max-width:760px' }, lista, form, h('div', null, restaurar)));
+}
+
 /* ---------- Indicador Pessoal e Indicador Real: telas ---------- */
 function imoveisDaPessoa(id) {
   const r = [];
@@ -1917,7 +2032,7 @@ function renderPessoa(pe) {
       c('documento', 'CPF', 2, 'text', { mascara: 'cpf', validar: validarCpf }), c('rg', 'RG', 2), c('passaporte', 'Passaporte', 2),
       c('sexo', 'Sexo', 2, 'select', { opcoes: SEXOS }), c('telefone', 'Telefone', 2, 'text', { mascara: 'tel' }), c('celular', 'Celular', 2, 'text', { mascara: 'cel' }),
       c('email', 'E-mail', 4, 'text', { inputmode: 'email' }), c('cnh', 'CNH', 3), c('profissao', 'Profissão', 5),
-      c('estadoCivil', 'Estado civil', 4, 'select', { opcoes: ESTADOS_CIVIS }), c('nacionalidade', 'Nacionalidade', 4, 'text', { lista: 'lista-nacionalidades' }),
+      c('estadoCivil', 'Estado civil', 4, 'select', { opcoes: opcoesTabela('estadoCivil', pe.estadoCivil) }), c('nacionalidade', 'Nacionalidade', 4, 'text', { lista: 'lista-nacionalidades' }),
       c('naturalidade', 'Naturalidade', 4, 'text', { placeholder: 'Município/UF de nascimento' }),
       c('certidaoNascimento', 'Certidão de nascimento', 8, 'text', { placeholder: 'Matrícula ou livro, folha e termo' })];
   const blocos = [h('fieldset', { class: 'ident grade12' }, h('legend', null, pj ? 'Dados da pessoa jurídica' : 'Dados pessoais'), dados)];
@@ -2460,7 +2575,7 @@ function imprimir(a) {
   setTimeout(() => w.print(), 300);
 }
 function exportarBackup() {
-  const dados = { formato: 'checklist-backup', versao: 1, exportadoEm: agora(), protocolos: Object.values(D().protocolos), pessoas: Object.values(D().pessoas), imoveis: Object.values(D().imoveis), modelos: Object.values(D().modelos), analises: Object.values(D().analises) };
+  const dados = { formato: 'checklist-backup', versao: 1, exportadoEm: agora(), tabelas: Object.values(D().tabelas), protocolos: Object.values(D().protocolos), pessoas: Object.values(D().pessoas), imoveis: Object.values(D().imoveis), modelos: Object.values(D().modelos), analises: Object.values(D().analises) };
   baixar(`checklist-reurb-backup-${hoje()}.json`, JSON.stringify(dados, null, 2));
 }
 async function importarArquivo(arq) {
@@ -2468,6 +2583,7 @@ async function importarArquivo(arq) {
   try { obj = JSON.parse(await arq.text()); } catch (e) { toast('O arquivo não é um JSON válido.'); return; }
   let nm = 0, na = 0, np = 0, npe = 0, nim = 0, ultimo = null;
   if (obj && obj.formato === 'checklist-backup') {
+    for (const x of obj.tabelas || []) Store.put('tabelas', normalizarTabela(x), 200);
     for (const x of obj.pessoas || []) { Store.put('pessoas', normalizarPessoa(x), 200 + npe * 50); npe++; }
     for (const x of obj.imoveis || []) { Store.put('imoveis', normalizarImovel(x), 200 + nim * 50); nim++; }
     for (const p of obj.protocolos || []) { const x = normalizarProtocolo(p); Store.put('protocolos', x, 200 + np * 50); np++; }
@@ -2548,6 +2664,7 @@ for (const b of document.querySelectorAll('[data-aba]')) b.addEventListener('cli
   const acao = b.dataset.acao;
   if (acao === 'fisica' || acao === 'juridica') { novoRegistro('pessoas', { tipo: acao }); return; }
   if (TIPOS_IMOVEL[acao]) { novoRegistro('imoveis', { tipo: acao }); return; }
+  if (acao && acao.startsWith('tabela:')) { abrirTabela(acao.slice(7)); return; }
   trocarAba(b.dataset.aba, !!b.dataset.novo);
   if (acao === 'pesquisar') { const f = $('#filtro'); f.focus(); f.select(); }
 });
