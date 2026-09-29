@@ -151,7 +151,11 @@ body:not(.ver-detalhe) .detalhe{display:none}
 textarea.inp{resize:vertical;min-height:38px;display:block}
 .inp[readonly]{background:var(--sup2);color:var(--tinta2);cursor:default}
 .linha-ordem{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:12px;align-items:end}
-.linha-ordem .campo-situacao .inp{width:230px;max-width:100%}
+.linha-ordem .campo-situacao .inp{width:200px;max-width:100%}
+.linha-dir{margin-left:auto;display:flex;flex-wrap:wrap;gap:12px;align-items:end}
+.linha-dir .inp{width:185px;max-width:100%}
+@media (max-width:640px){.linha-dir{margin-left:0}}
+.linha-3{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;align-items:end}
 .campo-curto .inp{max-width:140px;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 .inp[readonly]:hover,.inp[readonly]:focus{border-color:var(--linha);box-shadow:none}
 select.inp{padding-right:28px}
@@ -1778,10 +1782,13 @@ function renderProtocolo(p) {
     });
   }
   // primeira linha do quadro: ordem de protocolo e situação lado a lado
-  const [ordem, ...demais] = campos.map(c => c.rotulo);
-  const linhaOrdem = h('div', { class: 'linha-ordem' }, ordem,
-    h('label', { class: 'campo campo-situacao', for: 'pr-situacao' }, h('span', { class: 'rot' }, 'Situação'), selSit));
-  const quadroDados = h('fieldset', { class: 'ident' }, h('legend', null, 'Dados do protocolo'), linhaOrdem, demais);
+  // primeira linha: ordem e situação à esquerda; abertura e prazo estimado do outro lado
+  const rot = Object.fromEntries(campos.map(c => [c.el.id, c.rotulo]));
+  const linhaOrdem = h('div', { class: 'linha-ordem' }, rot['pr-numero'],
+    h('label', { class: 'campo campo-situacao', for: 'pr-situacao' }, h('span', { class: 'rot' }, 'Situação'), selSit),
+    h('div', { class: 'linha-dir' }, rot['pr-abertura'], rot['pr-prazo']));
+  const quadroDados = h('fieldset', { class: 'ident' }, h('legend', null, 'Dados do protocolo'), linhaOrdem,
+    h('div', { class: 'linha-3' }, rot['pr-interessado'], rot['pr-contato'], rot['pr-municipio']), rot['pr-descricao']);
   blocos.push(quadroDados);
   requestAnimationFrame(() => { const t = $('#pr-descricao'); if (t) autoAltura(t); });
 
