@@ -150,6 +150,8 @@ body:not(.ver-detalhe) .detalhe{display:none}
 .inp:focus{border-color:var(--acento);outline:none;box-shadow:0 0 0 3px var(--acento-suave)}
 textarea.inp{resize:vertical;min-height:38px;display:block}
 .inp[readonly]{background:var(--sup2);color:var(--tinta2);cursor:default}
+.linha-ordem{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:12px;align-items:end}
+.linha-ordem .campo-situacao .inp{width:230px;max-width:100%}
 .campo-curto .inp{max-width:140px;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 .inp[readonly]:hover,.inp[readonly]:focus{border-color:var(--linha);box-shadow:none}
 select.inp{padding-right:28px}
@@ -1734,7 +1736,6 @@ function renderProtocolo(p) {
     renderItens(); renderDetalhe();
   });
   const acoes = h('div', { class: 'acoes' },
-    h('label', { class: 'situacao', for: 'pr-situacao' }, h('span', { class: 'rot' }, 'Situação'), selSit),
     btn('Aplicar checklist', { icone: 'check', prim: true, onclick: () => abrirNovaAnalise(null, p.id) }),
     btn('Excluir protocolo', { icone: 'lixo', fant: true, perigo: true, onclick: ev => armar(ev.currentTarget, () => {
       for (const i of imoveisDoProtocolo(p.id)) { i.protocoloId = ''; Store.put('imoveis', i, 0); }
@@ -1757,7 +1758,7 @@ function renderProtocolo(p) {
 
   // dados do protocolo (salvos automaticamente)
   const campos = [
-    campoProt(p, 'numero', 'Ordem de protocolo', 'fixo', { valor: p.numero, largo: true, curto: true }),
+    campoProt(p, 'numero', 'Ordem de protocolo', 'fixo', { valor: p.numero, curto: true }),
     campoProt(p, 'abertura', 'Abertura', 'fixo', { valor: fmtAbertura(p) }),
     campoProt(p, 'interessado', 'Interessado', 'text'), campoProt(p, 'contato', 'Contato', 'text'),
     campoProt(p, 'municipio', 'Município/UF', 'text'), campoProt(p, 'prazo', 'Prazo estimado', 'date'),
@@ -1776,7 +1777,11 @@ function renderProtocolo(p) {
       renderItens();
     });
   }
-  const quadroDados = h('fieldset', { class: 'ident' }, h('legend', null, 'Dados do protocolo'), campos.map(c => c.rotulo));
+  // primeira linha do quadro: ordem de protocolo e situação lado a lado
+  const [ordem, ...demais] = campos.map(c => c.rotulo);
+  const linhaOrdem = h('div', { class: 'linha-ordem' }, ordem,
+    h('label', { class: 'campo campo-situacao', for: 'pr-situacao' }, h('span', { class: 'rot' }, 'Situação'), selSit));
+  const quadroDados = h('fieldset', { class: 'ident' }, h('legend', null, 'Dados do protocolo'), linhaOrdem, demais);
   blocos.push(quadroDados);
   requestAnimationFrame(() => { const t = $('#pr-descricao'); if (t) autoAltura(t); });
 
