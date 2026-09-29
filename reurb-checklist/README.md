@@ -31,6 +31,8 @@ A barra de menus do topo segue o S.R.I.:
   - *Urbano*: núcleo ou loteamento, quadra, lote, logradouro, área (m²);
   - *Rural*: denominação, localidade, área (ha), CCIR, NIRF/CIB, CAR e certificação SIGEF;
   - *Condomínio*: condomínio, unidade, bloco, vaga, fração ideal, área privativa e área total.
+
+  No fim do cadastro fica o botão **Salvar**: o imóvel novo só é gravado quando você clica nele (fechar a janela antes descarta o cadastro), e a janela volta para a lista do Indicador Real.
 - **Indicadores → Pessoal → Pesquisar / Pessoa Física / Pessoa Jurídica**: pesquisa e cadastro das pessoas, no mesmo formato do S.R.I.:
   - *Dados pessoais*: nome, nome social, nascimento, óbito, CPF (com conferência dos dígitos), RG, passaporte, sexo, telefone, celular, e-mail, CNH, profissão, estado civil, nacionalidade, naturalidade e certidão de nascimento;
   - *Casamento*: regime, data, cônjuge (ligado ao cadastro do outro cônjuge), pacto antenupcial e certidão;

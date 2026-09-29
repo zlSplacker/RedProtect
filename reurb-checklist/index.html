@@ -420,6 +420,7 @@ select.inp{padding-right:28px}
 /* indicadores pessoal e real */
 .reg-pilha{display:grid;gap:20px}
 .reg-pilha>.ident{margin:0}
+.reg-rodape{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--linha)}
 /* cadastro compacto (Indicador Pessoal): um só quadro, seções separadas por uma linha */
 .reg-pilha.compacta{gap:0;background:var(--sup);border:1px solid var(--linha);border-radius:10px}
 .compacta>.ident,.compacta>.bloco{border:0;border-radius:0;background:transparent;padding:10px 14px;margin:0}
@@ -1207,14 +1208,16 @@ const analisesDoProtocolo = id => analisesOrdenadas().filter(a => a.protocoloId 
 const numNat = (a, b) => String(a).localeCompare(String(b), 'pt-BR', { numeric: true, sensitivity: 'base' });
 const pessoasOrdenadas = () => Object.values(D().pessoas).sort((a, b) => numNat(a.nome, b.nome));
 const imoveisOrdenados = () => Object.values(D().imoveis).sort((a, b) => numNat(tituloImovel(a), tituloImovel(b)) || numNat(a.matricula, b.matricula));
-/* registro novo ainda não salvo (um por janela): só entra no armazenamento quando algo é digitado */
+/* registro novo ainda não salvo (um por janela): a pessoa entra no armazenamento quando algo é digitado;
+   o imóvel, só no botão Salvar */
 function registroSel(col) {
   const id = ui.sel[col], r = ui.rascunho;
   return D()[col][id] || (r && r.col === col && r.obj.id === id ? r.obj : null);
 }
 function gravarRegistro(col, obj) {
-  Store.put(col, obj);
   const r = ui.rascunho;
+  if (r && r.obj === obj && r.noBotao) return;
+  Store.put(col, obj);
   if (r && r.obj === obj) {
     ui.rascunho = null;
     if (r.aoSalvar) r.aoSalvar(obj);
@@ -2286,13 +2289,24 @@ const validarCnpj = v => (String(v).replace(/\D/g, '').length === 14 && !cnpjVal
 function novoRegistro(col, base, aoSalvar, naMesma) {
   const obj = col === 'pessoas' ? normalizarPessoa(base || {}) : normalizarImovel(base || {});
   if (!(naMesma && J && ui.aba === col)) abrirJanela({ aba: col });
-  ui.rascunho = { col, obj, aoSalvar };
+  ui.rascunho = { col, obj, aoSalvar, noBotao: col === 'imoveis' };
   ui.criando = false; ui.sel[col] = obj.id;
   mostrarDetalhe(true);
   renderTudo();
   rolarTopo();
   const j = J;
   requestAnimationFrame(() => { usar(j); const f = $(col === 'pessoas' ? '#pe-nome' : '#im-matricula'); if (f) f.focus(); });
+}
+// Salvar: grava o cadastro (o novo entra no armazenamento agora) e a janela volta para a lista
+function salvarRegistro(col, obj, msg) {
+  const r = ui.rascunho;
+  Store.put(col, obj, 0);
+  if (r && r.obj === obj) { ui.rascunho = null; if (r.aoSalvar) r.aoSalvar(obj); }
+  toast(msg);
+  J.direto = false;
+  mostrarDetalhe(false);
+  renderTudo();
+  rolarTopo();
 }
 function excluirRegistro(col, obj, msg) {
   if (D()[col][obj.id]) Store.remover(col, obj.id);
@@ -2514,7 +2528,8 @@ function renderImovel(im) {
       h('div', { class: 'acoes' }, btn('Excluir imóvel', { icone: 'lixo', fant: true, perigo: true, onclick: ev => armar(ev.currentTarget, () => excluirRegistro('imoveis', im, 'Imóvel excluído.')) }))),
     h('div', { class: 'reg-pilha' },
       h('fieldset', { class: 'ident' }, h('legend', null, 'Identificação do imóvel'), campos),
-      h('section', { class: 'bloco', 'aria-labelledby': 'im-vinc-tit' }, h('h2', { class: 'bloco-tit', id: 'im-vinc-tit' }, 'Pessoas vinculadas'), lista, addBox)));
+      h('section', { class: 'bloco', 'aria-labelledby': 'im-vinc-tit' }, h('h2', { class: 'bloco-tit', id: 'im-vinc-tit' }, 'Pessoas vinculadas'), lista, addBox)),
+    h('div', { class: 'reg-rodape' }, btn('Salvar', { icone: 'check', prim: true, onclick: () => salvarRegistro('imoveis', im, 'Imóvel salvo.') })));
 }
 
 /* ---------- editor de modelo ---------- */
