@@ -361,7 +361,15 @@ select.inp{padding-right:28px}
       <div class="mb-item" id="mb-indicadores">
         <button type="button" class="mb-btn" id="mb-indicadores-btn" aria-haspopup="true" aria-expanded="false" aria-controls="mb-indicadores-sub">Indicadores<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <div class="mb-sub" id="mb-indicadores-sub" role="menu" aria-labelledby="mb-indicadores-btn">
-          <button type="button" class="mb-op" role="menuitem" id="mb-imoveis" data-aba="imoveis"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7 M5 9.5V20h14V9.5 M10 20v-5h4v5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Real</span></button>
+          <div class="mb-grupo" id="mb-real">
+            <button type="button" class="mb-op mb-op-sub" role="menuitem" id="mb-real-btn" aria-haspopup="true" aria-expanded="false" aria-controls="mb-real-sub"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7 M5 9.5V20h14V9.5 M10 20v-5h4v5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Real</span></button>
+            <div class="mb-sub2" id="mb-real-sub" role="menu" aria-labelledby="mb-real-btn">
+              <button type="button" class="mb-op" role="menuitem" id="mb-imoveis" data-aba="imoveis" data-acao="pesquisar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M16 16l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Pesquisa</span></button>
+              <button type="button" class="mb-op" role="menuitem" id="mb-imovel-urbano" data-aba="imoveis" data-acao="urbano"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7 M5 9.5V20h14V9.5 M10 20v-5h4v5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Urbano</span></button>
+              <button type="button" class="mb-op" role="menuitem" id="mb-imovel-rural" data-aba="imoveis" data-acao="rural"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20h18 M5 20v-7l5-4 5 4v7 M9 20v-4h2v4 M17 20V9 M17 9c-2 0-3-1.5-3-3.5C16 5.5 17 7 17 9zm0 0c2 0 3-1.5 3-3.5C18 5.5 17 7 17 9z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Rural</span></button>
+              <button type="button" class="mb-op" role="menuitem" id="mb-imovel-condominio" data-aba="imoveis" data-acao="condominio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v17 M3 21h18 M9 7h2 M13 7h2 M9 11h2 M13 11h2 M9 15h2 M13 15h2 M11 21v-3h2v3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Condomínio</span></button>
+            </div>
+          </div>
           <div class="mb-grupo" id="mb-pessoal">
             <button type="button" class="mb-op mb-op-sub" role="menuitem" id="mb-pessoal-btn" aria-haspopup="true" aria-expanded="false" aria-controls="mb-pessoal-sub"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c0-3.9 3.1-6.5 7-6.5s7 2.6 7 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Pessoal</span></button>
             <div class="mb-sub2" id="mb-pessoal-sub" role="menu" aria-labelledby="mb-pessoal-btn">
@@ -750,12 +758,18 @@ function normalizarPessoa(p) {
     criadoEm: p.criadoEm || agora(), atualizadoEm: p.atualizadoEm || agora()
   };
 }
+const TIPOS_IMOVEL = { urbano: 'Urbano', rural: 'Rural', condominio: 'Condomínio' };
 function normalizarImovel(i) {
   i = i || {};
   return {
-    id: txt(i.id) || uid('im'), matricula: txt(i.matricula), protocoloId: txt(i.protocoloId),
+    id: txt(i.id) || uid('im'), tipo: TIPOS_IMOVEL[i.tipo] ? i.tipo : 'urbano',
+    matricula: txt(i.matricula), protocoloId: txt(i.protocoloId),
     nucleo: txt(i.nucleo), quadra: txt(i.quadra), lote: txt(i.lote), logradouro: txt(i.logradouro),
     municipio: txt(i.municipio), area: txt(i.area), descricao: txt(i.descricao), observacoes: txt(i.observacoes),
+    // rural
+    denominacao: txt(i.denominacao), localidade: txt(i.localidade), ccir: txt(i.ccir), nirf: txt(i.nirf), car: txt(i.car), sigef: txt(i.sigef),
+    // condomínio
+    condominio: txt(i.condominio), unidade: txt(i.unidade), bloco: txt(i.bloco), fracao: txt(i.fracao), areaPrivativa: txt(i.areaPrivativa), vaga: txt(i.vaga),
     vinculos: Array.isArray(i.vinculos) ? i.vinculos.filter(v => v && v.pessoaId).map(v => ({ pessoaId: txt(v.pessoaId), qualidade: txt(v.qualidade) || 'Ocupante' })) : [],
     criadoEm: i.criadoEm || agora(), atualizadoEm: i.atualizadoEm || agora()
   };
@@ -934,7 +948,7 @@ const protocolosOrdenados = () => Object.values(D().protocolos).sort((a, b) => (
 const analisesDoProtocolo = id => analisesOrdenadas().filter(a => a.protocoloId === id);
 const numNat = (a, b) => String(a).localeCompare(String(b), 'pt-BR', { numeric: true, sensitivity: 'base' });
 const pessoasOrdenadas = () => Object.values(D().pessoas).sort((a, b) => numNat(a.nome, b.nome));
-const imoveisOrdenados = () => Object.values(D().imoveis).sort((a, b) => numNat(a.nucleo, b.nucleo) || numNat(a.quadra, b.quadra) || numNat(a.lote, b.lote) || numNat(a.matricula, b.matricula));
+const imoveisOrdenados = () => Object.values(D().imoveis).sort((a, b) => numNat(tituloImovel(a), tituloImovel(b)) || numNat(a.matricula, b.matricula));
 /* registro novo ainda não salvo: só entra no armazenamento quando algo é digitado */
 let rascunho = null;
 function registroSel(col) {
@@ -982,7 +996,7 @@ function renderAbas() {
   marcar($('#mb-abrir-protocolo'), ui.aba === 'protocolos' && ui.criando);
   marcar($('#mb-protocolos'), ui.aba === 'protocolos' && !ui.criando);
   marcar($('#mb-pessoal-btn'), ui.aba === 'pessoas');
-  marcar($('#mb-imoveis'), ui.aba === 'imoveis');
+  marcar($('#mb-real-btn'), ui.aba === 'imoveis');
   marcar($('#mb-indicadores-btn'), ui.aba === 'pessoas' || ui.aba === 'imoveis');
 }
 function renderLateral() {
@@ -990,7 +1004,7 @@ function renderLateral() {
   $('#lat-tit').textContent = { analises: 'Análises', modelos: 'Modelos de checklist', protocolos: 'Protocolos', pessoas: 'Indicador Pessoal', imoveis: 'Indicador Real' }[aba];
   const f = $('#filtro');
   if (document.activeElement !== f) f.value = ui.filtro[aba] || '';
-  f.placeholder = { analises: 'Filtrar por núcleo, município ou processo', modelos: 'Filtrar modelos', protocolos: 'Filtrar por número, interessado, contato ou município', pessoas: 'Filtrar por nome, CPF/CNPJ ou RG', imoveis: 'Filtrar por matrícula, quadra, lote, endereço ou pessoa' }[aba];
+  f.placeholder = { analises: 'Filtrar por núcleo, município ou processo', modelos: 'Filtrar modelos', protocolos: 'Filtrar por número, interessado, contato ou município', pessoas: 'Filtrar por nome, CPF/CNPJ ou RG', imoveis: 'Filtrar por matrícula, endereço, denominação, condomínio ou pessoa' }[aba];
   const acoes = $('#lat-acoes');
   if (aba === 'protocolos') {
     acoes.replaceChildren(btn('Abrir protocolo', { icone: 'mais', prim: true, onclick: () => trocarAba('protocolos', true) }));
@@ -1029,7 +1043,8 @@ function renderItens() {
     else if (!vis.length) itens.push(h('li', { class: 'lat-vazio' }, 'Nenhuma pessoa corresponde ao filtro.'));
   } else if (aba === 'imoveis') {
     const todos = imoveisOrdenados();
-    const vis = todos.filter(i => !termo || norm([i.matricula, i.nucleo, 'quadra ' + i.quadra, 'lote ' + i.lote, i.logradouro, i.municipio,
+    const vis = todos.filter(i => !termo || norm([TIPOS_IMOVEL[i.tipo], i.matricula, i.nucleo, 'quadra ' + i.quadra, 'lote ' + i.lote, i.logradouro, i.municipio,
+      i.denominacao, i.localidade, i.ccir, i.nirf, i.car, i.condominio, 'unidade ' + i.unidade, 'bloco ' + i.bloco,
       ...i.vinculos.map(v => (D().pessoas[v.pessoaId] || {}).nome)].join(' ')).includes(termo));
     $('#lat-cont').textContent = String(todos.length);
     for (const i of vis) {
@@ -1038,6 +1053,7 @@ function renderItens() {
         h('span', { class: 'item-tit' }, tituloImovel(i)),
         subImovel(i) ? h('span', { class: 'item-sub' }, subImovel(i)) : null,
         h('span', { class: 'item-meta' },
+          h('span', { class: 'chip' + (i.tipo === 'urbano' ? '' : ' chip-acento') }, TIPOS_IMOVEL[i.tipo]),
           i.matricula ? h('span', { class: 'chip' }, 'Mat. ' + i.matricula) : null,
           prot ? h('span', { class: 'chip chip-acento' }, 'Prot. ' + prot.numero) : null,
           i.vinculos.length ? plural(i.vinculos.length, 'pessoa', 'pessoas') : null))));
@@ -1604,10 +1620,18 @@ function imoveisDaPessoa(id) {
   return r;
 }
 function tituloImovel(i) {
+  const mat = i.matricula && 'Matrícula ' + i.matricula;
+  if (i.tipo === 'rural') return i.denominacao || mat || 'Novo imóvel rural';
+  if (i.tipo === 'condominio') {
+    const u = [i.unidade && 'Unidade ' + i.unidade, i.bloco && 'Bloco ' + i.bloco].filter(Boolean).join(', ');
+    return [i.condominio, u].filter(Boolean).join(' — ') || mat || 'Nova unidade em condomínio';
+  }
   const t = [i.quadra && 'Quadra ' + i.quadra, i.lote && 'Lote ' + i.lote].filter(Boolean).join(', ');
-  return t || i.logradouro || (i.matricula && 'Matrícula ' + i.matricula) || 'Novo imóvel';
+  return t || i.logradouro || mat || 'Novo imóvel urbano';
 }
 function subImovel(i) {
+  if (i.tipo === 'rural') return [i.localidade, i.municipio, i.area && i.area + ' ha'].filter(Boolean).join(' · ');
+  if (i.tipo === 'condominio') return [i.logradouro, i.municipio].filter(Boolean).join(' · ');
   const t = tituloImovel(i);
   return [i.nucleo, t !== i.logradouro && i.logradouro, i.municipio].filter(Boolean).join(' · ');
 }
@@ -1700,20 +1724,41 @@ function renderImovel(im) {
   const d = $('#detalhe');
   const titulo = h('h1', { class: 'titulo' }, tituloImovel(im));
   const sub = h('p', { class: 'subt' }, subImovel(im));
-  const aoMudar = () => {
+  const aoMudar = k => {
     titulo.textContent = tituloImovel(im);
     sub.textContent = subImovel(im);
     gravarRegistro('imoveis', im);
     renderItens();
+    if (k === 'tipo') renderDetalhe();
   };
   const c = (k, rot, tipo = 'text', opts = {}) => campoReg(im, 'im', k, rot, tipo, Object.assign({ aoMudar }, opts));
   const protocolos = protocolosOrdenados();
-  const campos = [
+  const base = [
+    c('tipo', 'Tipo', 'select', { semVazio: true, opcoes: Object.entries(TIPOS_IMOVEL) }),
     c('matricula', 'Matrícula ou transcrição'),
-    c('protocoloId', 'Protocolo', 'select', { vazio: 'Sem protocolo', opcoes: protocolos.map(p => [p.id, `${p.numero} · ${nomeProtocolo(p)}`]) }),
-    c('nucleo', 'Núcleo ou loteamento'), c('quadra', 'Quadra'), c('lote', 'Lote'),
-    c('logradouro', 'Logradouro e número', 'text', { largo: true }), c('municipio', 'Município/UF'),
-    c('area', 'Área (m²)', 'text', { inputmode: 'decimal' }),
+    c('protocoloId', 'Protocolo', 'select', { vazio: 'Sem protocolo', opcoes: protocolos.map(p => [p.id, `${p.numero} · ${nomeProtocolo(p)}`]) })
+  ];
+  const decimal = { inputmode: 'decimal' };
+  const porTipo = {
+    urbano: [
+      c('nucleo', 'Núcleo ou loteamento'), c('quadra', 'Quadra'), c('lote', 'Lote'),
+      c('logradouro', 'Logradouro e número', 'text', { largo: true }), c('municipio', 'Município/UF'),
+      c('area', 'Área (m²)', 'text', decimal)
+    ],
+    rural: [
+      c('denominacao', 'Denominação do imóvel', 'text', { largo: true, placeholder: 'Ex.: Sítio Santa Luzia' }),
+      c('localidade', 'Localidade ou distrito'), c('municipio', 'Município/UF'), c('area', 'Área (ha)', 'text', decimal),
+      c('ccir', 'Código do imóvel no INCRA (CCIR)'), c('nirf', 'NIRF / CIB'), c('car', 'CAR'),
+      c('sigef', 'Certificação SIGEF')
+    ],
+    condominio: [
+      c('condominio', 'Condomínio ou edifício', 'text', { largo: true }),
+      c('unidade', 'Unidade'), c('bloco', 'Bloco ou torre'), c('vaga', 'Vaga de garagem'),
+      c('fracao', 'Fração ideal'), c('areaPrivativa', 'Área privativa (m²)', 'text', decimal), c('area', 'Área total (m²)', 'text', decimal),
+      c('municipio', 'Município/UF'), c('logradouro', 'Logradouro e número', 'text', { largo: true })
+    ]
+  };
+  const campos = [...base, ...porTipo[im.tipo],
     c('descricao', 'Descrição e confrontações', 'textarea', { largo: true }),
     c('observacoes', 'Observações', 'textarea', { largo: true })
   ];
@@ -1749,7 +1794,7 @@ function renderImovel(im) {
   desenhar();
   d.replaceChildren(
     h('div', { class: 'cab' },
-      h('div', { class: 'cab-txt' }, voltarBtn(), h('span', { class: 'sobre' }, 'Indicador Real'), titulo, sub),
+      h('div', { class: 'cab-txt' }, voltarBtn(), h('span', { class: 'sobre' }, 'Indicador Real · ' + TIPOS_IMOVEL[im.tipo]), titulo, sub),
       h('div', { class: 'acoes' }, btn('Excluir imóvel', { icone: 'lixo', fant: true, perigo: true, onclick: ev => armar(ev.currentTarget, () => excluirRegistro('imoveis', im, 'Imóvel excluído.')) }))),
     h('div', { class: 'reg-pilha' },
       h('fieldset', { class: 'ident' }, h('legend', null, 'Identificação do imóvel'), campos),
@@ -2187,6 +2232,7 @@ for (const b of document.querySelectorAll('[data-aba]')) b.addEventListener('cli
   if (b.classList.contains('mb-op')) { b.blur(); b.closest('.mb-item').classList.add('suprimir'); }
   const acao = b.dataset.acao;
   if (acao === 'fisica' || acao === 'juridica') { novoRegistro('pessoas', { tipo: acao }); return; }
+  if (TIPOS_IMOVEL[acao]) { novoRegistro('imoveis', { tipo: acao }); return; }
   trocarAba(b.dataset.aba, !!b.dataset.novo);
   if (acao === 'pesquisar') { const f = $('#filtro'); f.focus(); f.select(); }
 });
