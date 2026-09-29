@@ -387,6 +387,24 @@ select.inp{padding-right:28px}
 /* indicadores pessoal e real */
 .reg-pilha{display:grid;gap:20px}
 .reg-pilha>.ident{margin:0}
+/* cadastro compacto (Indicador Pessoal): um só quadro, seções separadas por uma linha */
+.reg-pilha.compacta{gap:0;background:var(--sup);border:1px solid var(--linha);border-radius:10px}
+.compacta>.ident,.compacta>.bloco{border:0;border-radius:0;background:transparent;padding:10px 14px;margin:0}
+.reg-pilha.compacta>*+*{border-top:1px solid var(--linha)}
+.compacta .ident.grade12{gap:6px 10px}
+.compacta .ident legend,.compacta .bloco-tit{font-size:13.5px;margin-bottom:0}
+.compacta .bloco{gap:6px}
+.compacta .campo{gap:2px}
+.compacta .rot{font-size:10px}
+.compacta .inp{padding:3px 8px;font-size:13px;border-radius:6px}
+.compacta .inp:not(textarea){height:28px}
+.compacta select.inp{padding-right:26px}
+.compacta textarea.inp{min-height:30px}
+.compacta .btn-ico{width:26px;height:26px;min-height:26px}
+.compacta .pr-abas{margin:0 0 4px}
+.compacta .pr-aba{padding:5px 10px;font-size:13px}
+.compacta .check{font-size:13px}
+.compacta .item{padding:7px 10px}
 /* grade de 12 colunas para fichas densas, como no S.R.I. */
 .ident.grade12,.grade12{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:10px 12px;align-items:end}
 .grade12>*{grid-column:span 12}
@@ -2367,7 +2385,7 @@ function renderPessoa(pe) {
           excluirRegistro('pessoas', pe, 'Pessoa excluída.');
         }) }))),
     ...(aviso ? [aviso] : []),
-    h('div', { class: 'reg-pilha' }, blocos));
+    h('div', { class: 'reg-pilha compacta' }, blocos));
 }
 /* consulta de CEP (ViaCEP); só no arquivo aberto no navegador, a página publicada não acessa outros sites */
 async function buscarCep(end, pref, cep, depois) {
