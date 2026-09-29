@@ -323,6 +323,8 @@ select.inp{padding-right:28px}
 .pr-aba:hover{color:var(--tinta)}
 .pr-aba[aria-selected="true"]{color:var(--tinta);border-bottom-color:var(--acento)}
 .pr-aba .n{font:500 12px var(--f-mono);color:var(--tinta3)}
+.dados-sub{grid-column:1/-1;margin-top:8px;min-width:0}
+.dados-sub .bloco{border:0;padding:0;background:transparent}
 .pr-sub{margin:6px 0 0;font:600 11px/1 var(--f-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--tinta3)}
 .link-prots{display:flex;flex-wrap:wrap;gap:4px}
 /* barra de botões do protocolo, como no S.R.I. */
@@ -1062,7 +1064,7 @@ const ui = (() => {
   return u;
 })();
 function salvarUI() {
-  try { localStorage.setItem(LS_UI, JSON.stringify({ aba: ui.aba, sel: ui.sel, filtro: ui.filtro, filtroQ: ui.filtroQ, abaProt: ui.abaProt, visaoProt: ui.visaoProt, abaEnd: ui.abaEnd, tabela: ui.tabela })); } catch (e) { /* conveniência apenas */ }
+  try { localStorage.setItem(LS_UI, JSON.stringify({ aba: ui.aba, sel: ui.sel, filtro: ui.filtro, filtroQ: ui.filtroQ, abaProt: ui.abaProt, abaDados: ui.abaDados, visaoProt: ui.visaoProt, abaEnd: ui.abaEnd, tabela: ui.tabela })); } catch (e) { /* conveniência apenas */ }
 }
 const D = () => Store.dados;
 const analisesOrdenadas = () => Object.values(D().analises).sort((a, b) => String(b.atualizadoEm).localeCompare(String(a.atualizadoEm)));
@@ -1618,7 +1620,7 @@ function protocolosDaPessoa(id) {
 }
 function botoesProtocolo(prots) {
   if (!prots.length) return null;
-  return h('div', { class: 'link-prots' }, prots.map(pr => btn('Protocolo ' + pr.numero, { icone: 'pasta', fant: true, sm: true, cls: 'link-prot', onclick: () => irPara('protocolos', pr.id) })));
+  return h('div', { class: 'link-prots' }, prots.map(pr => btn('Protocolo ' + pr.numero, { icone: 'pasta', fant: true, sm: true, cls: 'link-prot', onclick: () => { ui.visaoProt = 'dados'; irPara('protocolos', pr.id); } })));
 }
 
 /* ---------- protocolos: abrir, consultar, andamentos ---------- */
@@ -1697,22 +1699,36 @@ function renderProtocolo(p) {
       renderItens();
     });
   }
-  blocos.push(h('fieldset', { class: 'ident' }, h('legend', null, 'Dados do protocolo'), campos.map(c => c.rotulo)));
+  const quadroDados = h('fieldset', { class: 'ident' }, h('legend', null, 'Dados do protocolo'), campos.map(c => c.rotulo));
+  blocos.push(quadroDados);
   requestAnimationFrame(() => { const t = $('#pr-descricao'); if (t) autoAltura(t); });
 
   // abas do protocolo: tudo o que é feito no processo fica aqui
   const painel = h('div', { id: 'pr-painel', role: 'tabpanel' });
   const barraAbas = h('div', { class: 'pr-abas', role: 'tablist', 'aria-label': 'Conteúdo do protocolo' });
-  const ABAS_PROT = [['andamentos', 'Andamentos'], ['checklists', 'Checklists'], ['imoveis', 'Imóveis'], ['pessoas', 'Pessoas']];
+  const ABAS_PROT = [['andamentos', 'Andamentos'], ['checklists', 'Checklists']];
+  // imóveis e pessoas ficam dentro do quadro Dados do protocolo
+  const ABAS_DADOS = [['imoveis', 'Imóveis'], ['pessoas', 'Pessoas']];
+  if (ui.abaProt === 'imoveis' || ui.abaProt === 'pessoas') { ui.abaDados = ui.abaProt; ui.abaProt = 'andamentos'; }
   if (!ABAS_PROT.some(([k]) => k === ui.abaProt)) ui.abaProt = 'andamentos';
+  if (!ABAS_DADOS.some(([k]) => k === ui.abaDados)) ui.abaDados = 'imoveis';
+  const barraDados = h('div', { class: 'pr-abas sub-abas', role: 'tablist', 'aria-label': 'Imóveis e pessoas do protocolo' });
+  const painelDados = h('div', { id: 'pr-painel-dados', role: 'tabpanel' });
+  quadroDados.append(h('div', { class: 'dados-sub' }, barraDados, painelDados));
   const contagem = k => ({
     andamentos: p.andamentos.length, checklists: analisesDoProtocolo(p.id).length,
     imoveis: imoveisDoProtocolo(p.id).length, pessoas: pessoasDoProtocolo(p).total
   })[k];
-  const desenharAbas = () => barraAbas.replaceChildren(...ABAS_PROT.map(([k, rot]) => h('button', {
-    type: 'button', class: 'pr-aba', role: 'tab', id: 'pr-aba-' + k, 'aria-controls': 'pr-painel', 'aria-selected': String(ui.abaProt === k),
-    onclick: () => { ui.abaProt = k; salvarUI(); desenharAbas(); desenharPainel(); }
-  }, rot, h('span', { class: 'n' }, String(contagem(k))))));
+  const desenharAbas = () => {
+    barraAbas.replaceChildren(...ABAS_PROT.map(([k, rot]) => h('button', {
+      type: 'button', class: 'pr-aba', role: 'tab', id: 'pr-aba-' + k, 'aria-controls': 'pr-painel', 'aria-selected': String(ui.abaProt === k),
+      onclick: () => { ui.abaProt = k; salvarUI(); desenharAbas(); desenharPainel(); }
+    }, rot, h('span', { class: 'n' }, String(contagem(k))))));
+    barraDados.replaceChildren(...ABAS_DADOS.map(([k, rot]) => h('button', {
+      type: 'button', class: 'pr-aba', role: 'tab', id: 'pr-aba-' + k, 'aria-controls': 'pr-painel-dados', 'aria-selected': String(ui.abaDados === k),
+      onclick: () => { ui.abaDados = k; salvarUI(); desenharAbas(); desenharPainel(); }
+    }, rot, h('span', { class: 'n' }, String(contagem(k))))));
+  };
   const atualizarContagens = () => { desenharAbas(); renderItens(); };
 
   // andamentos
@@ -1835,7 +1851,9 @@ function renderProtocolo(p) {
 
   const desenharPainel = () => {
     painel.setAttribute('aria-labelledby', 'pr-aba-' + ui.abaProt);
-    painel.replaceChildren({ andamentos: () => blocoAnd, checklists: () => blocoVinc, imoveis: blocoImoveis, pessoas: blocoPessoas }[ui.abaProt]());
+    painel.replaceChildren(ui.abaProt === 'checklists' ? blocoVinc : blocoAnd);
+    painelDados.setAttribute('aria-labelledby', 'pr-aba-' + ui.abaDados);
+    painelDados.replaceChildren(ui.abaDados === 'pessoas' ? blocoPessoas() : blocoImoveis());
   };
   desenharAbas();
   desenharPainel();
