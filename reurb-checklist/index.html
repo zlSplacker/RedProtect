@@ -1809,15 +1809,12 @@ function renderProtocolo(p) {
     abrirJanela({ sobre: 'Protocolo ' + p.numero, titulo: 'Dados', conteudo: h('div', { class: 'dados-sub' }, barraDados, painelDados), aoFechar: renderDetalhe, largura: '1000px' });
     desenharAbas(); desenharPainel();
   };
-  const contagem = k => ({
-    andamentos: p.andamentos.length, financeiro: p.financeiro.lancamentos.length, checklists: analisesDoProtocolo(p.id).length,
-    imoveis: imoveisDoProtocolo(p.id).length, pessoas: pessoasDoProtocolo(p).total
-  })[k];
+  const contagem = k => ({ imoveis: imoveisDoProtocolo(p.id).length, pessoas: pessoasDoProtocolo(p).total })[k];
   const desenharAbas = () => {
     barraAbas.replaceChildren(...ABAS_PROT.map(([k, rot]) => h('button', {
       type: 'button', class: 'pr-aba', role: 'tab', id: 'pr-aba-' + k, 'aria-controls': 'pr-painel', 'aria-selected': String(ui.abaProt === k),
       onclick: () => { ui.abaProt = k; salvarUI(); desenharAbas(); desenharPainel(); }
-    }, rot, contagem(k) === undefined ? null : h('span', { class: 'n' }, String(contagem(k))))));
+    }, rot)));
     barraDados.replaceChildren(...ABAS_DADOS.map(([k, rot]) => h('button', {
       type: 'button', class: 'pr-aba', role: 'tab', id: 'pr-aba-' + k, 'aria-controls': 'pr-painel-dados', 'aria-selected': String(ui.abaDados === k),
       onclick: () => { ui.abaDados = k; salvarUI(); desenharAbas(); desenharPainel(); }
