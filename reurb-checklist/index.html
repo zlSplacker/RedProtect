@@ -473,7 +473,6 @@ select.inp{padding-right:28px}
 .dl-linha small{color:var(--tinta3);font-size:12.5px}
 .dl-linha .chip{margin-left:auto}
 .dl-bts{display:flex;gap:8px;padding-top:12px}
-.dl-add{margin-top:12px}
 .vinc-linha.tab-linha{grid-template-columns:minmax(0,1fr) 170px auto}
 @container (max-width:640px){.vinc-linha.tab-linha{grid-template-columns:minmax(0,1fr) auto}.vinc-linha.tab-linha>.inp{grid-column:1/-1}}
 @container (max-width:640px){.vinc-linha{grid-template-columns:minmax(0,1fr) auto}.vinc-linha select{grid-column:1/-1;grid-row:2}}
@@ -1301,9 +1300,10 @@ function renderLateral() {
   if (aba === 'protocolos' || aba === 'tabelas') {
     acoes.replaceChildren();
   } else if (aba === 'pessoas') {
-    acoes.replaceChildren(btn('Nova pessoa', { icone: 'mais', prim: true, onclick: () => novoRegistro('pessoas', null, null, true) }));
+    const pr = ui.selecionar && ui.selecionar.protocoloId;
+    acoes.replaceChildren(btn('Nova pessoa', { icone: 'mais', prim: true, onclick: () => novoRegistro('pessoas', null, pr ? pe => ligarAoProtocolo(pr, 'pessoas', pe.id) : null, true) }));
   } else if (aba === 'imoveis') {
-    acoes.replaceChildren(btn('Novo imóvel', { icone: 'mais', prim: true, onclick: () => novoRegistro('imoveis', null, null, true) }));
+    acoes.replaceChildren(btn('Novo imóvel', { icone: 'mais', prim: true, onclick: () => novoRegistro('imoveis', ui.selecionar ? { protocoloId: ui.selecionar.protocoloId } : null, null, true) }));
   } else if (aba === 'analises') {
     acoes.replaceChildren(btn('Nova análise', { icone: 'mais', prim: true, onclick: () => abrirNovaAnalise() }));
   } else {
@@ -1320,6 +1320,14 @@ function renderItens() {
   const itens = [];
   if (Store.modo === 'carregando') { lista.replaceChildren(); atualizarTitulo(); return; }
   const abrirItem = (col, id) => () => { ui.sel[col] = id; ui.criando = false; mostrarDetalhe(true); renderItens(); renderDetalhe(); rolarTopo(); };
+  // janela aberta pelo Adicionar do protocolo: um clique marca, dois cliques (ou Enter) adicionam ao protocolo
+  const sel = ui.selecionar && D().protocolos[ui.selecionar.protocoloId];
+  const acoesItem = (col, id) => sel ? {
+    title: 'Dois cliques adicionam ao protocolo ' + sel.numero,
+    onclick: ev => { ui.sel[col] = id; for (const b of lista.querySelectorAll('.item')) b.setAttribute('aria-current', String(b === ev.currentTarget)); },
+    ondblclick: () => adicionarAoProtocolo(col, id),
+    onkeydown: ev => { if (ev.key === 'Enter') { ev.preventDefault(); adicionarAoProtocolo(col, id); } }
+  } : { onclick: abrirItem(col, id) };
   if (aba === 'tabelas') {
     for (const id of Object.keys(TABELAS)) itens.push(h('li', null, h('button', { type: 'button', class: 'item', onclick: () => abrirTabela(id) },
       h('span', { class: 'item-tit' }, TABELAS[id].nome), h('span', { class: 'item-meta' }, plural(tabela(id).itens.length, 'opção', 'opções')))));
@@ -1329,10 +1337,12 @@ function renderItens() {
       || (termo.replace(/\D/g, '') && String(p.documento).replace(/\D/g, '').includes(termo.replace(/\D/g, ''))));
     for (const p of vis) {
       const n = imoveisDaPessoa(p.id).length;
-      itens.push(h('li', null, h('button', { type: 'button', class: 'item', 'aria-current': String(p.id === ui.sel.pessoas), onclick: abrirItem('pessoas', p.id) },
+      itens.push(h('li', null, h('button', { type: 'button', class: 'item', 'aria-current': String(p.id === ui.sel.pessoas), ...acoesItem('pessoas', p.id) },
         h('span', { class: 'item-tit' }, p.nome || 'Sem nome'),
         h('span', { class: 'item-sub' }, [p.documento, p.tipo === 'fisica' ? p.estadoCivil : 'Pessoa jurídica'].filter(Boolean).join(' · ') || 'Sem documento'),
-        n ? h('span', { class: 'item-meta' }, plural(n, 'imóvel', 'imóveis')) : null)));
+        n || (sel && sel.partes.some(x => x.pessoaId === p.id)) ? h('span', { class: 'item-meta' },
+          sel && sel.partes.some(x => x.pessoaId === p.id) ? h('span', { class: 'chip chip-acento' }, 'No protocolo') : null,
+          n ? plural(n, 'imóvel', 'imóveis') : null) : null)));
     }
     if (!todas.length) itens.push(h('li', { class: 'lat-vazio' }, 'Nenhuma pessoa cadastrada.'));
     else if (!vis.length) itens.push(h('li', { class: 'lat-vazio' }, 'Nenhuma pessoa corresponde ao filtro.'));
@@ -1343,7 +1353,7 @@ function renderItens() {
       ...i.vinculos.map(v => (D().pessoas[v.pessoaId] || {}).nome)].join(' ')).includes(termo));
     for (const i of vis) {
       const prot = D().protocolos[i.protocoloId];
-      itens.push(h('li', null, h('button', { type: 'button', class: 'item', 'aria-current': String(i.id === ui.sel.imoveis), onclick: abrirItem('imoveis', i.id) },
+      itens.push(h('li', null, h('button', { type: 'button', class: 'item', 'aria-current': String(i.id === ui.sel.imoveis), ...acoesItem('imoveis', i.id) },
         h('span', { class: 'item-tit' }, tituloImovel(i)),
         subImovel(i) ? h('span', { class: 'item-sub' }, subImovel(i)) : null,
         h('span', { class: 'item-meta' },
@@ -1869,7 +1879,7 @@ function renderProtocolo(p) {
     }, rot)));
     barraDados.replaceChildren(...ABAS_DADOS.map(([k, rot]) => h('button', {
       type: 'button', class: 'pr-aba', role: 'tab', id: 'pr-aba-' + k, 'aria-controls': 'pr-painel-dados', 'aria-selected': String(ui.abaDados === k),
-      onclick: () => { ui.abaDados = k; adicionando = false; desenharAbas(); desenharPainel(); }
+      onclick: () => { ui.abaDados = k; desenharAbas(); desenharPainel(); }
     }, rot, h('span', { class: 'n' }, String(contagem(k))))));
   };
   const atualizarContagens = () => { desenharAbas(); renderItens(); };
@@ -1919,9 +1929,15 @@ function renderProtocolo(p) {
     h('div', null, btn('Aplicar checklist', { icone: 'mais', sm: true, onclick: () => abrirNovaAnalise(null, p.id) })));
 
   // janela Dados: abaixo das abas fica só o que foi adicionado; depois, uma linha com Adicionar e Excluir
-  const selDados = { imoveis: null, pessoas: null };
-  let adicionando = false;
-  const listaDados = (aba, linhas, vazio, formAdd, excluir) => {
+  const selDados = ui.selDados || (ui.selDados = { imoveis: null, pessoas: null });
+  const jProt = J;
+  // Adicionar abre a pesquisa do indicador (Pessoal ou Real); dois cliques num nome o adicionam aqui
+  const abrirPesquisa = aba => {
+    const j = janelas.find(x => x.ui.selecionar && x.ui.selecionar.protocoloId === p.id && x.ui.aba === aba);
+    if (j) { ativar(j); focarJanela(j); return; }
+    abrirJanela({ aba, selecionar: { protocoloId: p.id, origem: jProt } });
+  };
+  const listaDados = (aba, linhas, vazio, excluir) => {
     if (!linhas.some(l => l.id === selDados[aba])) selDados[aba] = null;
     const botoes = linhas.map(l => h('button', {
       type: 'button', class: 'dl-linha', 'aria-pressed': String(l.id === selDados[aba]), title: 'Duplo clique abre o cadastro',
@@ -1937,67 +1953,22 @@ function renderProtocolo(p) {
     }) });
     return h('section', { class: 'dl' },
       h('div', { class: 'dl-lista' }, botoes.length ? botoes : h('p', { class: 'dica' }, vazio)),
-      h('div', { class: 'dl-bts' },
-        btn('Adicionar', { icone: 'mais', prim: true, onclick: () => { adicionando = !adicionando; desenharPainel(); } }),
-        bExcluir),
-      adicionando ? formAdd() : null);
+      h('div', { class: 'dl-bts' }, btn('Adicionar', { icone: 'mais', prim: true, onclick: () => abrirPesquisa(aba) }), bExcluir));
   };
 
   // imóveis do protocolo
   const blocoImoveis = () => listaDados('imoveis',
     imoveisDoProtocolo(p.id).map(i => ({ id: i.id, nome: tituloImovel(i), info: [TIPOS_IMOVEL[i.tipo], i.matricula && 'Mat. ' + i.matricula].filter(Boolean).join(' · '), abrir: () => irPara('imoveis', i.id) })),
     'Nenhum imóvel adicionado.',
-    () => {
-      const livres = imoveisOrdenados().filter(i => i.protocoloId !== p.id);
-      const add = h('div', { class: 'vinc-add dl-add' });
-      if (livres.length) {
-        const sel = h('select', { class: 'inp', id: 'pr-add-imovel', 'aria-label': 'Imóvel já cadastrado' }, livres.map(i => {
-          const outro = D().protocolos[i.protocoloId];
-          return h('option', { value: i.id }, tituloImovel(i) + (i.matricula ? ' · Mat. ' + i.matricula : '') + (outro ? ' (no protocolo ' + outro.numero + ')' : ''));
-        }));
-        add.append(sel, btn('Confirmar', { icone: 'check', prim: true, onclick: () => {
-          const i = D().imoveis[sel.value]; if (!i) return;
-          i.protocoloId = p.id; Store.put('imoveis', i, 0);
-          selDados.imoveis = i.id; adicionando = false; desenharPainel(); atualizarContagens();
-        } }));
-      }
-      const novo = tipo => () => novoRegistro('imoveis', { tipo, protocoloId: p.id });
-      add.append(h('span', { class: 'rot' }, livres.length ? 'ou cadastre' : 'Cadastre'),
-        btn('Urbano', { icone: 'mais', sm: true, onclick: novo('urbano') }),
-        btn('Rural', { icone: 'mais', sm: true, onclick: novo('rural') }),
-        btn('Condomínio', { icone: 'mais', sm: true, onclick: novo('condominio') }));
-      return add;
-    },
     id => { const i = D().imoveis[id]; if (i) { i.protocoloId = ''; Store.put('imoveis', i, 0); } });
 
   // pessoas do protocolo
-  const pid = p.id;
   const blocoPessoas = () => listaDados('pessoas',
     p.partes.map(x => {
       const pe = D().pessoas[x.pessoaId];
       return pe && { id: pe.id, nome: pe.nome || 'Sem nome', info: pe.documento, chip: x.qualidade, abrir: () => irPara('pessoas', pe.id) };
     }).filter(Boolean),
     'Nenhuma pessoa adicionada.',
-    () => {
-      const livres = pessoasOrdenadas().filter(pe => !p.partes.some(x => x.pessoaId === pe.id));
-      const add = h('div', { class: 'vinc-add dl-add' });
-      if (livres.length) {
-        const selP = h('select', { class: 'inp', id: 'pr-add-pessoa', 'aria-label': 'Pessoa já cadastrada' }, livres.map(pe => h('option', { value: pe.id }, (pe.nome || 'Sem nome') + (pe.documento ? ' · ' + pe.documento : ''))));
-        const selQ = h('select', { class: 'inp', id: 'pr-add-qualidade', 'aria-label': 'Qualidade', style: 'flex:0 1 200px' }, QUALIDADES_PROT.map(q => h('option', { value: q, selected: q === 'Beneficiário' }, q)));
-        add.append(selP, selQ, btn('Confirmar', { icone: 'check', prim: true, onclick: () => {
-          p.partes.push({ pessoaId: selP.value, qualidade: selQ.value }); Store.put('protocolos', p, 0);
-          selDados.pessoas = selP.value; adicionando = false; desenharPainel(); atualizarContagens();
-        } }));
-      }
-      const nova = tipo => () => novoRegistro('pessoas', { tipo }, pe => {
-        const pr = D().protocolos[pid];
-        if (pr && !pr.partes.some(x => x.pessoaId === pe.id)) { pr.partes.push({ pessoaId: pe.id, qualidade: 'Beneficiário' }); Store.put('protocolos', pr, 0); }
-      });
-      add.append(h('span', { class: 'rot' }, livres.length ? 'ou cadastre' : 'Cadastre'),
-        btn('Pessoa Física', { icone: 'mais', sm: true, onclick: nova('fisica') }),
-        btn('Pessoa Jurídica', { icone: 'mais', sm: true, onclick: nova('juridica') }));
-      return add;
-    },
     id => { p.partes = p.partes.filter(x => x.pessoaId !== id); Store.put('protocolos', p, 0); });
 
   const desenharPainel = () => {
@@ -2296,6 +2267,40 @@ function novoRegistro(col, base, aoSalvar, naMesma) {
   rolarTopo();
   const j = J;
   requestAnimationFrame(() => { usar(j); const f = $(col === 'pessoas' ? '#pe-nome' : '#im-matricula'); if (f) f.focus(); });
+}
+/* Adicionar do protocolo: liga a pessoa ou o imóvel ao protocolo */
+function ligarAoProtocolo(protocoloId, col, id) {
+  const pr = D().protocolos[protocoloId];
+  if (!pr) return false;
+  if (col === 'pessoas') {
+    if (pr.partes.some(x => x.pessoaId === id)) return false;
+    pr.partes.push({ pessoaId: id, qualidade: 'Beneficiário' });
+    Store.put('protocolos', pr, 0);
+  } else {
+    const i = D().imoveis[id];
+    if (!i || i.protocoloId === pr.id) return false;
+    i.protocoloId = pr.id;
+    Store.put('imoveis', i, 0);
+  }
+  return true;
+}
+// dois cliques na pesquisa aberta pelo Adicionar: entra no protocolo, a pesquisa fecha e o protocolo volta à frente
+function adicionarAoProtocolo(col, id) {
+  const { protocoloId, origem } = ui.selecionar;
+  const pr = D().protocolos[protocoloId];
+  if (!pr) { toast('Este protocolo não existe mais.'); return; }
+  const reg = D()[col][id];
+  const nome = col === 'pessoas' ? (reg.nome || 'Pessoa sem nome') : tituloImovel(reg);
+  if (!ligarAoProtocolo(protocoloId, col, id)) { toast(nome + ' já está no protocolo ' + pr.numero + '.'); return; }
+  fecharJanela(J);
+  const jp = origem && origem.el.isConnected ? origem : janelas.find(x => x.ui.aba === 'protocolos' && x.ui.sel.protocolos === protocoloId && x.el.classList.contains('ver-detalhe'));
+  if (jp) {
+    jp.ui.selDados = Object.assign(jp.ui.selDados || {}, { [col]: id });
+    redesenhar(jp);
+    ativar(jp);
+    focarJanela(jp);
+  }
+  toast(nome + ' adicionado ao protocolo ' + pr.numero + '.');
 }
 // Salvar: grava o cadastro (o novo entra no armazenamento agora) e a janela volta para a lista
 function salvarRegistro(col, obj, msg) {
@@ -2944,7 +2949,11 @@ function abrirJanela(op) {
   el.addEventListener('pointerdown', () => ativar(j), true);
   el.addEventListener('focusin', () => ativar(j));
   // dados que mudaram enquanto se digitava aqui: redesenha ao sair da janela
-  el.addEventListener('focusout', ev => { if (j.adiado && !(ev.relatedTarget && el.contains(ev.relatedTarget))) redesenhar(j); });
+  // (depois do evento: o foco pode sair porque a própria janela está se redesenhando)
+  el.addEventListener('focusout', ev => {
+    if (!j.adiado || (ev.relatedTarget && el.contains(ev.relatedTarget))) return;
+    setTimeout(() => { if (j.adiado && el.isConnected && !emUso(j)) redesenhar(j); });
+  });
   cab.addEventListener('pointerdown', ev => arrastar(j, ev));
   cab.addEventListener('dblclick', ev => { if (!ev.target.closest('.jan-bt')) alternarMax(j); });
   // posição em cascata, dentro da área
@@ -2960,6 +2969,7 @@ function abrirJanela(op) {
   area.append(el);
   if (op.sel) ui.sel[op.aba] = op.sel;
   if (op.tabela) ui.tabela = op.tabela;
+  if (op.selecionar) ui.selecionar = op.selecionar;
   if (op.criando) { ui.criando = true; ui.modeloNovo = op.modeloNovo || null; ui.protocoloNovo = op.protocoloNovo || null; }
   j.direto = !!(op.sel || op.tabela || op.criando);
   mostrarDetalhe(j.direto);
@@ -3090,6 +3100,7 @@ function desenharTarefas() {
     }
   }, j.titulo || '…')));
 }
+const paraProtocolo = () => { const pr = ui.selecionar && D().protocolos[ui.selecionar.protocoloId]; return pr ? ' · adicionar ao Protocolo ' + pr.numero : ''; };
 function tituloJanela() {
   const det = emDetalhe(), aba = ui.aba;
   if (aba === 'protocolos') {
@@ -3099,12 +3110,12 @@ function tituloJanela() {
   }
   if (aba === 'pessoas') {
     const pe = det && registroSel('pessoas');
-    if (!pe) return 'Indicador Pessoal';
+    if (!pe) return 'Indicador Pessoal' + paraProtocolo();
     return (pe.tipo === 'juridica' ? 'Pessoa Jurídica' : 'Pessoa Física') + (pe.nome ? ' · ' + pe.nome : '');
   }
   if (aba === 'imoveis') {
     const im = det && registroSel('imoveis');
-    if (!im) return 'Indicador Real';
+    if (!im) return 'Indicador Real' + paraProtocolo();
     const t = tituloImovel(im);
     return { urbano: 'Imóvel Urbano', rural: 'Imóvel Rural', condominio: 'Condomínio' }[im.tipo] + (t.startsWith('Novo imóvel') ? '' : ' · ' + t);
   }
