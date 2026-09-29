@@ -1845,7 +1845,7 @@ function renderProtocolo(p) {
   const painel = h('div', { id: 'pr-painel', role: 'tabpanel' });
   const barraAbas = h('div', { class: 'pr-abas', role: 'tablist', 'aria-label': 'Conteúdo do protocolo' });
   // linha de abas do protocolo: cada aba mostra só o seu conteúdo
-  const ABAS_PROT = [['dados', 'Dados Protocolo'], ['andamentos', 'Andamentos'], ['financeiro', 'Financeiro'], ['checklists', 'Checklists']];
+  const ABAS_PROT = [['dados', 'Recepção'], ['andamentos', 'Andamentos'], ['financeiro', 'Financeiro'], ['checklists', 'Checklists']];
   // imóveis e pessoas ficam dentro do quadro Dados do protocolo
   const ABAS_DADOS = [['imoveis', 'Indicador Real'], ['pessoas', 'Indicador Pessoal']];
   if (ui.abaProt === 'imoveis' || ui.abaProt === 'pessoas') { ui.abaDados = ui.abaProt; ui.abaProt = 'dados'; }
@@ -2005,7 +2005,7 @@ function renderProtocolo(p) {
   };
   desenharAbas();
   desenharPainel();
-  // o quadro Dados do protocolo aparece só na aba Dados Protocolo
+  // o quadro Dados do protocolo aparece só na aba Recepção
   blocos.splice(blocos.indexOf(quadroDados), 1, barraAbas, painel);
   d.replaceChildren(...blocos);
 }
