@@ -23,7 +23,7 @@ A barra de menus do topo segue o S.R.I.:
 
 ### Protocolos (Recepção)
 
-- **Número automático** por ano: `0001/2026`, `0002/2026`…
+- **Ordem de protocolo**: número automático por ano (`0001/2026`, `0002/2026`…), exibido acima da abertura e sem possibilidade de alteração.
 - **Abertura**: data e hora registradas automaticamente no clique em *Recepção de Título*, sem possibilidade de alteração.
 - **Dados do protocolo**: interessado (quem está contratando), contato, município, prazo estimado e descrição do pedido.
 - **Situação**: aberto, em análise, aguardando documentos, concluído ou arquivado. Cada mudança fica registrada nos andamentos.

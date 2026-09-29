@@ -150,6 +150,7 @@ body:not(.ver-detalhe) .detalhe{display:none}
 .inp:focus{border-color:var(--acento);outline:none;box-shadow:0 0 0 3px var(--acento-suave)}
 textarea.inp{resize:vertical;min-height:38px;display:block}
 .inp[readonly]{background:var(--sup2);color:var(--tinta2);cursor:default}
+.campo-curto .inp{max-width:240px;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 .inp[readonly]:hover,.inp[readonly]:focus{border-color:var(--linha);box-shadow:none}
 select.inp{padding-right:28px}
 .dica{margin:0;font-size:13px;color:var(--tinta3)}
@@ -1469,7 +1470,7 @@ function campoProt(p, k, rot, tipo, extra = {}) {
   if (tipo === 'fixo') el = h('input', { class: 'inp', id, type: 'text', readonly: true, value: extra.valor || '' });
   else if (tipo === 'textarea') el = h('textarea', { class: 'inp', id, rows: '2', value: p[k] || '' });
   else el = h('input', { class: 'inp', id, type: tipo, value: p[k] || '', autocomplete: 'off' });
-  return { el, rotulo: h('label', { class: 'campo' + (extra.largo ? ' largo' : ''), for: id }, h('span', { class: 'rot' }, rot), el) };
+  return { el, rotulo: h('label', { class: 'campo' + (extra.largo ? ' largo' : '') + (extra.curto ? ' campo-curto' : ''), for: id }, h('span', { class: 'rot' }, rot), el) };
 }
 function renderProtocolo(p) {
   const d = $('#detalhe');
@@ -1502,6 +1503,7 @@ function renderProtocolo(p) {
 
   // dados do protocolo (salvos automaticamente)
   const campos = [
+    campoProt(p, 'numero', 'Ordem de protocolo', 'fixo', { valor: p.numero, largo: true, curto: true }),
     campoProt(p, 'abertura', 'Abertura', 'fixo', { valor: fmtAbertura(p) }),
     campoProt(p, 'interessado', 'Interessado', 'text'), campoProt(p, 'contato', 'Contato', 'text'),
     campoProt(p, 'municipio', 'Município/UF', 'text'), campoProt(p, 'prazo', 'Prazo estimado', 'date'),
@@ -1576,10 +1578,11 @@ function renderVazioProtocolos() {
 }
 function renderNovoProtocolo() {
   const d = $('#detalhe');
-  const numero = h('span', { class: 'sobre' });
-  const campo = (id, rot, attrs = {}) => h('label', { class: 'campo' + (attrs.largo ? ' largo' : ''), for: id }, h('span', { class: 'rot' }, rot),
-    h('input', Object.assign({ class: 'inp', id, type: 'text', autocomplete: 'off' }, attrs, { largo: null })));
+  const anoAtual = () => Number(hoje().slice(0, 4));
+  const campo = (id, rot, attrs = {}) => h('label', { class: 'campo' + (attrs.largo ? ' largo' : '') + (attrs.curto ? ' campo-curto' : ''), for: id }, h('span', { class: 'rot' }, rot),
+    h('input', Object.assign({ class: 'inp', id, type: 'text', autocomplete: 'off' }, attrs, { largo: null, curto: null })));
   const form = h('form', { class: 'form-nova' },
+    campo('np-numero', 'Ordem de protocolo', { readonly: true, value: numeroProtocolo(anoAtual(), proximoSeq(anoAtual())), tabindex: '-1', largo: true, curto: true }),
     campo('np-abertura', 'Abertura', { readonly: true, value: fmtData(hoje()), tabindex: '-1' }),
     campo('np-interessado', 'Interessado', { required: true, placeholder: 'Nome de quem está contratando' }),
     campo('np-contato', 'Contato', { placeholder: 'Telefone ou e-mail' }),
@@ -1590,8 +1593,6 @@ function renderNovoProtocolo() {
     h('div', { class: 'acoes largo' },
       h('button', { type: 'submit', class: 'btn btn-prim' }, ico('check'), 'Recepção de Título'),
       btn('Cancelar', { fant: true, onclick: () => { ui.criando = false; mostrarDetalhe(false); renderTudo(); } })));
-  const anoAtual = () => Number(hoje().slice(0, 4));
-  numero.textContent = 'Protocolo nº ' + numeroProtocolo(anoAtual(), proximoSeq(anoAtual()));
   form.addEventListener('submit', ev => {
     ev.preventDefault();
     const v = id => form.querySelector('#' + id).value.trim();
@@ -1608,7 +1609,7 @@ function renderNovoProtocolo() {
     renderTudo();
     toast(`Protocolo ${p.numero} aberto.`);
   });
-  d.replaceChildren(h('div', { class: 'cab' }, h('div', { class: 'cab-txt' }, voltarBtn(), numero, h('h1', { class: 'titulo' }, 'Recepção de Título'))), form);
+  d.replaceChildren(h('div', { class: 'cab' }, h('div', { class: 'cab-txt' }, voltarBtn(), h('span', { class: 'sobre' }, 'Recepção'), h('h1', { class: 'titulo' }, 'Recepção de Título'))), form);
   form.querySelector('#np-interessado').focus();
 }
 
