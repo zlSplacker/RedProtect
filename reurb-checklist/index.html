@@ -1788,7 +1788,7 @@ function renderProtocolo(p) {
     h('label', { class: 'campo campo-situacao', for: 'pr-situacao' }, h('span', { class: 'rot' }, 'Situação'), selSit),
     h('div', { class: 'linha-dir' }, rot['pr-abertura'], rot['pr-prazo']));
   const quadroDados = h('fieldset', { class: 'ident' }, h('legend', null, 'Dados do protocolo'), linhaOrdem,
-    h('div', { class: 'linha-3' }, rot['pr-interessado'], rot['pr-contato'], rot['pr-municipio']), rot['pr-descricao']);
+    h('div', { class: 'linha-3' }, rot['pr-municipio'], rot['pr-interessado'], rot['pr-contato']), rot['pr-descricao']);
   blocos.push(quadroDados);
   requestAnimationFrame(() => { const t = $('#pr-descricao'); if (t) autoAltura(t); });
 
