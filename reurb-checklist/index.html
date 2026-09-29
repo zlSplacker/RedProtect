@@ -76,6 +76,14 @@ h1,h2,h3{text-wrap:balance}
 .mb-sub{display:none;position:absolute;left:0;top:100%;z-index:35;min-width:220px;background:var(--sup);border:1px solid var(--linha);border-radius:0 0 10px 10px;box-shadow:var(--sombra);padding:6px}
 .mb-item:hover>.mb-sub,.mb-item.aberto>.mb-sub{display:grid}
 .mb-item.suprimir:hover>.mb-sub{display:none}
+/* submenu em cascata (Indicadores → Pessoal → …) */
+.mb-grupo{position:relative;display:grid}
+.mb-op.mb-op-sub{grid-template-columns:auto 1fr auto}
+.mb-op-sub::after{content:"";width:7px;height:7px;border-right:1.8px solid currentColor;border-top:1.8px solid currentColor;transform:rotate(45deg);opacity:.6;margin-left:14px}
+.mb-sub2{display:none;position:absolute;left:100%;top:-6px;z-index:36;min-width:210px;background:var(--sup);border:1px solid var(--linha);border-radius:10px;box-shadow:var(--sombra);padding:6px}
+.mb-sub2.esq{left:auto;right:100%}
+.mb-grupo:hover>.mb-sub2,.mb-grupo.aberto>.mb-sub2{display:grid}
+.mb-grupo:hover>.mb-op-sub,.mb-grupo.aberto>.mb-op-sub{background:var(--acento-suave)}
 .mb-op{display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:center;border:0;background:transparent;text-align:left;padding:9px 10px;border-radius:7px;color:var(--tinta)}
 .mb-op svg{width:18px;height:18px;color:var(--acento)}
 .mb-op span{font-weight:600;white-space:nowrap}
@@ -86,6 +94,10 @@ h1,h2,h3{text-wrap:balance}
   .mb-btn{padding:0 8px;min-height:40px;font-size:13.5px;gap:3px}
   .mb-btn svg{width:12px;height:12px}
   .mb-sub{min-width:0;width:max-content;max-width:calc(100vw - 32px)}
+  .mb-sub2{position:static;box-shadow:none;border:0;border-left:2px solid var(--linha);border-radius:0;margin:2px 0 4px 18px;padding:0 0 0 6px;min-width:0}
+  .mb-op-sub::after{transform:rotate(135deg)}
+  .mb-grupo:hover>.mb-sub2{display:none}
+  .mb-grupo.aberto>.mb-sub2{display:grid}
 }
 .topo-dir{margin-left:auto;display:flex;align-items:center;gap:12px}
 .salvo{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--tinta3);white-space:nowrap}
@@ -350,7 +362,14 @@ select.inp{padding-right:28px}
         <button type="button" class="mb-btn" id="mb-indicadores-btn" aria-haspopup="true" aria-expanded="false" aria-controls="mb-indicadores-sub">Indicadores<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <div class="mb-sub" id="mb-indicadores-sub" role="menu" aria-labelledby="mb-indicadores-btn">
           <button type="button" class="mb-op" role="menuitem" id="mb-imoveis" data-aba="imoveis"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7 M5 9.5V20h14V9.5 M10 20v-5h4v5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Real</span></button>
-          <button type="button" class="mb-op" role="menuitem" id="mb-pessoas" data-aba="pessoas"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c0-3.9 3.1-6.5 7-6.5s7 2.6 7 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Pessoal</span></button>
+          <div class="mb-grupo" id="mb-pessoal">
+            <button type="button" class="mb-op mb-op-sub" role="menuitem" id="mb-pessoal-btn" aria-haspopup="true" aria-expanded="false" aria-controls="mb-pessoal-sub"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c0-3.9 3.1-6.5 7-6.5s7 2.6 7 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Pessoal</span></button>
+            <div class="mb-sub2" id="mb-pessoal-sub" role="menu" aria-labelledby="mb-pessoal-btn">
+              <button type="button" class="mb-op" role="menuitem" id="mb-pessoas" data-aba="pessoas" data-acao="pesquisar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M16 16l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Pesquisar</span></button>
+              <button type="button" class="mb-op" role="menuitem" id="mb-pessoa-fisica" data-aba="pessoas" data-acao="fisica"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c0-3.9 3.1-6.5 7-6.5s7 2.6 7 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Pessoa Física</span></button>
+              <button type="button" class="mb-op" role="menuitem" id="mb-pessoa-juridica" data-aba="pessoas" data-acao="juridica"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16 M15 10h4a1 1 0 0 1 1 1v10 M3 21h18 M8 8h3 M8 12h3 M8 16h3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Pessoa Jurídica</span></button>
+            </div>
+          </div>
         </div>
       </div>
       <div class="mb-item"><button type="button" class="mb-btn" id="mb-analises" data-aba="analises" aria-current="page">Análises</button></div>
@@ -962,7 +981,7 @@ function renderAbas() {
   marcar($('#mb-protocolo-btn'), ui.aba === 'protocolos' && !ui.criando);
   marcar($('#mb-abrir-protocolo'), ui.aba === 'protocolos' && ui.criando);
   marcar($('#mb-protocolos'), ui.aba === 'protocolos' && !ui.criando);
-  marcar($('#mb-pessoas'), ui.aba === 'pessoas');
+  marcar($('#mb-pessoal-btn'), ui.aba === 'pessoas');
   marcar($('#mb-imoveis'), ui.aba === 'imoveis');
   marcar($('#mb-indicadores-btn'), ui.aba === 'pessoas' || ui.aba === 'imoveis');
 }
@@ -1611,8 +1630,8 @@ function campoReg(obj, prefixo, k, rot, tipo, opts = {}) {
   if (tipo === 'textarea') requestAnimationFrame(() => autoAltura(el));
   return h('label', { class: 'campo' + (opts.largo ? ' largo' : ''), for: id }, h('span', { class: 'rot' }, rot), el);
 }
-function novoRegistro(col) {
-  const obj = col === 'pessoas' ? normalizarPessoa({}) : normalizarImovel({});
+function novoRegistro(col, base) {
+  const obj = col === 'pessoas' ? normalizarPessoa(base || {}) : normalizarImovel(base || {});
   rascunho = { col, obj };
   ui.aba = col; ui.criando = false; ui.sel[col] = obj.id; salvarUI();
   try { history.replaceState(null, '', '#' + col); } catch (e) { /* sem histórico no quadro */ }
@@ -2119,9 +2138,22 @@ function posicionarSub(it) {
     if (sub.getBoundingClientRect().left < 8) { sub.style.right = 'auto'; sub.style.left = (8 - it.getBoundingClientRect().left) + 'px'; }
   }
 }
+function abrirGrupo(g, sim, focar) {
+  const gb = g.querySelector('.mb-op-sub'), sub2 = g.querySelector('.mb-sub2');
+  g.classList.toggle('aberto', sim);
+  gb.setAttribute('aria-expanded', String(sim));
+  if (sim) { posicionarSub2(g); if (focar) sub2.querySelector('.mb-op').focus(); }
+}
+/* abre o submenu em cascata à esquerda quando não cabe à direita */
+function posicionarSub2(g) {
+  const sub2 = g.querySelector('.mb-sub2');
+  sub2.classList.remove('esq');
+  if (getComputedStyle(sub2).position === 'absolute' && sub2.getBoundingClientRect().right > innerWidth - 8) sub2.classList.add('esq');
+}
 function abrirMenu(it, sim, focar) {
   it.classList.toggle('aberto', sim);
-  if (sim) posicionarSub(it);
+  if (!sim) for (const g of it.querySelectorAll('.mb-grupo')) abrirGrupo(g, false);
+  if (sim) { it.classList.remove('suprimir'); posicionarSub(it); }
   it.querySelector('.mb-btn').setAttribute('aria-expanded', String(sim));
   if (sim && focar) it.querySelector('.mb-op').focus();
 }
@@ -2129,20 +2161,34 @@ const fecharMenus = exceto => { for (const it of menusTopo) if (it !== exceto) a
 for (const it of menusTopo) {
   const b = it.querySelector('.mb-btn');
   b.addEventListener('click', () => { const abrir = !it.classList.contains('aberto'); fecharMenus(it); abrirMenu(it, abrir); });
-  b.addEventListener('keydown', ev => { if (ev.key === 'ArrowDown') { ev.preventDefault(); fecharMenus(it); abrirMenu(it, true, true); } });
+  b.addEventListener('keydown', ev => { if (ev.key === 'ArrowDown') { ev.preventDefault(); ev.stopPropagation(); fecharMenus(it); abrirMenu(it, true, true); } });
   it.addEventListener('keydown', ev => {
-    const ops = [...it.querySelectorAll('.mb-op')], i = ops.indexOf(document.activeElement);
+    const nivel = document.activeElement.closest('.mb-sub2, .mb-sub');
+    const ops = [...it.querySelectorAll('.mb-op')].filter(o => o.offsetParent !== null && o.closest('.mb-sub2, .mb-sub') === nivel);
+    const i = ops.indexOf(document.activeElement);
     if (ev.key === 'Escape') { abrirMenu(it, false); b.focus(); }
     else if (i >= 0 && (ev.key === 'ArrowDown' || ev.key === 'ArrowUp')) { ev.preventDefault(); ops[(i + (ev.key === 'ArrowDown' ? 1 : ops.length - 1)) % ops.length].focus(); }
   });
   it.addEventListener('pointerenter', () => posicionarSub(it));
   it.addEventListener('pointerleave', ev => { it.classList.remove('suprimir'); if (ev.pointerType === 'mouse') abrirMenu(it, false); });
 }
+for (const g of document.querySelectorAll('.mb-grupo')) {
+  const gb = g.querySelector('.mb-op-sub'), sub2 = g.querySelector('.mb-sub2');
+  g.addEventListener('pointerenter', () => posicionarSub2(g));
+  gb.addEventListener('click', () => abrirGrupo(g, !g.classList.contains('aberto')));
+  gb.addEventListener('keydown', ev => { if (ev.key === 'ArrowRight') { ev.preventDefault(); ev.stopPropagation(); abrirGrupo(g, true, true); } });
+  sub2.addEventListener('keydown', ev => {
+    if (ev.key === 'ArrowLeft' || ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); abrirGrupo(g, false); gb.focus(); }
+  });
+}
 document.addEventListener('click', ev => { for (const it of menusTopo) if (!it.contains(ev.target)) abrirMenu(it, false); });
 for (const b of document.querySelectorAll('[data-aba]')) b.addEventListener('click', () => {
   fecharMenus();
   if (b.classList.contains('mb-op')) { b.blur(); b.closest('.mb-item').classList.add('suprimir'); }
+  const acao = b.dataset.acao;
+  if (acao === 'fisica' || acao === 'juridica') { novoRegistro('pessoas', { tipo: acao }); return; }
   trocarAba(b.dataset.aba, !!b.dataset.novo);
+  if (acao === 'pesquisar') { const f = $('#filtro'); f.focus(); f.select(); }
 });
 $('#filtro').addEventListener('input', ev => { ui.filtro[ui.aba] = ev.target.value; salvarUI(); renderItens(); });
 const menu = $('#menu-backup');
