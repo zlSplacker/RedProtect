@@ -21,6 +21,19 @@ A barra de menus do topo segue o S.R.I.:
 - **Indicadores → Pessoal → Pesquisar / Pessoa Física / Pessoa Jurídica**: pesquisa e cadastro das pessoas (ocupantes, beneficiários, proprietários), com a qualificação que a CRF exige dos ocupantes (art. 41, VI): CPF, RG, estado civil, profissão e filiação.
 - **Análises**: aplica os modelos aos núcleos e mostra as pendências.
 
+### O protocolo é o centro do trabalho
+
+Tudo começa na **Recepção de Título**, que cria o protocolo. A ficha do protocolo reúne o processo inteiro em abas:
+
+| Aba | O que tem |
+| --- | --- |
+| **Andamentos** | Histórico datado; registra sozinho a abertura, as mudanças de situação e os checklists aplicados. |
+| **Checklists** | Análises aplicadas ao protocolo, com progresso e pendências, e o botão *Aplicar checklist*. |
+| **Imóveis** | Imóveis do protocolo; vincula um já cadastrado ou cadastra um novo (Urbano, Rural, Condomínio) já ligado ao protocolo. |
+| **Pessoas** | Partes do protocolo com sua qualidade (requerente, beneficiário, ocupante, proprietário, confrontante…), mais as pessoas que vêm pelos imóveis do protocolo. |
+
+Imóveis, pessoas e análises mostram um botão *Protocolo 0000/AAAA* para voltar ao protocolo de origem.
+
 ### Protocolos (Recepção)
 
 - **Ordem de protocolo**: número automático por ano (`0001/2026`, `0002/2026`…), exibido acima da abertura e sem possibilidade de alteração.
