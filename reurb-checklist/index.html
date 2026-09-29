@@ -349,7 +349,7 @@ select.inp{padding-right:28px}
       <div class="mb-item" id="mb-recepcao">
         <button type="button" class="mb-btn" id="mb-recepcao-btn" aria-haspopup="true" aria-expanded="false" aria-controls="mb-recepcao-sub">Recepção<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <div class="mb-sub" id="mb-recepcao-sub" role="menu" aria-labelledby="mb-recepcao-btn">
-          <button type="button" class="mb-op" role="menuitem" id="mb-abrir-protocolo" data-aba="protocolos" data-novo="1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5z M14 3v5h5 M12 11v6 M9 14h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Abrir protocolo</span></button>
+          <button type="button" class="mb-op" role="menuitem" id="mb-abrir-protocolo" data-aba="protocolos" data-novo="1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5z M14 3v5h5 M12 11v6 M9 14h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Recepção de Título</span></button>
         </div>
       </div>
       <div class="mb-item" id="mb-protocolo">
@@ -717,7 +717,7 @@ function normalizarProtocolo(p) {
     atualizadoEm: p.atualizadoEm || agora()
   };
 }
-/* A abertura é carimbada no clique em “Abrir protocolo” e não pode ser alterada. */
+/* A abertura é carimbada no clique em “Recepção de Título” e não pode ser alterada. */
 function fmtAbertura(p) {
   const t = p.abertoEm ? new Date(p.abertoEm) : null;
   if (!t || isNaN(t)) return fmtData(p.abertura);
@@ -1007,7 +1007,7 @@ function renderLateral() {
   f.placeholder = { analises: 'Filtrar por núcleo, município ou processo', modelos: 'Filtrar modelos', protocolos: 'Filtrar por número, interessado, contato ou município', pessoas: 'Filtrar por nome, CPF/CNPJ ou RG', imoveis: 'Filtrar por matrícula, endereço, denominação, condomínio ou pessoa' }[aba];
   const acoes = $('#lat-acoes');
   if (aba === 'protocolos') {
-    acoes.replaceChildren(btn('Abrir protocolo', { icone: 'mais', prim: true, onclick: () => trocarAba('protocolos', true) }));
+    acoes.replaceChildren(btn('Recepção de Título', { icone: 'mais', prim: true, onclick: () => trocarAba('protocolos', true) }));
   } else if (aba === 'pessoas') {
     acoes.replaceChildren(btn('Nova pessoa', { icone: 'mais', prim: true, onclick: () => novoRegistro('pessoas') }));
   } else if (aba === 'imoveis') {
@@ -1573,7 +1573,7 @@ function renderProtocolo(p) {
 function renderVazioProtocolos() {
   $('#detalhe').replaceChildren(h('div', { class: 'vazio' },
     h('h2', null, 'Nenhum protocolo aberto'),
-    btn('Abrir protocolo', { icone: 'mais', prim: true, onclick: () => trocarAba('protocolos', true) })));
+    btn('Recepção de Título', { icone: 'mais', prim: true, onclick: () => trocarAba('protocolos', true) })));
 }
 function renderNovoProtocolo() {
   const d = $('#detalhe');
@@ -1589,7 +1589,7 @@ function renderNovoProtocolo() {
     h('label', { class: 'campo largo', for: 'np-descricao' }, h('span', { class: 'rot' }, 'Descrição do pedido'),
       h('textarea', { class: 'inp', id: 'np-descricao', rows: '3' })),
     h('div', { class: 'acoes largo' },
-      h('button', { type: 'submit', class: 'btn btn-prim' }, ico('check'), 'Abrir protocolo'),
+      h('button', { type: 'submit', class: 'btn btn-prim' }, ico('check'), 'Recepção de Título'),
       btn('Cancelar', { fant: true, onclick: () => { ui.criando = false; mostrarDetalhe(false); renderTudo(); } })));
   const anoAtual = () => Number(hoje().slice(0, 4));
   numero.textContent = 'Protocolo nº ' + numeroProtocolo(anoAtual(), proximoSeq(anoAtual()));
@@ -1609,7 +1609,7 @@ function renderNovoProtocolo() {
     renderTudo();
     toast(`Protocolo ${p.numero} aberto.`);
   });
-  d.replaceChildren(h('div', { class: 'cab' }, h('div', { class: 'cab-txt' }, voltarBtn(), numero, h('h1', { class: 'titulo' }, 'Abrir protocolo'))), form);
+  d.replaceChildren(h('div', { class: 'cab' }, h('div', { class: 'cab-txt' }, voltarBtn(), numero, h('h1', { class: 'titulo' }, 'Recepção de Título'))), form);
   form.querySelector('#np-interessado').focus();
 }
 

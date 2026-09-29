@@ -12,7 +12,7 @@ Abra `index.html` no navegador (Chrome, Edge ou Firefox). Não precisa instalar 
 A barra de menus do topo segue o S.R.I.:
 
 - **Cadastros → Modelos de checklist**: passe o mouse sobre *Cadastros* (no celular, toque) e escolha a opção para criar e editar os modelos. Os próximos cadastros do sistema entram neste mesmo menu.
-- **Recepção → Abrir protocolo**: cadastra um novo protocolo para cada processo acompanhado (veja abaixo).
+- **Recepção → Recepção de Título**: cadastra um novo protocolo para cada processo acompanhado (veja abaixo).
 - **Protocolo → Consultar protocolos**: lista, filtra e abre os protocolos para acompanhar situação, prazo e andamentos.
 - **Indicadores → Real → Pesquisa / Urbano / Rural / Condomínio**: pesquisa e cadastro dos imóveis, com vínculo ao protocolo e às pessoas do Indicador Pessoal, cada uma com sua qualidade (ocupante, proprietário, beneficiário…). Cada tipo tem seus campos:
   - *Urbano*: núcleo ou loteamento, quadra, lote, logradouro, área (m²);
@@ -24,7 +24,7 @@ A barra de menus do topo segue o S.R.I.:
 ### Protocolos (Recepção)
 
 - **Número automático** por ano: `0001/2026`, `0002/2026`…
-- **Abertura**: data e hora registradas automaticamente no clique em *Abrir protocolo*, sem possibilidade de alteração.
+- **Abertura**: data e hora registradas automaticamente no clique em *Recepção de Título*, sem possibilidade de alteração.
 - **Dados do protocolo**: interessado (quem está contratando), contato, município, prazo estimado e descrição do pedido.
 - **Situação**: aberto, em análise, aguardando documentos, concluído ou arquivado. Cada mudança fica registrada nos andamentos.
 - **Prazo estimado**: o protocolo avisa quando faltam 7 dias ou menos e quando o prazo venceu.
