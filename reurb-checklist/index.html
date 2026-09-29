@@ -3072,6 +3072,7 @@ function desenharTarefas() {
   }, j.titulo || '…')));
 }
 const paraProtocolo = () => { const pr = ui.selecionar && D().protocolos[ui.selecionar.protocoloId]; return pr ? ' · adicionar ao Protocolo ' + pr.numero : ''; };
+// o título diz o que a janela mostra; não repete o que se digita nos campos
 function tituloJanela() {
   const det = emDetalhe(), aba = ui.aba;
   if (aba === 'protocolos') {
@@ -3082,22 +3083,21 @@ function tituloJanela() {
   if (aba === 'pessoas') {
     const pe = det && registroSel('pessoas');
     if (!pe) return 'Indicador Pessoal' + paraProtocolo();
-    return (pe.tipo === 'juridica' ? 'Pessoa Jurídica' : 'Pessoa Física') + (pe.nome ? ' · ' + pe.nome : '');
+    return pe.tipo === 'juridica' ? 'Pessoa Jurídica' : 'Pessoa Física';
   }
   if (aba === 'imoveis') {
     const im = det && registroSel('imoveis');
     if (!im) return 'Indicador Real' + paraProtocolo();
-    const t = tituloImovel(im);
-    return { urbano: 'Imóvel Urbano', rural: 'Imóvel Rural', condominio: 'Condomínio' }[im.tipo] + (/^Nov[oa] /.test(t) ? '' : ' · ' + t);
+    return { urbano: 'Imóvel Urbano', rural: 'Imóvel Rural', condominio: 'Condomínio' }[im.tipo];
   }
   if (aba === 'analises') {
     if (ui.criando) return 'Nova análise';
     const a = det && D().analises[ui.sel.analises];
-    return a ? 'Análise · ' + (a.ident.nucleo || 'Núcleo sem nome') : 'Análises';
+    return a ? 'Análise' : 'Análises';
   }
   if (aba === 'modelos') {
     const m = det && D().modelos[ui.sel.modelos];
-    return m ? 'Modelo · ' + (m.nome || 'Sem nome') : 'Modelos de checklist';
+    return m ? 'Modelo de checklist' : 'Modelos de checklist';
   }
   return det && TABELAS[ui.tabela] ? TABELAS[ui.tabela].nome : 'Tabelas de indicadores';
 }
