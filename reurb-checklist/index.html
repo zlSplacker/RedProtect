@@ -2202,9 +2202,6 @@ function subImovel(i) {
   const t = tituloImovel(i);
   return [i.nucleo, t !== i.logradouro && i.logradouro, i.municipio].filter(Boolean).join(' · ');
 }
-function subPessoa(p) {
-  return [p.documento && (p.tipo === 'juridica' ? 'CNPJ ' : 'CPF ') + p.documento, p.tipo === 'fisica' && p.estadoCivil, p.tipo === 'fisica' && p.profissao].filter(Boolean).join(' · ') || (p.tipo === 'juridica' ? 'Pessoa jurídica' : 'Pessoa física');
-}
 function campoReg(obj, prefixo, k, rot, tipo, opts = {}) {
   const id = prefixo + '-' + k;
   let el;
@@ -2266,24 +2263,16 @@ function renderVazioIndicador(col) {
 function renderPessoa(pe) {
   const d = $('#detalhe');
   const pj = pe.tipo === 'juridica';
-  const titulo = h('h1', { class: 'titulo' }, pe.nome || 'Nova pessoa');
-  const sub = h('p', { class: 'subt' }, subPessoa(pe));
   const linksProt = h('div');
   const atualizarLinks = () => linksProt.replaceChildren(botoesProtocolo(protocolosDaPessoa(pe.id)) || '');
   atualizarLinks();
-  const aoMudar = k => {
-    titulo.textContent = pe.nome || 'Nova pessoa';
-    sub.textContent = subPessoa(pe);
+  const aoMudar = () => {
     gravarRegistro('pessoas', pe);
     atualizarLinks();
     renderItens();
-    if (k === 'tipo') renderDetalhe();
   };
   const c = (k, rot, span, tipo = 'text', opts = {}) => campoReg(pe, 'pe', k, rot, tipo, Object.assign({ aoMudar, span }, opts));
   const ck = (k, rot) => campoCheck(pe, 'pe', k, rot, aoMudar);
-  const selTipo = h('select', { class: 'inp', id: 'pe-tipo', 'aria-label': 'Tipo de pessoa' },
-    [['fisica', 'Pessoa física'], ['juridica', 'Pessoa jurídica']].map(([v, r]) => h('option', { value: v, selected: v === pe.tipo }, r)));
-  selTipo.addEventListener('change', () => { pe.tipo = selTipo.value; aoMudar('tipo'); });
 
   // dados pessoais
   const dados = pj
@@ -2371,9 +2360,8 @@ function renderPessoa(pe) {
     ? h('p', { class: 'nota' }, ico('aviso'), h('span', null, h('strong', null, 'Observação: '), pe.observacoes)) : null;
   d.replaceChildren(
     h('div', { class: 'cab' },
-      h('div', { class: 'cab-txt' }, voltarBtn(), h('span', { class: 'sobre' }, 'Indicador Pessoal'), titulo, sub, linksProt),
+      h('div', { class: 'cab-txt' }, voltarBtn(), h('span', { class: 'sobre' }, 'Indicador Pessoal'), linksProt),
       h('div', { class: 'acoes' },
-        h('label', { class: 'situacao', for: 'pe-tipo' }, h('span', { class: 'rot' }, 'Tipo'), selTipo),
         btn('Excluir pessoa', { icone: 'lixo', fant: true, perigo: true, onclick: ev => armar(ev.currentTarget, () => {
           for (const i of Object.values(D().imoveis)) {
             if (i.vinculos.some(v => v.pessoaId === pe.id)) { i.vinculos = i.vinculos.filter(v => v.pessoaId !== pe.id); Store.put('imoveis', i, 0); }
