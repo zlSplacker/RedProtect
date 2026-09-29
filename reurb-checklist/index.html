@@ -1756,7 +1756,7 @@ function campoProt(p, k, rot, tipo, extra = {}) {
   if (tipo === 'fixo') el = h('input', { class: 'inp', id, type: 'text', readonly: true, value: extra.valor || '' });
   else if (tipo === 'textarea') el = h('textarea', { class: 'inp', id, rows: '2', value: p[k] || '' });
   else el = h('input', { class: 'inp', id, type: tipo, value: p[k] || '', autocomplete: 'off' });
-  return { el, rotulo: h('label', { class: 'campo' + (extra.largo ? ' largo' : '') + (extra.curto ? ' campo-curto' : ''), for: id }, h('span', { class: 'rot' }, rot), el) };
+  return { k, el, rotulo: h('label', { class: 'campo' + (extra.largo ? ' largo' : '') + (extra.curto ? ' campo-curto' : ''), for: id }, h('span', { class: 'rot' }, rot), el) };
 }
 function renderProtocolo(p) {
   const d = $('#detalhe');
@@ -1809,9 +1809,8 @@ function renderProtocolo(p) {
   ];
   for (const c of campos) {
     if (c.el.readOnly) continue;
-    const k = c.el.id.slice(3);
     c.el.addEventListener('input', () => {
-      p[k] = c.el.value;
+      p[c.k] = c.el.value;
       if (c.el.tagName === 'TEXTAREA') autoAltura(c.el);
       titulo.textContent = nomeProtocolo(p);
       sub.textContent = subtituloProtocolo(p);
@@ -1822,12 +1821,12 @@ function renderProtocolo(p) {
   }
   // primeira linha do quadro: ordem de protocolo e situação lado a lado
   // primeira linha: ordem e situação à esquerda; abertura e prazo estimado do outro lado
-  const rot = Object.fromEntries(campos.map(c => [c.el.id, c.rotulo]));
-  const linhaOrdem = h('div', { class: 'linha-ordem' }, rot['pr-numero'],
+  const rot = Object.fromEntries(campos.map(c => [c.k, c.rotulo]));
+  const linhaOrdem = h('div', { class: 'linha-ordem' }, rot.numero,
     h('label', { class: 'campo campo-situacao', for: 'pr-situacao' }, h('span', { class: 'rot' }, 'Situação'), selSit),
-    h('div', { class: 'linha-dir' }, rot['pr-abertura'], rot['pr-prazo']));
+    h('div', { class: 'linha-dir' }, rot.abertura, rot.prazo));
   const quadroDados = h('fieldset', { class: 'ident' }, h('legend', null, 'Dados do protocolo'), linhaOrdem,
-    h('div', { class: 'linha-3' }, rot['pr-municipio'], rot['pr-interessado'], rot['pr-contato']), rot['pr-descricao']);
+    h('div', { class: 'linha-3' }, rot.municipio, rot.interessado, rot.contato), rot.descricao);
   blocos.push(quadroDados);
   requestAnimationFrame(() => { const t = $('#pr-descricao'); if (t) autoAltura(t); });
 
