@@ -973,7 +973,6 @@ function opcoesTabela(id, atual) {
   const nomes = tabela(id).itens.map(x => x.nome);
   return atual && !nomes.includes(atual) ? [...nomes, [atual, atual + ' (fora da tabela)']] : nomes;
 }
-const QUALIDADES = ['Ocupante', 'Proprietário', 'Beneficiário', 'Cônjuge ou companheiro', 'Outro'];
 const txt = v => String(v ?? '');
 const SEXOS = ['Feminino', 'Masculino'];
 const REGIMES = ['Comunhão parcial de bens', 'Comunhão universal de bens', 'Separação convencional de bens', 'Separação obrigatória de bens', 'Participação final nos aquestos'];
@@ -2497,43 +2496,12 @@ function renderImovel(im) {
     c('descricao', 'Descrição e confrontações', 'textarea', { largo: true }),
     c('observacoes', 'Observações', 'textarea', { largo: true })
   ];
-  // pessoas vinculadas
-  const lista = h('div', { class: 'vinc' });
-  const desenhar = () => {
-    lista.replaceChildren(...im.vinculos.map((v, k) => {
-      const pe = D().pessoas[v.pessoaId];
-      const qual = h('select', { class: 'inp', 'aria-label': 'Qualidade' }, QUALIDADES.map(q => h('option', { value: q, selected: q === v.qualidade }, q)));
-      qual.addEventListener('change', () => { v.qualidade = qual.value; gravarRegistro('imoveis', im); });
-      return h('div', { class: 'vinc-linha' },
-        h('button', { type: 'button', class: 'vinc-nome', onclick: () => pe && irPara('pessoas', pe.id) },
-          pe ? pe.nome || 'Sem nome' : 'Pessoa excluída', pe && pe.documento ? h('small', null, pe.documento) : null),
-        qual,
-        btn('Remover vínculo', { icone: 'x', soIcone: true, fant: true, onclick: ev => armar(ev.currentTarget, () => {
-          im.vinculos.splice(k, 1); gravarRegistro('imoveis', im); desenhar(); renderItens();
-        }) }));
-    }));
-    if (!im.vinculos.length) lista.append(h('p', { class: 'dica' }, 'Nenhuma pessoa vinculada.'));
-    const livres = pessoasOrdenadas().filter(p => !im.vinculos.some(v => v.pessoaId === p.id));
-    addBox.replaceChildren();
-    if (livres.length) {
-      const selP = h('select', { class: 'inp', id: 'im-add-pessoa', 'aria-label': 'Pessoa' }, livres.map(p => h('option', { value: p.id }, p.nome + (p.documento ? ' · ' + p.documento : ''))));
-      const selQ = h('select', { class: 'inp', id: 'im-add-qualidade', 'aria-label': 'Qualidade', style: 'flex:0 1 210px' }, QUALIDADES.map(q => h('option', { value: q }, q)));
-      addBox.append(selP, selQ, btn('Vincular', { icone: 'mais', prim: true, onclick: () => {
-        im.vinculos.push({ pessoaId: selP.value, qualidade: selQ.value });
-        gravarRegistro('imoveis', im); desenhar(); renderItens();
-      } }));
-    }
-    addBox.append(btn('Nova pessoa', { icone: 'mais', fant: true, onclick: () => novoRegistro('pessoas') }));
-  };
-  const addBox = h('div', { class: 'vinc-add' });
-  desenhar();
   d.replaceChildren(
     h('div', { class: 'cab' },
       h('div', { class: 'cab-txt' }, voltarBtn(), h('span', { class: 'sobre' }, 'Indicador Real · ' + TIPOS_IMOVEL[im.tipo]), titulo, sub, linksProt),
       h('div', { class: 'acoes' }, btn('Excluir imóvel', { icone: 'lixo', fant: true, perigo: true, onclick: ev => armar(ev.currentTarget, () => excluirRegistro('imoveis', im, 'Imóvel excluído.')) }))),
     h('div', { class: 'reg-pilha' },
-      h('fieldset', { class: 'ident' }, h('legend', null, 'Identificação do imóvel'), campos),
-      h('section', { class: 'bloco', 'aria-labelledby': 'im-vinc-tit' }, h('h2', { class: 'bloco-tit', id: 'im-vinc-tit' }, 'Pessoas vinculadas'), lista, addBox)),
+      h('fieldset', { class: 'ident' }, h('legend', null, 'Identificação do imóvel'), campos)),
     h('div', { class: 'reg-rodape' }, btn('Salvar', { icone: 'check', prim: true, onclick: () => salvarRegistro('imoveis', im, 'Imóvel salvo.') })));
 }
 
@@ -3117,7 +3085,7 @@ function tituloJanela() {
     const im = det && registroSel('imoveis');
     if (!im) return 'Indicador Real' + paraProtocolo();
     const t = tituloImovel(im);
-    return { urbano: 'Imóvel Urbano', rural: 'Imóvel Rural', condominio: 'Condomínio' }[im.tipo] + (t.startsWith('Novo imóvel') ? '' : ' · ' + t);
+    return { urbano: 'Imóvel Urbano', rural: 'Imóvel Rural', condominio: 'Condomínio' }[im.tipo] + (/^Nov[oa] /.test(t) ? '' : ' · ' + t);
   }
   if (aba === 'analises') {
     if (ui.criando) return 'Nova análise';
