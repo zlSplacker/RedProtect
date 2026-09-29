@@ -325,6 +325,24 @@ select.inp{padding-right:28px}
 .pr-aba .n{font:500 12px var(--f-mono);color:var(--tinta3)}
 .pr-sub{margin:6px 0 0;font:600 11px/1 var(--f-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--tinta3)}
 .link-prots{display:flex;flex-wrap:wrap;gap:4px}
+/* barra de botões do protocolo, como no S.R.I. */
+.barra-prot{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:6px;background:var(--sup);border:1px solid var(--linha);border-radius:10px;margin-bottom:18px}
+.bp{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--linha);background:var(--sup2);color:var(--tinta);border-radius:7px;padding:7px 14px;font-weight:600;min-height:36px}
+.bp svg{width:17px;height:17px;flex:none;color:var(--acento)}
+.bp:hover{border-color:var(--acento)}
+.bp[aria-pressed="true"]{background:var(--acento-suave);border-color:var(--acento);color:var(--acento-texto)}
+.bp .cont{background:var(--pend);color:var(--sobre-pend);border-radius:999px;font:600 11px/1.5 var(--f-mono);padding:0 7px}
+.barra-prot .fim{margin-left:auto}
+.exig-lista{list-style:none;margin:0;padding:0;display:grid;gap:8px;counter-reset:exig}
+.exig{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px 12px;align-items:start;padding:12px 14px;border:1px solid var(--linha2);border-radius:9px;background:var(--sup2)}
+.exig.cumprida{opacity:.72}
+.exig-num{font:500 13px/1.6 var(--f-mono);color:var(--acento-texto)}
+.exig-txt{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5}
+.exig-meta{grid-column:2;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px;color:var(--tinta3)}
+.exig-acoes{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.exig-form{display:grid;gap:8px}
+.exig-form .linha{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+@media (max-width:640px){.exig{grid-template-columns:auto minmax(0,1fr)}.exig-acoes{grid-column:1/-1;justify-content:flex-start}}
 .ident textarea.inp{grid-column:1/-1}
 /* indicadores pessoal e real */
 .reg-pilha{display:grid;gap:20px}
@@ -515,6 +533,8 @@ const ICONES = {
   lista: '<path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/>',
   x: '<path d="M6 6l12 12M18 6L6 18"/>',
   aviso: '<path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18h.01"/>',
+  exigencia: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5z"/><path d="M14 3v5h5M12 11v4M12 18h.01"/>',
+  dados: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>',
   lupa: '<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/>',
   livro: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5z"/><path d="M4 19a2 2 0 0 1 2-2h13"/>',
   pasta: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/>'
@@ -747,6 +767,7 @@ function normalizarProtocolo(p) {
     prazo: String(p.prazo || ''), descricao: String(p.descricao || ''),
     situacao: SITUACOES[p.situacao] ? p.situacao : 'aberto',
     andamentos: Array.isArray(p.andamentos) ? p.andamentos.map(x => ({ id: String(x.id || uid('n')), data: String(x.data || ''), texto: String(x.texto || ''), em: x.em || '' })) : [],
+    exigencias: Array.isArray(p.exigencias) ? p.exigencias.filter(x => x && String(x.texto || '').trim()).map(x => ({ id: String(x.id || uid('ex')), texto: String(x.texto), emitidaEm: String(x.emitidaEm || ''), cumpridaEm: String(x.cumpridaEm || '') })) : [],
     partes: Array.isArray(p.partes) ? p.partes.filter(x => x && x.pessoaId).map(x => ({ pessoaId: String(x.pessoaId), qualidade: String(x.qualidade || 'Beneficiário') })) : [],
     exemplo: !!p.exemplo,
     criadoEm: p.criadoEm || agora(),
@@ -1042,7 +1063,7 @@ const ui = (() => {
   return u;
 })();
 function salvarUI() {
-  try { localStorage.setItem(LS_UI, JSON.stringify({ aba: ui.aba, sel: ui.sel, filtro: ui.filtro, filtroQ: ui.filtroQ, abaProt: ui.abaProt, abaEnd: ui.abaEnd, tabela: ui.tabela })); } catch (e) { /* conveniência apenas */ }
+  try { localStorage.setItem(LS_UI, JSON.stringify({ aba: ui.aba, sel: ui.sel, filtro: ui.filtro, filtroQ: ui.filtroQ, abaProt: ui.abaProt, visaoProt: ui.visaoProt, abaEnd: ui.abaEnd, tabela: ui.tabela })); } catch (e) { /* conveniência apenas */ }
 }
 const D = () => Store.dados;
 const analisesOrdenadas = () => Object.values(D().analises).sort((a, b) => String(b.atualizadoEm).localeCompare(String(a.atualizadoEm)));
@@ -1193,6 +1214,7 @@ function renderItens() {
         sub ? h('span', { class: 'item-sub' }, sub) : null,
         h('span', { class: 'item-meta' },
           h('span', { class: 'chip ' + sitCls }, sitRot),
+          p.exigencias.some(x => !x.cumpridaEm) ? h('span', { class: 'chip chip-pend' }, plural(p.exigencias.filter(x => !x.cumpridaEm).length, 'exigência', 'exigências')) : null,
           prazo ? h('span', { class: 'chip ' + prazo[1] }, prazo[0]) : null,
           nChk ? h('span', null, plural(nChk, 'checklist', 'checklists')) : null,
           imoveisDoProtocolo(p.id).length ? h('span', null, plural(imoveisDoProtocolo(p.id).length, 'imóvel', 'imóveis')) : null,
@@ -1638,8 +1660,21 @@ function renderProtocolo(p) {
       Store.remover('protocolos', p.id); ui.sel.protocolos = null; garantirSelecao(); mostrarDetalhe(false); renderTudo();
       toast('Protocolo excluído. Checklists, imóveis e pessoas continuam cadastrados.');
     }) }));
-  const blocos = [h('div', { class: 'cab' },
-    h('div', { class: 'cab-txt' }, voltarBtn(), h('span', { class: 'sobre' }, 'Protocolo ' + p.numero), titulo, sub, chips), acoes)];
+  const pendentesExig = p.exigencias.filter(x => !x.cumpridaEm).length;
+  const visao = ui.visaoProt === 'exigencia' ? 'exigencia' : 'dados';
+  const botaoVisao = (k, rot, icone, extra) => h('button', {
+    type: 'button', class: 'bp', id: 'pr-bt-' + k, 'aria-pressed': String(visao === k),
+    onclick: () => { ui.visaoProt = k; salvarUI(); renderDetalhe(); }
+  }, ico(icone), rot, extra);
+  const bExig = botaoVisao('exigencia', 'Exigência', 'exigencia', h('span', { class: 'cont', hidden: !pendentesExig }, String(pendentesExig)));
+  const barraProt = h('div', { class: 'barra-prot', role: 'toolbar', 'aria-label': 'Protocolo ' + p.numero },
+    bExig,
+    botaoVisao('dados', 'Dados', 'dados'),
+    h('span', { class: 'fim' }, voltarBtn()));
+  const cab = h('div', { class: 'cab' },
+    h('div', { class: 'cab-txt' }, h('span', { class: 'sobre' }, 'Protocolo ' + p.numero), titulo, sub, chips), acoes);
+  if (visao === 'exigencia') { d.replaceChildren(barraProt, cab, blocoExigencias(p, bExig)); return; }
+  const blocos = [barraProt, cab];
   if (p.exemplo) blocos.push(h('p', { class: 'nota nota-info' }, ico('info'), h('span', null, 'Protocolo de exemplo, com dados fictícios. Exclua-o quando não precisar mais.')));
 
   // dados do protocolo (salvos automaticamente)
@@ -1808,6 +1843,56 @@ function renderProtocolo(p) {
   blocos.push(barraAbas, painel);
   d.replaceChildren(...blocos);
 }
+/* exigências do protocolo: o que o interessado ou o município ainda precisa apresentar */
+function blocoExigencias(p, botao) {
+  const salvar = () => { Store.put('protocolos', p, 0); renderItens(); };
+  const lista = h('ol', { class: 'exig-lista' });
+  const resumo = h('p', { class: 'dica' });
+  const desenhar = () => {
+    const pend = p.exigencias.filter(x => !x.cumpridaEm).length;
+    resumo.textContent = p.exigencias.length ? `${plural(pend, 'pendente', 'pendentes')} · ${plural(p.exigencias.length - pend, 'cumprida', 'cumpridas')}` : 'Nenhuma exigência registrada.';
+    const cont = botao.querySelector('.cont');
+    cont.textContent = String(pend); cont.hidden = !pend;
+    copiarBtn.disabled = !pend;
+    lista.replaceChildren(...p.exigencias.map((x, k) => h('li', { class: 'exig' + (x.cumpridaEm ? ' cumprida' : '') },
+      h('span', { class: 'exig-num' }, String(k + 1) + '.'),
+      h('p', { class: 'exig-txt' }, x.texto),
+      h('div', { class: 'exig-acoes' },
+        x.cumpridaEm
+          ? btn('Reabrir', { icone: 'voltar', sm: true, fant: true, onclick: () => { x.cumpridaEm = ''; registrarAndamento(p, `Exigência ${k + 1} reaberta.`); salvar(); desenhar(); } })
+          : btn('Marcar como cumprida', { icone: 'check', sm: true, onclick: () => { x.cumpridaEm = hoje(); registrarAndamento(p, `Exigência ${k + 1} cumprida.`); salvar(); desenhar(); } }),
+        btn('Excluir exigência', { icone: 'lixo', soIcone: true, fant: true, perigo: true, onclick: ev => armar(ev.currentTarget, () => { p.exigencias.splice(k, 1); salvar(); desenhar(); }) })),
+      h('div', { class: 'exig-meta' },
+        h('span', { class: 'chip ' + (x.cumpridaEm ? 'chip-ok' : 'chip-pend') }, x.cumpridaEm ? 'Cumprida em ' + fmtData(x.cumpridaEm) : 'Pendente'),
+        x.emitidaEm ? 'Emitida em ' + fmtData(x.emitidaEm) : null))));
+  };
+  const texto = h('textarea', { class: 'inp', id: 'exig-texto', rows: '3', placeholder: 'Descreva o que precisa ser apresentado ou corrigido' });
+  texto.addEventListener('input', () => autoAltura(texto));
+  const data = h('input', { class: 'inp', type: 'date', id: 'exig-data', value: hoje(), style: 'max-width:180px', 'aria-label': 'Data de emissão' });
+  const form = h('form', { class: 'exig-form' },
+    h('label', { class: 'campo', for: 'exig-texto' }, h('span', { class: 'rot' }, 'Nova exigência'), texto),
+    h('div', { class: 'linha' }, h('label', { class: 'rot', for: 'exig-data' }, 'Emitida em'), data,
+      h('button', { type: 'submit', class: 'btn btn-prim' }, ico('mais'), 'Registrar exigência')));
+  form.addEventListener('submit', ev => {
+    ev.preventDefault();
+    const t = texto.value.trim();
+    if (!t) { toast('Descreva a exigência antes de registrar.'); texto.focus(); return; }
+    p.exigencias.push({ id: uid('ex'), texto: t, emitidaEm: data.value || hoje(), cumpridaEm: '' });
+    registrarAndamento(p, `Exigência ${p.exigencias.length} registrada.`, data.value || hoje());
+    salvar(); texto.value = ''; autoAltura(texto); desenhar(); texto.focus();
+  });
+  const copiarBtn = btn('Copiar exigências pendentes', { icone: 'copiar', sm: true, onclick: () => {
+    const pend = p.exigencias.map((x, k) => [x, k]).filter(([x]) => !x.cumpridaEm);
+    const linhas = [`Protocolo ${p.numero}${p.interessado ? ' — ' + p.interessado : ''}`, 'Exigências pendentes:', '',
+      ...pend.map(([x, k]) => `${k + 1}. ${x.texto}${x.emitidaEm ? ' (emitida em ' + fmtData(x.emitidaEm) + ')' : ''}`)];
+    copiar(linhas.join('\n'), 'Exigências copiadas.', 'Copiar exigências');
+  } });
+  desenhar();
+  return h('section', { class: 'bloco', 'aria-labelledby': 'exig-tit' },
+    h('div', { class: 'lat-cab', style: 'justify-content:space-between;flex-wrap:wrap' },
+      h('h2', { class: 'bloco-tit', id: 'exig-tit' }, 'Exigências'), copiarBtn),
+    resumo, lista, form);
+}
 function renderVazioProtocolos() {
   $('#detalhe').replaceChildren(h('div', { class: 'vazio' },
     h('h2', null, 'Nenhum protocolo aberto'),
@@ -1842,7 +1927,7 @@ function renderNovoProtocolo() {
       andamentos: [{ id: uid('n'), data: abertura, texto: 'Protocolo aberto.', em: abertoEm }]
     });
     Store.put('protocolos', p, 0);
-    ui.sel.protocolos = p.id; ui.criando = false; ui.abaProt = 'andamentos'; salvarUI();
+    ui.sel.protocolos = p.id; ui.criando = false; ui.abaProt = 'andamentos'; ui.visaoProt = 'dados'; salvarUI();
     renderTudo();
     toast(`Protocolo ${p.numero} aberto.`);
   });
@@ -2538,10 +2623,10 @@ function mostrarTexto(titulo, texto, dica) {
   document.body.append(modal);
   ta.focus(); ta.select();
 }
-function copiar(texto) {
-  const falhou = () => mostrarTexto('Copiar pendências', texto, 'Selecione o texto abaixo e copie com Ctrl+C.');
+function copiar(texto, msg = 'Pendências copiadas.', titulo = 'Copiar pendências') {
+  const falhou = () => mostrarTexto(titulo, texto, 'Selecione o texto abaixo e copie com Ctrl+C.');
   try {
-    navigator.clipboard.writeText(texto).then(() => toast('Pendências copiadas.'), falhou);
+    navigator.clipboard.writeText(texto).then(() => toast(msg), falhou);
   } catch (e) { falhou(); }
 }
 let downloadsP = null;

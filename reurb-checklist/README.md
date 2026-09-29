@@ -31,7 +31,10 @@ A barra de menus do topo segue o S.R.I.:
 
 ### O protocolo é o centro do trabalho
 
-Tudo começa na **Recepção de Título**, que cria o protocolo. A ficha do protocolo reúne o processo inteiro em abas:
+Tudo começa na **Recepção de Título**, que cria o protocolo. No topo da ficha fica a barra de botões, como no S.R.I.:
+
+- **Exigência**: registro das exigências do protocolo (texto e data de emissão), com marcação de cumprida e cópia das pendentes em texto. O botão mostra quantas estão pendentes, e cada registro ou cumprimento entra nos andamentos.
+- **Dados**: a ficha do protocolo, que reúne o processo inteiro em abas:
 
 | Aba | O que tem |
 | --- | --- |
