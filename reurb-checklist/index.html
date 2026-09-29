@@ -326,13 +326,12 @@ select.inp{padding-right:28px}
 .pr-sub{margin:6px 0 0;font:600 11px/1 var(--f-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--tinta3)}
 .link-prots{display:flex;flex-wrap:wrap;gap:4px}
 /* barra de botões do protocolo, como no S.R.I. */
-.barra-prot{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:6px;background:var(--sup);border:1px solid var(--linha);border-radius:10px;margin-bottom:18px}
+.barra-prot{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:6px;background:var(--sup);border:1px solid var(--linha);border-radius:10px;margin-bottom:10px}
 .bp{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--linha);background:var(--sup2);color:var(--tinta);border-radius:7px;padding:7px 14px;font-weight:600;min-height:36px}
 .bp svg{width:17px;height:17px;flex:none;color:var(--acento)}
 .bp:hover{border-color:var(--acento)}
 .bp[aria-pressed="true"]{background:var(--acento-suave);border-color:var(--acento);color:var(--acento-texto)}
 .bp .cont{background:var(--pend);color:var(--sobre-pend);border-radius:999px;font:600 11px/1.5 var(--f-mono);padding:0 7px}
-.barra-prot .fim{margin-left:auto}
 .exig-lista{list-style:none;margin:0;padding:0;display:grid;gap:8px;counter-reset:exig}
 .exig{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px 12px;align-items:start;padding:12px 14px;border:1px solid var(--linha2);border-radius:9px;background:var(--sup2)}
 .exig.cumprida{opacity:.72}
@@ -1667,15 +1666,15 @@ function renderProtocolo(p) {
     onclick: () => { ui.visaoProt = k; salvarUI(); renderDetalhe(); }
   }, ico(icone), rot, extra);
   const bExig = botaoVisao('exigencia', 'Exigência', 'exigencia', h('span', { class: 'cont', hidden: !pendentesExig }, String(pendentesExig)));
+  // a barra fica logo acima do quadro, alinhada com ele
   const barraProt = h('div', { class: 'barra-prot', role: 'toolbar', 'aria-label': 'Protocolo ' + p.numero },
     bExig,
-    botaoVisao('dados', 'Dados', 'dados'),
-    h('span', { class: 'fim' }, voltarBtn()));
+    botaoVisao('dados', 'Dados', 'dados'));
   const cab = h('div', { class: 'cab' },
-    h('div', { class: 'cab-txt' }, h('span', { class: 'sobre' }, 'Protocolo ' + p.numero), titulo, sub, chips), acoes);
-  if (visao === 'exigencia') { d.replaceChildren(barraProt, cab, blocoExigencias(p, bExig)); return; }
-  const blocos = [barraProt, cab];
-  if (p.exemplo) blocos.push(h('p', { class: 'nota nota-info' }, ico('info'), h('span', null, 'Protocolo de exemplo, com dados fictícios. Exclua-o quando não precisar mais.')));
+    h('div', { class: 'cab-txt' }, voltarBtn(), h('span', { class: 'sobre' }, 'Protocolo ' + p.numero), titulo, sub, chips), acoes);
+  const notaEx = p.exemplo ? h('p', { class: 'nota nota-info' }, ico('info'), h('span', null, 'Protocolo de exemplo, com dados fictícios. Exclua-o quando não precisar mais.')) : null;
+  if (visao === 'exigencia') { d.replaceChildren(...[cab, notaEx, barraProt, blocoExigencias(p, bExig)].filter(Boolean)); return; }
+  const blocos = [cab, notaEx, barraProt].filter(Boolean);
 
   // dados do protocolo (salvos automaticamente)
   const campos = [
