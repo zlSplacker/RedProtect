@@ -1023,11 +1023,12 @@ function cnpjValido(v) {
   return dig(12) === +d[12] && dig(13) === +d[13];
 }
 const TIPOS_IMOVEL = { urbano: 'Urbano', rural: 'Rural', condominio: 'Condomínio' };
+const ORIGENS_IMOVEL = { mae: 'Matrícula Mãe', filha: 'Matrícula Filha' };
 function normalizarImovel(i) {
   i = i || {};
   return {
     id: txt(i.id) || uid('im'), tipo: TIPOS_IMOVEL[i.tipo] ? i.tipo : 'urbano',
-    matricula: txt(i.matricula), protocoloId: txt(i.protocoloId),
+    matricula: txt(i.matricula), origem: ORIGENS_IMOVEL[i.origem] ? i.origem : '', protocoloId: txt(i.protocoloId),
     nucleo: txt(i.nucleo), quadra: txt(i.quadra), lote: txt(i.lote), logradouro: txt(i.logradouro),
     municipio: txt(i.municipio), area: txt(i.area), areaConstruida: txt(i.areaConstruida), descricao: txt(i.descricao), observacoes: txt(i.observacoes),
     // rural
@@ -2470,6 +2471,7 @@ function renderImovel(im) {
   const base = [
     c('tipo', 'Tipo', 'select', { semVazio: true, opcoes: Object.entries(TIPOS_IMOVEL) }),
     c('matricula', 'Matrícula ou transcrição'),
+    c('origem', 'Origem', 'select', { vazio: 'Não informada', opcoes: Object.entries(ORIGENS_IMOVEL) }),
     c('protocoloId', 'Protocolo', 'select', { vazio: 'Sem protocolo', opcoes: protocolos.map(p => [p.id, `${p.numero} · ${nomeProtocolo(p)}`]) })
   ];
   const decimal = { inputmode: 'decimal' };
