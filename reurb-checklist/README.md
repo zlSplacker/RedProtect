@@ -13,7 +13,7 @@ A barra de menus do topo segue o S.R.I.:
 
 - **Cadastros → Modelos de checklist**: passe o mouse sobre *Cadastros* (no celular, toque) e escolha a opção para criar e editar os modelos. Os próximos cadastros do sistema entram neste mesmo menu.
 - **Recepção → Recepção de Título**: cadastra um novo protocolo para cada processo acompanhado (veja abaixo).
-- **Protocolo → Consultar protocolos**: lista, filtra e abre os protocolos para acompanhar situação, prazo e andamentos.
+- **Protocolo → Consultar Protocolos**: lista, filtra e abre os protocolos para acompanhar situação, prazo e andamentos.
 - **Indicadores → Real → Pesquisa / Urbano / Rural / Condomínio**: pesquisa e cadastro dos imóveis, com vínculo ao protocolo e às pessoas do Indicador Pessoal, cada uma com sua qualidade (ocupante, proprietário, beneficiário…). Cada tipo tem seus campos:
   - *Urbano*: núcleo ou loteamento, quadra, lote, logradouro, área (m²);
   - *Rural*: denominação, localidade, área (ha), CCIR, NIRF/CIB, CAR e certificação SIGEF;
