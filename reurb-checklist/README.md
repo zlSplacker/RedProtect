@@ -28,7 +28,7 @@ A barra de menus do topo segue o S.R.I.:
 - **Recepção → Recepção de Título**: cadastra um novo protocolo para cada processo acompanhado (veja abaixo).
 - **Protocolo → Consultar Protocolos**: um protocolo por linha, no formato *Protocolo | Município | Interessado*, com a situação na ponta direita. O filtro procura por qualquer um desses três dados; clique na linha para abrir o protocolo.
 - **Indicadores → Real → Pesquisa / Urbano / Rural / Condomínio**: pesquisa e cadastro dos imóveis, com vínculo ao protocolo e às pessoas do Indicador Pessoal, cada uma com sua qualidade (ocupante, proprietário, beneficiário…). Cada tipo tem seus campos:
-  - *Urbano*: núcleo ou loteamento, quadra, lote, logradouro, área (m²);
+  - *Urbano*: núcleo ou loteamento, quadra, lote, logradouro, área (m²) e construção (m²);
   - *Rural*: denominação, localidade, área (ha), CCIR, NIRF/CIB, CAR e certificação SIGEF;
   - *Condomínio*: condomínio, unidade, bloco, vaga, fração ideal, área privativa e área total.
 

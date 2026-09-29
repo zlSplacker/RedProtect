@@ -1030,7 +1030,7 @@ function normalizarImovel(i) {
     id: txt(i.id) || uid('im'), tipo: TIPOS_IMOVEL[i.tipo] ? i.tipo : 'urbano',
     matricula: txt(i.matricula), protocoloId: txt(i.protocoloId),
     nucleo: txt(i.nucleo), quadra: txt(i.quadra), lote: txt(i.lote), logradouro: txt(i.logradouro),
-    municipio: txt(i.municipio), area: txt(i.area), descricao: txt(i.descricao), observacoes: txt(i.observacoes),
+    municipio: txt(i.municipio), area: txt(i.area), areaConstruida: txt(i.areaConstruida), descricao: txt(i.descricao), observacoes: txt(i.observacoes),
     // rural
     denominacao: txt(i.denominacao), localidade: txt(i.localidade), ccir: txt(i.ccir), nirf: txt(i.nirf), car: txt(i.car), sigef: txt(i.sigef),
     // condomínio
@@ -2478,7 +2478,7 @@ function renderImovel(im) {
     urbano: [
       c('nucleo', 'Núcleo ou loteamento'), c('quadra', 'Quadra'), c('lote', 'Lote'),
       c('logradouro', 'Logradouro e número', 'text', { largo: true }), c('municipio', 'Município/UF'),
-      c('area', 'Área (m²)', 'text', decimal)
+      c('area', 'Área (m²)', 'text', decimal), c('areaConstruida', 'Construção (m²)', 'text', decimal)
     ],
     rural: [
       c('denominacao', 'Denominação do imóvel', 'text', { largo: true, placeholder: 'Ex.: Sítio Santa Luzia' }),
