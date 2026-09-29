@@ -1367,7 +1367,7 @@ function renderProtocolo(p) {
   const campos = [
     campoProt(p, 'abertura', 'Abertura', 'fixo', { valor: fmtAbertura(p) }),
     campoProt(p, 'interessado', 'Interessado', 'text'), campoProt(p, 'contato', 'Contato', 'text'),
-    campoProt(p, 'municipio', 'Município/UF', 'text'), campoProt(p, 'prazo', 'Prazo', 'date'),
+    campoProt(p, 'municipio', 'Município/UF', 'text'), campoProt(p, 'prazo', 'Prazo estimado', 'date'),
     campoProt(p, 'descricao', 'Descrição do pedido', 'textarea', { largo: true })
   ];
   for (const c of campos) {
@@ -1447,7 +1447,7 @@ function renderNovoProtocolo() {
     campo('np-interessado', 'Interessado', { required: true, placeholder: 'Nome de quem está contratando' }),
     campo('np-contato', 'Contato', { placeholder: 'Telefone ou e-mail' }),
     campo('np-municipio', 'Município/UF', { placeholder: 'Ex.: Assis Chateaubriand/PR' }),
-    campo('np-prazo', 'Prazo', { type: 'date' }),
+    campo('np-prazo', 'Prazo estimado', { type: 'date' }),
     h('label', { class: 'campo largo', for: 'np-descricao' }, h('span', { class: 'rot' }, 'Descrição do pedido'),
       h('textarea', { class: 'inp', id: 'np-descricao', rows: '3' })),
     h('div', { class: 'acoes largo' },

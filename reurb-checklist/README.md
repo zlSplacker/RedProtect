@@ -20,9 +20,9 @@ A barra de menus do topo segue o S.R.I.:
 
 - **Número automático** por ano: `0001/2026`, `0002/2026`…
 - **Abertura**: data e hora registradas automaticamente no clique em *Abrir protocolo*, sem possibilidade de alteração.
-- **Dados do protocolo**: interessado (quem está contratando), contato, município, prazo e descrição do pedido.
+- **Dados do protocolo**: interessado (quem está contratando), contato, município, prazo estimado e descrição do pedido.
 - **Situação**: aberto, em análise, aguardando documentos, concluído ou arquivado. Cada mudança fica registrada nos andamentos.
-- **Prazo**: o protocolo avisa quando faltam 7 dias ou menos e quando o prazo venceu.
+- **Prazo estimado**: o protocolo avisa quando faltam 7 dias ou menos e quando o prazo venceu.
 - **Andamentos**: histórico datado de tudo o que aconteceu no processo.
 - **Aplicar checklist**: abre uma análise já vinculada ao protocolo, com núcleo, município e número preenchidos. A análise mostra o link de volta para o protocolo.
 
