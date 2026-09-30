@@ -745,6 +745,7 @@ const ICONES = {
   alinharEsq: '<path d="M4 6h16M4 10h10M4 14h16M4 18h10"/>',
   alinharCentro: '<path d="M4 6h16M7 10h10M4 14h16M7 18h10"/>',
   justificar: '<path d="M4 6h16M4 10h16M4 14h16M4 18h16"/>',
+  casa: '<path d="M3 11l9-7 9 7M5 9.5V20h14V9.5M10 20v-6h4v6"/>',
   anexo: '<path d="M20.5 11.5l-8.2 8.2a5 5 0 0 1-7.1-7.1l8.6-8.6a3.4 3.4 0 0 1 4.8 4.8l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4l7.9-7.9"/>',
   ladoALado: '<rect x="3" y="5" width="8" height="14" rx="1"/><rect x="13" y="5" width="8" height="14" rx="1"/>'
 };
@@ -1409,7 +1410,10 @@ function renderLateral() {
     const pr = ui.selecionar && ui.selecionar.protocoloId;
     acoes.replaceChildren(btn('Nova pessoa', { icone: 'mais', prim: true, onclick: () => novoRegistro('pessoas', null, pr ? pe => ligarAoProtocolo(pr, 'pessoas', pe.id) : null, true) }));
   } else if (aba === 'imoveis') {
-    acoes.replaceChildren(btn('Novo imóvel', { icone: 'mais', prim: true, onclick: () => novoRegistro('imoveis', ui.selecionar ? { protocoloId: ui.selecionar.protocoloId } : null, null, true) }));
+    const s = ui.selecionar;
+    // aberta pela Propriedade de uma pessoa: o imóvel novo já fica vinculado a ela ao salvar
+    const aoSalvar = s && s.pessoaId ? i => { vincularImovel(pessoaAlvo(s), i.id); redesenharDepois(s.origem); } : null;
+    acoes.replaceChildren(btn('Novo imóvel', { icone: 'mais', prim: true, onclick: () => novoRegistro('imoveis', s && s.protocoloId ? { protocoloId: s.protocoloId } : null, aoSalvar, true) }));
   } else if (aba === 'analises') {
     acoes.replaceChildren(btn('Nova análise', { icone: 'mais', prim: true, onclick: () => abrirNovaAnalise() }));
   } else {
@@ -1426,13 +1430,15 @@ function renderItens() {
   const itens = [];
   if (Store.modo === 'carregando' || aba === 'modelosMinuta') { lista.replaceChildren(); atualizarTitulo(); return; }
   const abrirItem = (col, id) => () => { ui.sel[col] = id; ui.criando = false; mostrarDetalhe(true); renderItens(); renderDetalhe(); rolarTopo(); };
-  // janela aberta pelo Adicionar do protocolo: um clique marca, dois cliques (ou Enter) adicionam ao protocolo
+  // janela aberta pelo Adicionar (do protocolo ou da Propriedade de uma pessoa): um clique marca, dois cliques (ou Enter) adicionam
   const sel = ui.selecionar && D().protocolos[ui.selecionar.protocoloId];
-  const acoesItem = (col, id) => sel ? {
-    title: 'Dois cliques adicionam ao protocolo ' + sel.numero,
+  const dono = ui.selecionar && ui.selecionar.pessoaId ? pessoaAlvo(ui.selecionar) : null;
+  const escolher = (col, id) => (dono ? vincularAPessoa(id) : adicionarAoProtocolo(col, id));
+  const acoesItem = (col, id) => sel || dono ? {
+    title: sel ? 'Dois cliques adicionam ao protocolo ' + sel.numero : 'Dois cliques vinculam o imóvel',
     onclick: ev => { ui.sel[col] = id; for (const b of lista.querySelectorAll('.item')) b.setAttribute('aria-current', String(b === ev.currentTarget)); },
-    ondblclick: () => adicionarAoProtocolo(col, id),
-    onkeydown: ev => { if (ev.key === 'Enter') { ev.preventDefault(); adicionarAoProtocolo(col, id); } }
+    ondblclick: () => escolher(col, id),
+    onkeydown: ev => { if (ev.key === 'Enter') { ev.preventDefault(); escolher(col, id); } }
   } : { onclick: abrirItem(col, id) };
   if (aba === 'tabelas') {
     for (const id of Object.keys(TABELAS)) itens.push(h('li', null, h('button', { type: 'button', class: 'item', onclick: () => abrirTabela(id) },
@@ -1466,6 +1472,7 @@ function renderItens() {
           h('span', { class: 'chip' + (i.tipo === 'urbano' ? '' : ' chip-acento') }, TIPOS_IMOVEL[i.tipo]),
           i.matricula ? h('span', { class: 'chip' }, 'Mat. ' + i.matricula) : null,
           prot ? h('span', { class: 'chip chip-acento' }, 'Prot. ' + prot.numero) : null,
+          dono && propriedadesDe(dono).some(x => x.imovel.id === i.id) ? h('span', { class: 'chip chip-acento' }, 'Vinculado') : null,
           i.vinculos.length ? plural(i.vinculos.length, 'pessoa', 'pessoas') : null))));
     }
     if (!todos.length) itens.push(h('li', { class: 'lat-vazio' }, 'Nenhum imóvel cadastrado.'));
@@ -3213,6 +3220,45 @@ function imoveisDaPessoa(id) {
   for (const i of imoveisOrdenados()) for (const v of i.vinculos) if (v.pessoaId === id) r.push({ imovel: i, qualidade: v.qualidade });
   return r;
 }
+/* Propriedade: o vínculo fica no imóvel; na pessoa ainda não salva, os vínculos esperam o Salvar */
+const vinculosPendentes = new WeakMap();
+const pessoaAlvo = s => D().pessoas[s.pessoaId] || s.pessoa;
+function propriedadesDe(pe) {
+  if (D().pessoas[pe.id]) return imoveisDaPessoa(pe.id);
+  return (vinculosPendentes.get(pe) || []).map(v => ({ imovel: D().imoveis[v.imovelId], qualidade: v.qualidade })).filter(x => x.imovel);
+}
+function vincularImovel(pe, imovelId, qualidade = 'Proprietário') {
+  const i = D().imoveis[imovelId];
+  if (!i || propriedadesDe(pe).some(x => x.imovel.id === imovelId)) return false;
+  if (D().pessoas[pe.id]) { i.vinculos.push({ pessoaId: pe.id, qualidade }); Store.put('imoveis', i, 0); }
+  else vinculosPendentes.set(pe, [...(vinculosPendentes.get(pe) || []), { imovelId, qualidade }]);
+  return true;
+}
+function desvincularImovel(pe, imovelId) {
+  const i = D().imoveis[imovelId];
+  if (D().pessoas[pe.id]) { if (i) { i.vinculos = i.vinculos.filter(v => v.pessoaId !== pe.id); Store.put('imoveis', i, 0); } }
+  else vinculosPendentes.set(pe, (vinculosPendentes.get(pe) || []).filter(v => v.imovelId !== imovelId));
+}
+function gravarVinculosPendentes(pe) {
+  for (const v of vinculosPendentes.get(pe) || []) {
+    const i = D().imoveis[v.imovelId];
+    if (i && !i.vinculos.some(x => x.pessoaId === pe.id)) { i.vinculos.push({ pessoaId: pe.id, qualidade: v.qualidade }); Store.put('imoveis', i, 0); }
+  }
+  vinculosPendentes.delete(pe);
+}
+// redesenha outra janela sem tirar o contexto da janela atual
+function redesenharDepois(j) {
+  setTimeout(() => { if (!j || !j.el.isConnected) return; const a = J; redesenhar(j); if (a && a.el.isConnected) usar(a); });
+}
+// dois cliques na pesquisa aberta pela Propriedade: o imóvel é vinculado, a pesquisa fecha e a pessoa volta à frente
+function vincularAPessoa(id) {
+  const s = ui.selecionar, pe = pessoaAlvo(s), i = D().imoveis[id];
+  if (!vincularImovel(pe, id)) { toast(tituloImovel(i) + ' já está vinculado.'); return; }
+  fecharJanela(J);
+  const jo = s.origem;
+  if (jo && jo.el.isConnected) { jo.ui.selProp = id; redesenhar(jo); ativar(jo); focarJanela(jo); }
+  toast(tituloImovel(i) + ' vinculado.');
+}
 function tituloImovel(i) {
   const mat = i.matricula && 'Matrícula ' + i.matricula;
   if (i.tipo === 'rural') return i.denominacao || mat || 'Novo imóvel rural';
@@ -3408,15 +3454,37 @@ function renderPessoa(pe) {
     c('observacoes', 'Observação', 12, 'textarea'),
     h('div', { style: 'grid-column:1/-1' }, ck('avisoObservacao', 'Mostrar aviso com observação quando consultado?'))));
 
-  // imóveis vinculados
-  const vinc = imoveisDaPessoa(pe.id);
-  blocos.push(h('section', { class: 'bloco', 'aria-labelledby': 'pe-vinc-tit' }, h('h2', { class: 'bloco-tit', id: 'pe-vinc-tit' }, 'Imóveis vinculados'),
-    vinc.length ? h('ul', { class: 'vinc' }, vinc.map(({ imovel, qualidade }) => h('li', null,
-      h('button', { type: 'button', class: 'item', onclick: () => irPara('imoveis', imovel.id) },
-        h('span', { class: 'item-tit' }, tituloImovel(imovel)),
-        subImovel(imovel) ? h('span', { class: 'item-sub' }, subImovel(imovel)) : null,
-        h('span', { class: 'item-meta' }, h('span', { class: 'chip chip-acento' }, qualidade), imovel.matricula ? h('span', { class: 'chip' }, 'Mat. ' + imovel.matricula) : null)))))
-      : h('p', { class: 'dica' }, 'Nenhum imóvel vinculado.')));
+  // Propriedade: imóveis vinculados à pessoa; Adicionar abre a pesquisa do Indicador Real, dois cliques vinculam
+  const jPe = J;
+  const abrirPesquisaImovel = () => {
+    const j = janelas.find(x => x.ui.selecionar && x.ui.selecionar.pessoaId === pe.id);
+    if (j) { ativar(j); focarJanela(j); return; }
+    abrirJanela({ aba: 'imoveis', selecionar: { pessoaId: pe.id, pessoa: pe, origem: jPe } });
+  };
+  const abrirPropriedade = () => {
+    const corpo = h('div');
+    const desenhar = () => {
+      const linhas = propriedadesDe(pe);
+      if (!linhas.some(x => x.imovel.id === ui.selProp)) ui.selProp = null;
+      const botoes = linhas.map(({ imovel: i, qualidade }) => h('button', {
+        type: 'button', class: 'dl-linha', 'aria-pressed': String(i.id === ui.selProp), title: 'Duplo clique abre o cadastro',
+        onclick: ev => { ui.selProp = i.id; for (const b of botoes) b.setAttribute('aria-pressed', String(b === ev.currentTarget)); bExcluir.disabled = false; },
+        ondblclick: () => irPara('imoveis', i.id)
+      }, h('span', { class: 'dl-nome' }, tituloImovel(i)),
+        h('small', null, [TIPOS_IMOVEL[i.tipo], i.matricula && 'Mat. ' + i.matricula].filter(Boolean).join(' · ')),
+        h('span', { class: 'chip chip-acento' }, qualidade)));
+      const bExcluir = btn('Excluir', { icone: 'lixo', perigo: true, disabled: !ui.selProp, onclick: ev => armar(ev.currentTarget, () => {
+        desvincularImovel(pe, ui.selProp); ui.selProp = null; desenhar(); renderItens();
+      }) });
+      corpo.replaceChildren(h('section', { class: 'dl' },
+        h('div', { class: 'dl-lista' }, botoes.length ? botoes : h('p', { class: 'dica' }, 'Nenhum imóvel vinculado.')),
+        h('div', { class: 'dl-bts' }, btn('Adicionar', { icone: 'mais', prim: true, onclick: abrirPesquisaImovel }), bExcluir)));
+    };
+    abrirDialogo({ titulo: 'Propriedade', conteudo: corpo, atualizar: desenhar, largura: '900px' });
+    desenhar();
+  };
+  const barraPe = h('div', { class: 'barra-prot', role: 'toolbar', 'aria-label': 'Indicador Pessoal' },
+    h('button', { type: 'button', class: 'bp', id: 'pe-bt-propriedade', 'aria-haspopup': 'dialog', onclick: abrirPropriedade }, ico('casa'), 'Propriedade'));
 
   const aviso = pe.avisoObservacao && pe.observacoes.trim()
     ? h('p', { class: 'nota' }, ico('aviso'), h('span', null, h('strong', null, 'Observação: '), pe.observacoes)) : null;
@@ -3436,10 +3504,12 @@ function renderPessoa(pe) {
           excluirRegistro('pessoas', pe, 'Pessoa excluída.');
         }) }))),
     ...(aviso ? [aviso] : []),
+    barraPe,
     h('div', { class: 'reg-pilha compacta' }, blocos),
     h('div', { class: 'reg-rodape' }, btn('Salvar', { icone: 'check', prim: true, onclick: () => {
       const outro = D().pessoas[pe.conjugeId];
       if (outro && !outro.conjugeId) { outro.conjugeId = pe.id; Store.put('pessoas', outro, 0); }
+      gravarVinculosPendentes(pe);
       salvarRegistro('pessoas', pe, 'Pessoa salva.');
     } })));
 }
@@ -4094,7 +4164,10 @@ function desenharTarefas() {
     }
   }, j.titulo || '…')));
 }
-const paraProtocolo = () => { const pr = ui.selecionar && D().protocolos[ui.selecionar.protocoloId]; return pr ? ' · adicionar ao Protocolo ' + pr.numero : ''; };
+const paraProtocolo = () => {
+  const s = ui.selecionar, pr = s && D().protocolos[s.protocoloId], pe = s && s.pessoaId && pessoaAlvo(s);
+  return pr ? ' · adicionar ao Protocolo ' + pr.numero : pe ? ' · propriedade de ' + (pe.nome || 'pessoa nova') : '';
+};
 // o título diz o que a janela mostra; não repete o que se digita nos campos
 function tituloJanela() {
   const det = emDetalhe(), aba = ui.aba;
