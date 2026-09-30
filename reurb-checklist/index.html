@@ -236,11 +236,16 @@ select.inp{padding-right:28px}
 .prot-campo b{font-weight:600}
 .prot-campo .item-num{font-size:13.5px;margin:0}
 .item-prot > .chip{justify-self:end;margin-left:12px}
+/* linha do lote na pesquisa do Indicador Real: Núcleo | Lote | Quadra | Cidade */
+.item.item-lote{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,.55fr) minmax(0,.55fr) minmax(0,1fr) auto;align-items:center;gap:0;font-size:14px}
+.item-lote > .chip{justify-self:end;margin-left:12px}
 @container (max-width:560px){
   .item.item-prot{grid-template-columns:minmax(0,1fr) auto;align-items:start;row-gap:2px}
   .prot-campo{grid-column:1;white-space:normal;overflow-wrap:anywhere}
   .prot-campo + .prot-campo{border-left:0;margin-left:0;padding-left:0}
   .item-prot > .chip{grid-column:2;grid-row:1}
+  .item.item-lote{grid-template-columns:minmax(0,1fr) auto;align-items:start;row-gap:2px}
+  .item-lote > .chip{grid-column:2;grid-row:1}
 }
 .lat-vazio{padding:12px;border:1px dashed var(--linha);border-radius:9px;color:var(--tinta3);font-size:13px}
 
@@ -1407,7 +1412,7 @@ function renderLateral() {
   const aba = ui.aba;
   const f = $('#filtro');
   if (document.activeElement !== f) f.value = ui.filtro[aba] || '';
-  f.placeholder = { analises: 'Filtrar por núcleo, município ou processo', modelos: 'Filtrar modelos', protocolos: 'Filtrar por protocolo, município ou interessado', pessoas: 'Filtrar por nome, CPF/CNPJ, RG, passaporte ou e-mail', imoveis: 'Filtrar por matrícula, endereço, denominação, condomínio ou pessoa', tabelas: 'Filtrar tabelas' }[aba];
+  f.placeholder = { analises: 'Filtrar por núcleo, município ou processo', modelos: 'Filtrar modelos', protocolos: 'Filtrar por protocolo, município ou interessado', pessoas: 'Filtrar por nome, CPF/CNPJ, RG, passaporte ou e-mail', imoveis: 'Filtrar por núcleo, lote, quadra, cidade, matrícula ou pessoa', tabelas: 'Filtrar tabelas' }[aba];
   const acoes = $('#lat-acoes'), pe = $('#lat-pe');
   pe.replaceChildren();
   // pesquisa dos indicadores: um clique marca o cadastro; Excluir (fora da pesquisa aberta pelo Adicionar) apaga o marcado
@@ -1498,6 +1503,15 @@ function renderItens() {
       ...i.vinculos.map(v => (D().pessoas[v.pessoaId] || {}).nome)].join(' ')).includes(termo));
     for (const i of vis) {
       const prot = D().protocolos[i.protocoloId];
+      const vinculado = dono && propriedadesDe(dono).some(x => x.imovel.id === i.id);
+      // lote (urbano): uma linha Núcleo | Lote | Quadra | Cidade, como a consulta de protocolos
+      if (i.tipo === 'urbano') {
+        const campo = (rot, v) => h('span', { class: 'prot-campo', title: rot + ': ' + (v || '—') }, h('span', { class: 'rot-in' }, rot + ':'), h('b', null, v || '—'));
+        itens.push(h('li', null, h('button', { type: 'button', class: 'item item-lote', 'aria-current': String(i.id === marca.imoveis), ...acoesItem('imoveis', i.id) },
+          campo('Núcleo', i.nucleo), campo('Lote', i.lote), campo('Quadra', i.quadra), campo('Cidade', i.municipio),
+          vinculado ? h('span', { class: 'chip chip-acento' }, 'Vinculado') : sel && i.protocoloId === sel.id ? h('span', { class: 'chip chip-acento' }, 'No protocolo') : null)));
+        continue;
+      }
       itens.push(h('li', null, h('button', { type: 'button', class: 'item', 'aria-current': String(i.id === marca.imoveis), ...acoesItem('imoveis', i.id) },
         h('span', { class: 'item-tit' }, tituloImovel(i)),
         subImovel(i) ? h('span', { class: 'item-sub' }, subImovel(i)) : null,
@@ -1505,7 +1519,7 @@ function renderItens() {
           h('span', { class: 'chip' + (i.tipo === 'urbano' ? '' : ' chip-acento') }, TIPOS_IMOVEL[i.tipo]),
           i.matricula ? h('span', { class: 'chip' }, 'Mat. ' + i.matricula) : null,
           prot ? h('span', { class: 'chip chip-acento' }, 'Prot. ' + prot.numero) : null,
-          dono && propriedadesDe(dono).some(x => x.imovel.id === i.id) ? h('span', { class: 'chip chip-acento' }, 'Vinculado') : null,
+          vinculado ? h('span', { class: 'chip chip-acento' }, 'Vinculado') : null,
           i.vinculos.length ? plural(i.vinculos.length, 'pessoa', 'pessoas') : null))));
     }
     desmarcarFora(vis);
