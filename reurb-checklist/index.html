@@ -2056,25 +2056,19 @@ function renderProtocolo(p) {
   const barraAbas = h('div', { class: 'pr-abas', role: 'tablist', 'aria-label': 'Conteúdo do protocolo' });
   // linha de abas do protocolo: cada aba mostra só o seu conteúdo
   const ABAS_PROT = [['dados', 'Recepção'], ['andamentos', 'Andamentos'], ['financeiro', 'Financeiro'], ['checklists', 'Checklists'], ['indicadores', 'Dados']];
-  // imóveis e pessoas ficam na aba Dados, ao lado de Checklists
-  const ABAS_DADOS = [['imoveis', 'Indicador Real'], ['pessoas', 'Indicador Pessoal']];
-  if (ui.abaProt === 'imoveis' || ui.abaProt === 'pessoas') { ui.abaDados = ui.abaProt; ui.abaProt = 'indicadores'; }
+  // pessoas e imóveis ficam na aba Dados, ao lado de Checklists
+  if (ui.abaProt === 'imoveis' || ui.abaProt === 'pessoas') ui.abaProt = 'indicadores';
   if (!ABAS_PROT.some(([k]) => k === ui.abaProt)) ui.abaProt = 'dados';
-  if (!ABAS_DADOS.some(([k]) => k === ui.abaDados)) ui.abaDados = 'imoveis';
-  const barraDados = h('div', { class: 'pr-abas sub-abas', role: 'tablist', 'aria-label': 'Imóveis e pessoas do protocolo' });
-  const painelDados = h('div', { id: 'pr-painel-dados', role: 'tabpanel' });
-  // aba Dados: indicadores real e pessoal do protocolo
+  // aba Dados: uma lista só, Partes/Imóveis (as partes que moram no núcleo, cada uma com o seu imóvel)
+  const barraDados = h('div', { class: 'pr-abas sub-abas', role: 'tablist', 'aria-label': 'Partes e imóveis do protocolo' },
+    h('button', { type: 'button', class: 'pr-aba', role: 'tab', id: 'pr-aba-partes', 'aria-controls': 'pr-painel-dados', 'aria-selected': 'true' }, 'Partes/Imóveis'));
+  const painelDados = h('div', { id: 'pr-painel-dados', role: 'tabpanel', 'aria-labelledby': 'pr-aba-partes' });
   const blocoDados = h('section', { class: 'bloco' }, h('div', { class: 'dados-sub' }, barraDados, painelDados));
-  const contagem = k => ({ imoveis: imoveisDoProtocolo(p.id).length, pessoas: p.partes.filter(x => D().pessoas[x.pessoaId]).length })[k];
   const desenharAbas = () => {
     barraAbas.replaceChildren(...ABAS_PROT.map(([k, rot]) => h('button', {
       type: 'button', class: 'pr-aba', role: 'tab', id: 'pr-aba-' + k, 'aria-controls': 'pr-painel', 'aria-selected': String(ui.abaProt === k),
       onclick: () => { ui.abaProt = k; desenharAbas(); desenharPainel(); }
     }, rot)));
-    barraDados.replaceChildren(...ABAS_DADOS.map(([k, rot]) => h('button', {
-      type: 'button', class: 'pr-aba', role: 'tab', id: 'pr-aba-' + k, 'aria-controls': 'pr-painel-dados', 'aria-selected': String(ui.abaDados === k),
-      onclick: () => { ui.abaDados = k; desenharAbas(); desenharPainel(); }
-    }, rot, h('span', { class: 'n' }, String(contagem(k))))));
   };
   const atualizarContagens = () => { desenharAbas(); renderItens(); };
 
@@ -2122,54 +2116,54 @@ function renderProtocolo(p) {
     })) : h('p', { class: 'dica' }, 'Nenhum checklist aplicado.'),
     h('div', null, btn('Aplicar checklist', { icone: 'mais', sm: true, onclick: () => escolherChecklist(p) })));
 
-  // aba Dados: abaixo das abas fica só o que foi adicionado; depois, uma linha com Adicionar e Excluir
-  const selDados = ui.selDados || (ui.selDados = { imoveis: null, pessoas: null });
+  // Partes/Imóveis: a lista do que foi adicionado; depois, uma linha com Adicionar e Excluir
+  const selDados = ui.selDados || (ui.selDados = {});
   const jProt = J;
-  // Adicionar abre a pesquisa do indicador (Pessoal ou Real); dois cliques num nome o adicionam aqui
-  const abrirPesquisa = aba => {
-    const j = janelas.find(x => x.ui.selecionar && x.ui.selecionar.protocoloId === p.id && x.ui.aba === aba);
+  // Adicionar abre a pesquisa do Indicador Pessoal; dois cliques num nome o adicionam aqui (com os imóveis da Propriedade dele)
+  const abrirPesquisa = () => {
+    const j = janelas.find(x => x.ui.selecionar && x.ui.selecionar.protocoloId === p.id && x.ui.aba === 'pessoas');
     if (j) { ativar(j); focarJanela(j); return; }
-    abrirJanela({ aba, selecionar: { protocoloId: p.id, origem: jProt } });
+    abrirJanela({ aba: 'pessoas', selecionar: { protocoloId: p.id, origem: jProt } });
   };
-  const listaDados = (aba, linhas, vazio, excluir) => {
-    if (!linhas.some(l => l.id === selDados[aba])) selDados[aba] = null;
+  const blocoPartes = () => {
+    const partes = p.partes.map(x => ({ x, pe: D().pessoas[x.pessoaId] })).filter(y => y.pe);
+    const idsPartes = new Set(partes.map(y => y.pe.id));
+    const linhas = [
+      ...partes.map(({ x, pe }) => ({
+        id: 'pe:' + pe.id, nome: pe.nome || 'Sem nome', chip: x.qualidade, abrir: () => irPara('pessoas', pe.id),
+        info: [pe.documento, ...imoveisDaPessoa(pe.id).filter(v => !v.imovel.protocoloId || v.imovel.protocoloId === p.id).map(v => descImovel(v.imovel))].filter(Boolean).join(' · ')
+      })),
+      // imóvel do protocolo sem nenhuma parte ligada a ele
+      ...imoveisDoProtocolo(p.id).filter(i => !i.vinculos.some(v => idsPartes.has(v.pessoaId))).map(i => ({
+        id: 'im:' + i.id, nome: descImovel(i), abrir: () => irPara('imoveis', i.id),
+        info: [TIPOS_IMOVEL[i.tipo], i.matricula && 'Mat. ' + i.matricula].filter(Boolean).join(' · ')
+      }))
+    ];
+    if (!linhas.some(l => l.id === selDados.partes)) selDados.partes = null;
     const botoes = linhas.map(l => h('button', {
-      type: 'button', class: 'dl-linha', 'aria-pressed': String(l.id === selDados[aba]), title: 'Duplo clique abre o cadastro',
-      onclick: () => {
-        selDados[aba] = l.id;
-        for (const b of botoes) b.setAttribute('aria-pressed', String(b === botoes[linhas.indexOf(l)]));
+      type: 'button', class: 'dl-linha', 'aria-pressed': String(l.id === selDados.partes), title: 'Duplo clique abre o cadastro',
+      onclick: ev => {
+        selDados.partes = l.id;
+        for (const b of botoes) b.setAttribute('aria-pressed', String(b === ev.currentTarget));
         bExcluir.disabled = false;
       },
       ondblclick: l.abrir
     }, h('span', { class: 'dl-nome' }, l.nome), l.info ? h('small', null, l.info) : null, l.chip ? h('span', { class: 'chip chip-acento' }, l.chip) : null));
-    const bExcluir = btn('Excluir', { icone: 'lixo', perigo: true, disabled: !selDados[aba], onclick: ev => armar(ev.currentTarget, () => {
-      excluir(selDados[aba]); selDados[aba] = null; desenharPainel(); atualizarContagens();
+    const bExcluir = btn('Excluir', { icone: 'lixo', perigo: true, disabled: !selDados.partes, onclick: ev => armar(ev.currentTarget, () => {
+      const [tipo, id] = selDados.partes.split(':');
+      if (tipo === 'pe') tirarParte(p, id);
+      else { const i = D().imoveis[id]; if (i) { i.protocoloId = ''; Store.put('imoveis', i, 0); } }
+      selDados.partes = null; desenharPainel(); atualizarContagens();
     }) });
     return h('section', { class: 'dl' },
-      h('div', { class: 'dl-lista' }, botoes.length ? botoes : h('p', { class: 'dica' }, vazio)),
-      h('div', { class: 'dl-bts' }, btn('Adicionar', { icone: 'mais', prim: true, onclick: () => abrirPesquisa(aba) }), bExcluir));
+      h('div', { class: 'dl-lista' }, botoes.length ? botoes : h('p', { class: 'dica' }, 'Nenhuma parte adicionada.')),
+      h('div', { class: 'dl-bts' }, btn('Adicionar', { icone: 'mais', prim: true, onclick: abrirPesquisa }), bExcluir));
   };
-
-  // imóveis do protocolo
-  const blocoImoveis = () => listaDados('imoveis',
-    imoveisDoProtocolo(p.id).map(i => ({ id: i.id, nome: tituloImovel(i), info: [TIPOS_IMOVEL[i.tipo], i.matricula && 'Mat. ' + i.matricula].filter(Boolean).join(' · '), abrir: () => irPara('imoveis', i.id) })),
-    'Nenhum imóvel adicionado.',
-    id => { const i = D().imoveis[id]; if (i) { i.protocoloId = ''; Store.put('imoveis', i, 0); } });
-
-  // pessoas do protocolo
-  const blocoPessoas = () => listaDados('pessoas',
-    p.partes.map(x => {
-      const pe = D().pessoas[x.pessoaId];
-      return pe && { id: pe.id, nome: pe.nome || 'Sem nome', info: pe.documento, chip: x.qualidade, abrir: () => irPara('pessoas', pe.id) };
-    }).filter(Boolean),
-    'Nenhuma pessoa adicionada.',
-    id => { p.partes = p.partes.filter(x => x.pessoaId !== id); Store.put('protocolos', p, 0); });
 
   const desenharPainel = () => {
     painel.setAttribute('aria-labelledby', idJ('pr-aba-' + ui.abaProt));
     painel.replaceChildren({ dados: () => quadroDados, andamentos: () => blocoAnd, financeiro: () => blocoFinanceiro(p, atualizarContagens), checklists: () => blocoVinc, indicadores: () => blocoDados }[ui.abaProt]());
-    painelDados.setAttribute('aria-labelledby', idJ('pr-aba-' + ui.abaDados));
-    painelDados.replaceChildren(ui.abaDados === 'pessoas' ? blocoPessoas() : blocoImoveis());
+    painelDados.replaceChildren(blocoPartes());
   };
   desenharAbas();
   desenharPainel();
@@ -3278,7 +3272,7 @@ function propriedadesDe(pe) {
 function vincularImovel(pe, imovelId, qualidade = 'Proprietário') {
   const i = D().imoveis[imovelId];
   if (!i || propriedadesDe(pe).some(x => x.imovel.id === imovelId)) return false;
-  if (D().pessoas[pe.id]) { i.vinculos.push({ pessoaId: pe.id, qualidade }); Store.put('imoveis', i, 0); }
+  if (D().pessoas[pe.id]) { i.vinculos.push({ pessoaId: pe.id, qualidade }); levarAoProtocolo(pe.id, i); Store.put('imoveis', i, 0); }
   else vinculosPendentes.set(pe, [...(vinculosPendentes.get(pe) || []), { imovelId, qualidade }]);
   return true;
 }
@@ -3287,10 +3281,18 @@ function desvincularImovel(pe, imovelId) {
   if (D().pessoas[pe.id]) { if (i) { i.vinculos = i.vinculos.filter(v => v.pessoaId !== pe.id); Store.put('imoveis', i, 0); } }
   else vinculosPendentes.set(pe, (vinculosPendentes.get(pe) || []).filter(v => v.imovelId !== imovelId));
 }
+// imóvel sem protocolo, vinculado a quem é parte de um protocolo, entra nesse protocolo (Partes/Imóveis)
+function levarAoProtocolo(pessoaId, i) {
+  if (i.protocoloId) return;
+  const pr = protocolosOrdenados().find(x => x.partes.some(y => y.pessoaId === pessoaId));
+  if (pr) i.protocoloId = pr.id;
+}
+// lote: Núcleo, Quadra e Lote; os outros tipos, o título do imóvel
+const descImovel = i => (i.tipo === 'urbano' && [i.nucleo, i.quadra && 'Quadra ' + i.quadra, i.lote && 'Lote ' + i.lote].filter(Boolean).join(', ')) || tituloImovel(i);
 function gravarVinculosPendentes(pe) {
   for (const v of vinculosPendentes.get(pe) || []) {
     const i = D().imoveis[v.imovelId];
-    if (i && !i.vinculos.some(x => x.pessoaId === pe.id)) { i.vinculos.push({ pessoaId: pe.id, qualidade: v.qualidade }); Store.put('imoveis', i, 0); }
+    if (i && !i.vinculos.some(x => x.pessoaId === pe.id)) { i.vinculos.push({ pessoaId: pe.id, qualidade: v.qualidade }); levarAoProtocolo(pe.id, i); Store.put('imoveis', i, 0); }
   }
   vinculosPendentes.delete(pe);
 }
@@ -3379,6 +3381,8 @@ function ligarAoProtocolo(protocoloId, col, id) {
     if (pr.partes.some(x => x.pessoaId === id)) return false;
     pr.partes.push({ pessoaId: id, qualidade: 'Beneficiário' });
     Store.put('protocolos', pr, 0);
+    // a parte leva junto os imóveis da Propriedade dela que ainda não estão em nenhum protocolo
+    for (const { imovel: i } of imoveisDaPessoa(id)) if (!i.protocoloId) { i.protocoloId = pr.id; Store.put('imoveis', i, 0); }
   } else {
     const i = D().imoveis[id];
     if (!i || i.protocoloId === pr.id) return false;
@@ -3386,6 +3390,15 @@ function ligarAoProtocolo(protocoloId, col, id) {
     Store.put('imoveis', i, 0);
   }
   return true;
+}
+// a parte sai do protocolo e leva junto os imóveis dela que nenhuma outra parte do protocolo ocupa
+function tirarParte(pr, pessoaId) {
+  pr.partes = pr.partes.filter(x => x.pessoaId !== pessoaId);
+  Store.put('protocolos', pr, 0);
+  for (const { imovel: i } of imoveisDaPessoa(pessoaId)) {
+    if (i.protocoloId !== pr.id || i.vinculos.some(v => pr.partes.some(x => x.pessoaId === v.pessoaId))) continue;
+    i.protocoloId = ''; Store.put('imoveis', i, 0);
+  }
 }
 // dois cliques na pesquisa aberta pelo Adicionar: entra no protocolo, a pesquisa fecha e o protocolo volta à frente
 function adicionarAoProtocolo(col, id) {
@@ -3398,7 +3411,7 @@ function adicionarAoProtocolo(col, id) {
   fecharJanela(J);
   const jp = origem && origem.el.isConnected ? origem : janelas.find(x => x.ui.aba === 'protocolos' && x.ui.sel.protocolos === protocoloId && x.el.classList.contains('ver-detalhe'));
   if (jp) {
-    jp.ui.selDados = Object.assign(jp.ui.selDados || {}, { [col]: id });
+    jp.ui.selDados = Object.assign(jp.ui.selDados || {}, { partes: (col === 'pessoas' ? 'pe:' : 'im:') + id });
     redesenhar(jp);
     ativar(jp);
     focarJanela(jp);
