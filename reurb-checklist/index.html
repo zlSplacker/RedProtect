@@ -157,6 +157,11 @@ body.arrastando .jan-corpo{pointer-events:none}
 .lat-cab{display:flex;align-items:baseline;gap:10px}
 .lat-acoes{display:flex;flex-wrap:wrap;gap:6px}
 .lat-acoes:empty{display:none}
+/* pesquisa dos indicadores: Novo e Excluir no canto inferior direito, sempre à vista */
+.lateral{min-height:100cqh}
+.lat-pe{position:sticky;bottom:0;margin-top:auto;display:flex;justify-content:flex-end;gap:8px;padding:10px 0 12px;margin-bottom:-12px;background:var(--chao);border-top:1px solid var(--linha)}
+.lat-pe:empty{display:none}
+.itens.marcavel .item[aria-current="true"]{background:var(--acento-suave);border-color:var(--acento)}
 .detalhe{padding:14px 18px 28px;min-width:0}
 .jan.ver-detalhe .lateral{display:none}
 .jan:not(.ver-detalhe) .detalhe{display:none}
@@ -1403,17 +1408,28 @@ function renderLateral() {
   const f = $('#filtro');
   if (document.activeElement !== f) f.value = ui.filtro[aba] || '';
   f.placeholder = { analises: 'Filtrar por núcleo, município ou processo', modelos: 'Filtrar modelos', protocolos: 'Filtrar por protocolo, município ou interessado', pessoas: 'Filtrar por nome, CPF/CNPJ, RG, passaporte ou e-mail', imoveis: 'Filtrar por matrícula, endereço, denominação, condomínio ou pessoa', tabelas: 'Filtrar tabelas' }[aba];
-  const acoes = $('#lat-acoes');
+  const acoes = $('#lat-acoes'), pe = $('#lat-pe');
+  pe.replaceChildren();
+  // pesquisa dos indicadores: um clique marca o cadastro; Excluir (fora da pesquisa aberta pelo Adicionar) apaga o marcado
+  const bExcluir = col => ui.selecionar ? null : btn('Excluir', { icone: 'lixo', perigo: true, id: 'lat-excluir', disabled: !D()[col][(ui.marca || {})[col]],
+    onclick: ev => armar(ev.currentTarget, () => {
+      const r = D()[col][ui.marca[col]];
+      ui.marca[col] = null;
+      if (!r) return;
+      if (col === 'pessoas') excluirPessoa(r); else excluirRegistro('imoveis', r, 'Imóvel excluído.');
+    }) });
   if (aba === 'protocolos' || aba === 'tabelas' || aba === 'modelosMinuta') {
     acoes.replaceChildren();
   } else if (aba === 'pessoas') {
     const pr = ui.selecionar && ui.selecionar.protocoloId;
-    acoes.replaceChildren(btn('Nova pessoa', { icone: 'mais', prim: true, onclick: () => novoRegistro('pessoas', null, pr ? pe => ligarAoProtocolo(pr, 'pessoas', pe.id) : null, true) }));
+    acoes.replaceChildren();
+    pe.replaceChildren(btn('Nova pessoa', { icone: 'mais', prim: true, onclick: () => novoRegistro('pessoas', null, pr ? pe => ligarAoProtocolo(pr, 'pessoas', pe.id) : null, true) }), bExcluir('pessoas') || '');
   } else if (aba === 'imoveis') {
     const s = ui.selecionar;
     // aberta pela Propriedade de uma pessoa: o imóvel novo já fica vinculado a ela ao salvar
     const aoSalvar = s && s.pessoaId ? i => { vincularImovel(pessoaAlvo(s), i.id); redesenharDepois(s.origem); } : null;
-    acoes.replaceChildren(btn('Novo imóvel', { icone: 'mais', prim: true, onclick: () => novoRegistro('imoveis', s && s.protocoloId ? { protocoloId: s.protocoloId } : null, aoSalvar, true) }));
+    acoes.replaceChildren();
+    pe.replaceChildren(btn('Novo imóvel', { icone: 'mais', prim: true, onclick: () => novoRegistro('imoveis', s && s.protocoloId ? { protocoloId: s.protocoloId } : null, aoSalvar, true) }), bExcluir('imoveis') || '');
   } else if (aba === 'analises') {
     acoes.replaceChildren(btn('Nova análise', { icone: 'mais', prim: true, onclick: () => abrirNovaAnalise() }));
   } else {
@@ -1434,12 +1450,28 @@ function renderItens() {
   const sel = ui.selecionar && D().protocolos[ui.selecionar.protocoloId];
   const dono = ui.selecionar && ui.selecionar.pessoaId ? pessoaAlvo(ui.selecionar) : null;
   const escolher = (col, id) => (dono ? vincularAPessoa(id) : adicionarAoProtocolo(col, id));
-  const acoesItem = (col, id) => sel || dono ? {
-    title: sel ? 'Dois cliques adicionam ao protocolo ' + sel.numero : 'Dois cliques vinculam o imóvel',
-    onclick: ev => { ui.sel[col] = id; for (const b of lista.querySelectorAll('.item')) b.setAttribute('aria-current', String(b === ev.currentTarget)); },
-    ondblclick: () => escolher(col, id),
-    onkeydown: ev => { if (ev.key === 'Enter') { ev.preventDefault(); escolher(col, id); } }
-  } : { onclick: abrirItem(col, id) };
+  // pessoas e imóveis: um clique marca (para o Excluir), dois cliques (ou Enter) abrem o cadastro ou adicionam
+  const marca = ui.marca || (ui.marca = {});
+  lista.classList.toggle('marcavel', aba === 'pessoas' || aba === 'imoveis');
+  // o filtro escondeu o marcado: nada fica marcado para o Excluir
+  const desmarcarFora = vis => {
+    if (!marca[aba] || vis.some(x => x.id === marca[aba])) return;
+    marca[aba] = null;
+    const bx = $('#lat-excluir'); if (bx) bx.disabled = true;
+  };
+  const acoesItem = (col, id) => {
+    const abrir = sel || dono ? () => escolher(col, id) : abrirItem(col, id);
+    return {
+      title: sel ? 'Dois cliques adicionam ao protocolo ' + sel.numero : dono ? 'Dois cliques vinculam o imóvel' : 'Dois cliques abrem o cadastro',
+      onclick: ev => {
+        marca[col] = id;
+        for (const b of lista.querySelectorAll('.item')) b.setAttribute('aria-current', String(b === ev.currentTarget));
+        const bx = $('#lat-excluir'); if (bx && !bx.dataset.armado) bx.disabled = false;
+      },
+      ondblclick: abrir,
+      onkeydown: ev => { if (ev.key === 'Enter') { ev.preventDefault(); abrir(); } }
+    };
+  };
   if (aba === 'tabelas') {
     for (const id of Object.keys(TABELAS)) itens.push(h('li', null, h('button', { type: 'button', class: 'item', onclick: () => abrirTabela(id) },
       h('span', { class: 'item-tit' }, TABELAS[id].nome), h('span', { class: 'item-meta' }, plural(tabela(id).itens.length, 'opção', 'opções')))));
@@ -1449,13 +1481,14 @@ function renderItens() {
       || (termo.replace(/\D/g, '') && String(p.documento).replace(/\D/g, '').includes(termo.replace(/\D/g, ''))));
     for (const p of vis) {
       const n = imoveisDaPessoa(p.id).length;
-      itens.push(h('li', null, h('button', { type: 'button', class: 'item', 'aria-current': String(p.id === ui.sel.pessoas), ...acoesItem('pessoas', p.id) },
+      itens.push(h('li', null, h('button', { type: 'button', class: 'item', 'aria-current': String(p.id === marca.pessoas), ...acoesItem('pessoas', p.id) },
         h('span', { class: 'item-tit' }, p.nome || 'Sem nome'),
         h('span', { class: 'item-sub' }, [p.documento, p.tipo === 'fisica' ? p.estadoCivil : 'Pessoa jurídica'].filter(Boolean).join(' · ') || 'Sem documento'),
         n || (sel && sel.partes.some(x => x.pessoaId === p.id)) ? h('span', { class: 'item-meta' },
           sel && sel.partes.some(x => x.pessoaId === p.id) ? h('span', { class: 'chip chip-acento' }, 'No protocolo') : null,
           n ? plural(n, 'imóvel', 'imóveis') : null) : null)));
     }
+    desmarcarFora(vis);
     if (!todas.length) itens.push(h('li', { class: 'lat-vazio' }, 'Nenhuma pessoa cadastrada.'));
     else if (!vis.length) itens.push(h('li', { class: 'lat-vazio' }, 'Nenhuma pessoa corresponde ao filtro.'));
   } else if (aba === 'imoveis') {
@@ -1465,7 +1498,7 @@ function renderItens() {
       ...i.vinculos.map(v => (D().pessoas[v.pessoaId] || {}).nome)].join(' ')).includes(termo));
     for (const i of vis) {
       const prot = D().protocolos[i.protocoloId];
-      itens.push(h('li', null, h('button', { type: 'button', class: 'item', 'aria-current': String(i.id === ui.sel.imoveis), ...acoesItem('imoveis', i.id) },
+      itens.push(h('li', null, h('button', { type: 'button', class: 'item', 'aria-current': String(i.id === marca.imoveis), ...acoesItem('imoveis', i.id) },
         h('span', { class: 'item-tit' }, tituloImovel(i)),
         subImovel(i) ? h('span', { class: 'item-sub' }, subImovel(i)) : null,
         h('span', { class: 'item-meta' },
@@ -1475,6 +1508,7 @@ function renderItens() {
           dono && propriedadesDe(dono).some(x => x.imovel.id === i.id) ? h('span', { class: 'chip chip-acento' }, 'Vinculado') : null,
           i.vinculos.length ? plural(i.vinculos.length, 'pessoa', 'pessoas') : null))));
     }
+    desmarcarFora(vis);
     if (!todos.length) itens.push(h('li', { class: 'lat-vazio' }, 'Nenhum imóvel cadastrado.'));
     else if (!vis.length) itens.push(h('li', { class: 'lat-vazio' }, 'Nenhum imóvel corresponde ao filtro.'));
   } else if (aba === 'protocolos') {
@@ -3368,6 +3402,17 @@ function salvarRegistro(col, obj, msg) {
   renderTudo();
   rolarTopo();
 }
+// a pessoa sai dos imóveis, dos protocolos e do cadastro do cônjuge
+function excluirPessoa(pe) {
+  for (const i of Object.values(D().imoveis)) {
+    if (i.vinculos.some(v => v.pessoaId === pe.id)) { i.vinculos = i.vinculos.filter(v => v.pessoaId !== pe.id); Store.put('imoveis', i, 0); }
+  }
+  for (const pr of Object.values(D().protocolos)) {
+    if (pr.partes.some(x => x.pessoaId === pe.id)) { pr.partes = pr.partes.filter(x => x.pessoaId !== pe.id); Store.put('protocolos', pr, 0); }
+  }
+  for (const x of Object.values(D().pessoas)) if (x.conjugeId === pe.id) { x.conjugeId = ''; Store.put('pessoas', x, 0); }
+  excluirRegistro('pessoas', pe, 'Pessoa excluída.');
+}
 function excluirRegistro(col, obj, msg) {
   if (D()[col][obj.id]) Store.remover(col, obj.id);
   if (ui.rascunho && ui.rascunho.obj === obj) ui.rascunho = null;
@@ -3502,16 +3547,7 @@ function renderPessoa(pe) {
       h('div', { class: 'cab-txt' }, voltarBtn(), h('span', { class: 'sobre' }, 'Indicador Pessoal'), linksProt),
       // pessoa nova ainda não existe (só é gravada no Salvar): não há o que excluir
       D().pessoas[pe.id] && h('div', { class: 'acoes' },
-        btn('Excluir pessoa', { icone: 'lixo', fant: true, perigo: true, onclick: ev => armar(ev.currentTarget, () => {
-          for (const i of Object.values(D().imoveis)) {
-            if (i.vinculos.some(v => v.pessoaId === pe.id)) { i.vinculos = i.vinculos.filter(v => v.pessoaId !== pe.id); Store.put('imoveis', i, 0); }
-          }
-          for (const pr of Object.values(D().protocolos)) {
-            if (pr.partes.some(x => x.pessoaId === pe.id)) { pr.partes = pr.partes.filter(x => x.pessoaId !== pe.id); Store.put('protocolos', pr, 0); }
-          }
-          for (const x of Object.values(D().pessoas)) if (x.conjugeId === pe.id) { x.conjugeId = ''; Store.put('pessoas', x, 0); }
-          excluirRegistro('pessoas', pe, 'Pessoa excluída.');
-        }) }))),
+        btn('Excluir pessoa', { icone: 'lixo', fant: true, perigo: true, onclick: ev => armar(ev.currentTarget, () => excluirPessoa(pe)) }))),
     ...(aviso ? [aviso] : []),
     barraPe,
     painelPe,
@@ -4003,7 +4039,8 @@ function abrirJanela(op) {
     h('aside', { class: 'lateral', 'aria-label': 'Lista' },
       h('div', { class: 'lat-acoes', id: 'lat-acoes' }),
       h('label', { class: 'busca' }, h('span', { class: 'rot', hidden: true }, 'Filtrar'), ico('lupa'), filtro),
-      h('ul', { class: 'itens', id: 'itens' })),
+      h('ul', { class: 'itens', id: 'itens' }),
+      h('div', { class: 'lat-pe', id: 'lat-pe' })),
     h('section', { class: 'detalhe', id: 'detalhe' }));
   const botao = (rot, icone, acao, cls) => h('button', { type: 'button', class: 'jan-bt' + (cls ? ' ' + cls : ''), title: rot, 'aria-label': rot, onclick: acao }, ico(icone));
   const bMax = botao('Maximizar', 'maximizar', () => alternarMax(j), 'jan-max');

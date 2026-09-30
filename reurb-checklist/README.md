@@ -16,7 +16,7 @@ Ao abrir, o sistema mostra só a barra de menus e, abaixo dela, a área de traba
 - arraste pela barra de título para mover; puxe as bordas ou os cantos para mudar o tamanho (o conteúdo se reorganiza conforme a largura da janela);
 - os botões do canto minimizam, maximizam (ou duplo clique no título) e fecham;
 - a barra de baixo lista as janelas abertas e só aparece quando há alguma: clique para trazer a janela para a frente ou, se ela já estiver na frente, minimizá-la. O botão **Lado a lado** divide a área entre todas as janelas abertas;
-- numa janela de pesquisa, clicar num item abre o registro na própria janela (*Voltar à lista* volta). Um link para outro registro — como o botão *Protocolo 0001/2026* numa pessoa — abre esse registro em outra janela ou traz para a frente a janela dele, se já estiver aberta;
+- numa janela de pesquisa, clicar num item abre o registro na própria janela (*Voltar à lista* volta). Nas pesquisas do Indicador Pessoal e do Indicador Real, um clique marca o cadastro e dois cliques (ou Enter) o abrem; no canto inferior direito, sempre à vista, ficam **Nova pessoa** / **Novo imóvel** e **Excluir**, que apaga o cadastro marcado (confirmando no segundo clique). Na pesquisa aberta pelo *Adicionar* do protocolo ou da *Propriedade*, fica só o botão de novo cadastro. Um link para outro registro — como o botão *Protocolo 0001/2026* numa pessoa — abre esse registro em outra janela ou traz para a frente a janela dele, se já estiver aberta;
 - o que se altera numa janela aparece nas outras; um formulário ainda não enviado numa janela não se perde.
 
 No celular, cada janela ocupa a tela inteira e a barra de baixo alterna entre elas.
