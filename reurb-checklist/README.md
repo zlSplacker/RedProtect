@@ -72,7 +72,7 @@ Na página, abaixo da barra, fica a linha de abas **Recepção**, **Andamentos**
 
 | Aba | O que tem |
 | --- | --- |
-| **Recepção** | O quadro *Dados do protocolo*: na primeira linha, ordem de protocolo e situação à esquerda e abertura e prazo estimado à direita; depois município, interessado e contato; e a descrição do pedido. |
+| **Recepção** | O quadro *Dados do protocolo*: na primeira linha, ordem de protocolo e situação à esquerda e abertura e prazo estimado à direita; depois município, interessado e contato; e a descrição do pedido. Os campos ficam travados: embaixo, **Editar** libera a edição e **Salvar** grava e trava de novo (nada é gravado antes do *Salvar*; a mudança de situação entra nos andamentos ao salvar). |
 | **Andamentos** | Histórico datado; registra sozinho a abertura, as mudanças de situação e os checklists aplicados. |
 | **Financeiro** | Honorários contratados e lançamentos (recebimentos e despesas, com data, descrição e valor), com o resumo de recebido, a receber, despesas e saldo. |
 | **Checklists** | Análises aplicadas ao protocolo, com progresso e pendências, e o botão *Aplicar checklist*. |

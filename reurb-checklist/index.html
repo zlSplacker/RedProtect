@@ -206,6 +206,8 @@ textarea.inp{resize:vertical;min-height:38px;display:block}
 .campo-curto .inp{max-width:140px;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 .inp[readonly]:hover,.inp[readonly]:focus{border-color:var(--linha);box-shadow:none}
 select.inp{padding-right:28px}
+select.inp:disabled{background:var(--sup2);color:var(--tinta2);cursor:default;opacity:1}
+.prot-edicao{grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px;padding-top:12px;border-top:1px solid var(--linha2)}
 .dica{margin:0;font-size:13px;color:var(--tinta3)}
 .busca{position:relative}
 .busca svg{position:absolute;left:10px;top:50%;width:15px;height:15px;transform:translateY(-50%);color:var(--tinta3);pointer-events:none}
@@ -1978,9 +1980,6 @@ function botoesProtocolo(prots) {
 }
 
 /* ---------- protocolos: abrir, consultar, andamentos ---------- */
-function subtituloProtocolo(p) {
-  return [p.interessado && p.municipio, p.contato, 'Aberto em ' + fmtAbertura(p)].filter(Boolean).join(' · ');
-}
 function campoProt(p, k, rot, tipo, extra = {}) {
   const id = 'pr-' + k;
   let el;
@@ -1991,8 +1990,6 @@ function campoProt(p, k, rot, tipo, extra = {}) {
 }
 function renderProtocolo(p) {
   const d = $('#detalhe');
-  const titulo = h('h1', { class: 'titulo' }, nomeProtocolo(p));
-  const sub = h('p', { class: 'subt' }, subtituloProtocolo(p));
   const chips = h('div', { class: 'cab-chips' });
   // no alto fica só o alerta de prazo; número, interessado, situação e datas já estão nos campos
   const atualizarChips = () => {
@@ -2001,14 +1998,14 @@ function renderProtocolo(p) {
     chips.hidden = !alerta;
   };
   atualizarChips();
-  const selSit = h('select', { class: 'inp', id: 'pr-situacao' },
-    Object.entries(SITUACOES).map(([k, [rot]]) => h('option', { value: k, selected: k === p.situacao }, rot)));
-  selSit.addEventListener('change', () => {
-    p.situacao = selSit.value;
-    registrarAndamento(p, `Situação alterada para “${SITUACOES[p.situacao][0]}”.`);
-    Store.put('protocolos', p, 0);
-    renderItens(); renderDetalhe();
-  });
+  // Recepção: os campos ficam travados; Editar libera (as mudanças ficam num rascunho da janela) e Salvar grava e trava de novo
+  const editando = ui.editProt === p.id;
+  if (!editando) ui.rascProt = null;
+  const rasc = editando ? (ui.rascProt || (ui.rascProt = { interessado: p.interessado, contato: p.contato, municipio: p.municipio, prazo: p.prazo, descricao: p.descricao, situacao: p.situacao })) : null;
+  const fonte = rasc || p;
+  const selSit = h('select', { class: 'inp', id: 'pr-situacao', disabled: !editando },
+    Object.entries(SITUACOES).map(([k, [rot]]) => h('option', { value: k, selected: k === fonte.situacao }, rot)));
+  selSit.addEventListener('change', () => { rasc.situacao = selSit.value; });
   // excluir fica no canto inferior direito da janela, discreto
   const pe = h('div', { class: 'pe-prot' },
     btn('Excluir protocolo', { icone: 'lixo', fant: true, sm: true, cls: 'btn-discreto', onclick: ev => armar(ev.currentTarget, () => {
@@ -2038,26 +2035,37 @@ function renderProtocolo(p) {
   const notaEx = p.exemplo ? h('p', { class: 'nota nota-info' }, ico('info'), h('span', null, 'Protocolo de exemplo, com dados fictícios. Exclua-o quando não precisar mais.')) : null;
   const blocos = [cab, notaEx, barraProt].filter(Boolean);
 
-  // dados do protocolo (salvos automaticamente)
+  // dados do protocolo (gravados só no Salvar)
   const campos = [
     campoProt(p, 'numero', 'Ordem de protocolo', 'fixo', { valor: p.numero, curto: true }),
     campoProt(p, 'abertura', 'Abertura', 'fixo', { valor: fmtAbertura(p) }),
-    campoProt(p, 'interessado', 'Interessado', 'text'), campoProt(p, 'contato', 'Contato', 'text'),
-    campoProt(p, 'municipio', 'Município/UF', 'text'), campoProt(p, 'prazo', 'Prazo estimado', 'date'),
-    campoProt(p, 'descricao', 'Descrição do pedido', 'textarea', { largo: true })
+    campoProt(fonte, 'interessado', 'Interessado', 'text'), campoProt(fonte, 'contato', 'Contato', 'text'),
+    campoProt(fonte, 'municipio', 'Município/UF', 'text'), campoProt(fonte, 'prazo', 'Prazo estimado', 'date'),
+    campoProt(fonte, 'descricao', 'Descrição do pedido', 'textarea', { largo: true })
   ];
   for (const c of campos) {
     if (c.el.readOnly) continue;
+    if (!editando) { c.el.readOnly = true; continue; }
     c.el.addEventListener('input', () => {
-      p[c.k] = c.el.value;
+      rasc[c.k] = c.el.value;
       if (c.el.tagName === 'TEXTAREA') autoAltura(c.el);
-      titulo.textContent = nomeProtocolo(p);
-      sub.textContent = subtituloProtocolo(p);
-      atualizarChips();
-      Store.put('protocolos', p);
-      renderItens();
     });
   }
+  const bEditar = btn('Editar', { icone: 'nota', disabled: editando, onclick: () => {
+    ui.editProt = p.id; ui.rascProt = null; renderDetalhe();
+    const j = J; requestAnimationFrame(() => { usar(j); const f = $('#pr-interessado'); if (f) f.focus(); });
+  } });
+  const bSalvar = btn('Salvar', { icone: 'check', prim: true, disabled: !editando, onclick: () => {
+    for (const k of ['interessado', 'contato', 'municipio', 'prazo', 'descricao']) p[k] = rasc[k];
+    if (rasc.situacao !== p.situacao) {
+      p.situacao = rasc.situacao;
+      registrarAndamento(p, `Situação alterada para “${SITUACOES[p.situacao][0]}”.`);
+    }
+    Store.put('protocolos', p, 0);
+    ui.editProt = null; ui.rascProt = null;
+    renderItens(); renderDetalhe();
+    toast('Protocolo salvo.');
+  } });
   // primeira linha do quadro: ordem de protocolo e situação lado a lado
   // primeira linha: ordem e situação à esquerda; abertura e prazo estimado do outro lado
   const rot = Object.fromEntries(campos.map(c => [c.k, c.rotulo]));
@@ -2065,7 +2073,8 @@ function renderProtocolo(p) {
     h('label', { class: 'campo campo-situacao', for: 'pr-situacao' }, h('span', { class: 'rot' }, 'Situação'), selSit),
     h('div', { class: 'linha-dir' }, rot.abertura, rot.prazo));
   const quadroDados = h('fieldset', { class: 'ident' }, h('legend', null, 'Dados do protocolo'), linhaOrdem,
-    h('div', { class: 'linha-3' }, rot.municipio, rot.interessado, rot.contato), rot.descricao);
+    h('div', { class: 'linha-3' }, rot.municipio, rot.interessado, rot.contato), rot.descricao,
+    h('div', { class: 'prot-edicao' }, bEditar, bSalvar));
   blocos.push(quadroDados);
   requestAnimationFrame(() => { const t = $('#pr-descricao'); if (t) autoAltura(t); });
 
