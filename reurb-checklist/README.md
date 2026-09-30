@@ -80,7 +80,7 @@ Imóveis, pessoas e análises mostram um botão *Protocolo 0000/AAAA*, que abre 
 - **Situação**: aberto, em análise, aguardando documentos, concluído ou arquivado. Cada mudança fica registrada nos andamentos.
 - **Prazo estimado**: o protocolo avisa quando faltam 7 dias ou menos e quando o prazo venceu.
 - **Andamentos**: histórico datado de tudo o que aconteceu no processo.
-- **Aplicar checklist**: mostra só os nomes dos checklists cadastrados. Ao escolher um, a análise do núcleo abre vinculada ao protocolo, pronta para responder (município e número vêm do protocolo). A análise mostra o link de volta para o protocolo.
+- **Aplicar checklist** (na aba *Checklists*): mostra só os nomes dos checklists cadastrados. Ao escolher um, a análise do núcleo abre vinculada ao protocolo, pronta para responder (município e número vêm do protocolo). A análise mostra o link de volta para o protocolo.
 - **Excluir protocolo**: fica no canto inferior direito da janela e pede confirmação no segundo clique. Imóveis, pessoas e checklists continuam cadastrados.
 
 > Use **Backup → Exportar backup (JSON)** de tempos em tempos. Se você limpar os dados do navegador ou trocar de computador, é esse arquivo que recupera os modelos e as análises (**Backup → Importar arquivo JSON**).

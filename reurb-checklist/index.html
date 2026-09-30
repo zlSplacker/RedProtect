@@ -178,10 +178,10 @@ body.arrastando .jan-corpo{pointer-events:none}
 .btn-ico{padding:0;width:32px;min-height:32px;height:32px}
 .btn[data-armado]{background:var(--pend);border-color:var(--pend);color:var(--sobre-pend);width:auto;padding:0 10px}
 .btn-sm{min-height:28px;padding:4px 9px;font-size:12.5px}
-.btn-discreto{color:var(--tinta3);font-weight:500}
-.btn-discreto:hover:not(:disabled){color:var(--pend);background:var(--pend-suave)}
+.btn-discreto{color:var(--tinta3);font-weight:500;border-color:var(--linha)}
+.btn-discreto:hover:not(:disabled){color:var(--pend);background:var(--pend-suave);border-color:color-mix(in srgb,var(--pend) 30%,transparent)}
 .btn-discreto svg{width:14px;height:14px}
-.btn-discreto[data-armado]{background:var(--pend-suave);border-color:transparent;color:var(--pend);padding:4px 9px}
+.btn-discreto[data-armado]{background:var(--pend-suave);border-color:color-mix(in srgb,var(--pend) 30%,transparent);color:var(--pend);padding:4px 9px}
 .jan.ver-detalhe .detalhe:has(>.pe-prot){display:flex;flex-direction:column;min-height:100cqh;padding-bottom:12px}
 .pe-prot{margin-top:auto;display:flex;justify-content:flex-end;padding-top:14px}
 .campo{display:grid;gap:5px;min-width:0}
@@ -1935,8 +1935,6 @@ function renderProtocolo(p) {
     Store.put('protocolos', p, 0);
     renderItens(); renderDetalhe();
   });
-  const acoes = h('div', { class: 'acoes' },
-    btn('Aplicar checklist', { icone: 'check', prim: true, onclick: () => escolherChecklist(p) }));
   // excluir fica no canto inferior direito da janela, discreto
   const pe = h('div', { class: 'pe-prot' },
     btn('Excluir protocolo', { icone: 'lixo', fant: true, sm: true, cls: 'btn-discreto', onclick: ev => armar(ev.currentTarget, () => {
@@ -1963,7 +1961,7 @@ function renderProtocolo(p) {
       abrirDialogo({ titulo: 'Minutas', conteudo: b.el, aoFechar: renderDetalhe, atualizar: b.desenhar, cls: 'arq' });
     }));
   const cab = h('div', { class: 'cab' },
-    h('div', { class: 'cab-txt' }, voltarBtn(), chips), acoes);
+    h('div', { class: 'cab-txt' }, voltarBtn(), chips));
   const notaEx = p.exemplo ? h('p', { class: 'nota nota-info' }, ico('info'), h('span', null, 'Protocolo de exemplo, com dados fictícios. Exclua-o quando não precisar mais.')) : null;
   const blocos = [cab, notaEx, barraProt].filter(Boolean);
 
