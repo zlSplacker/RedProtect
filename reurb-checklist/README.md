@@ -3,7 +3,7 @@
 Ferramenta de checklist para consultoria jurídica em processos de Regularização Fundiária Urbana (REURB), inspirada no módulo de checklist do S.R.I.:
 
 - **Modelos de checklist** (cadastro): nome, descrição e perguntas. Cada pergunta tem tipo de resposta, fundamentação legal, providência e orientação para quem responde.
-- **Análises** (aplicação): você escolhe um modelo, identifica o núcleo e o processo e responde. O checklist marca as pendências e monta o relatório.
+- **Análises** (aplicação): feitas dentro do protocolo (aba *Checklists* → *Aplicar checklist*). Você responde as perguntas do modelo; o checklist marca as pendências e monta o relatório.
 
 ## Como usar
 
@@ -41,7 +41,6 @@ A barra de menus do topo segue o S.R.I.:
   - *Observação*, com a opção de mostrar um aviso sempre que o cadastro for consultado.
   
   No arquivo aberto no navegador, a lupa do CEP preenche o endereço automaticamente (ViaCEP).
-- **Análises**: aplica os modelos aos núcleos e mostra as pendências.
 
 ### O protocolo é o centro do trabalho
 

@@ -623,7 +623,6 @@ select.inp{padding-right:28px}
           </div>
         </div>
       </div>
-      <div class="mb-item"><button type="button" class="mb-btn" id="mb-analises" data-aba="analises">Análises</button></div>
     </nav>
     <div class="topo-dir">
       <span class="salvo" id="salvo" data-estado="carregando">Carregando…</span>
@@ -1380,7 +1379,6 @@ function marcarMenu() {
   const a = janelas.find(x => x.el.classList.contains('ativa'));
   const u = a ? a.ui : {};
   const marcar = (id, sim) => { const el = document.getElementById(id); if (sim) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current'); };
-  marcar('mb-analises', u.aba === 'analises');
   marcar('mb-modelos', u.aba === 'modelos');
   marcar('mb-cadastros-btn', u.aba === 'modelos' || u.aba === 'tabelas' || u.aba === 'modelosMinuta');
   marcar('mb-modelos-minuta', u.aba === 'modelosMinuta');
