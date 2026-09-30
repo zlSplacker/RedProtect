@@ -2285,19 +2285,30 @@ function blocoArquivos(p) {
   const raiz = h('div', { class: 'arq-grade' }, lado, visor);
   const vis = visualizador(visor);
   const entrada = h('input', { type: 'file', multiple: true, hidden: true });
-  let sel = null, aberto = null, enviando = 0;
-  const abrir = a => { sel = aberto = a.id; desenhar(); vis.abrir(a); };
+  let sel = null, aberto = null, enviando = 0, linhas = [], bExcluir = null;
+  // um clique: mostra o arquivo no visualizador ao lado; dois cliques: abre no computador (Baixar)
+  // (a lista não é redesenhada no clique, para o segundo clique cair no mesmo item)
+  const marcar = () => {
+    for (const b of linhas) { b.setAttribute('aria-pressed', String(b.dataset.id === sel)); b.classList.toggle('aberto', b.dataset.id === aberto); }
+    if (bExcluir) bExcluir.disabled = !sel || enviando > 0;
+  };
+  const abrir = a => {
+    sel = a.id;
+    if (aberto !== a.id) { aberto = a.id; vis.abrir(a); }
+    marcar();
+  };
   const desenhar = () => {
     if (!p.arquivos.some(a => a.id === sel)) sel = null;
     if (aberto && !p.arquivos.some(a => a.id === aberto)) { aberto = null; vis.vazio(); }
-    const linhas = p.arquivos.map(a => h('button', {
-      type: 'button', class: 'dl-linha' + (a.id === aberto ? ' aberto' : ''), 'aria-pressed': String(a.id === sel), title: 'Dois cliques abrem o arquivo',
-      onclick: ev => { sel = a.id; for (const b of linhas) b.setAttribute('aria-pressed', String(b === ev.currentTarget)); bExcluir.disabled = false; },
-      ondblclick: () => abrir(a),
-      onkeydown: ev => { if (ev.key === 'Enter') { ev.preventDefault(); abrir(a); } }
+    linhas = p.arquivos.map(a => h('button', {
+      type: 'button', class: 'dl-linha' + (a.id === aberto ? ' aberto' : ''), 'data-id': a.id, 'aria-pressed': String(a.id === sel),
+      title: 'Um clique mostra ao lado; dois cliques abrem no computador',
+      onclick: () => abrir(a),
+      ondblclick: () => baixarArquivo(a),
+      onkeydown: ev => { if (ev.key === 'Enter' && ev.shiftKey) { ev.preventDefault(); baixarArquivo(a); } }
     }, h('span', { class: 'dl-nome' }, a.nome), h('small', null, [tamanhoArquivo(a.tamanho), fmtData(a.em)].filter(Boolean).join(' · '))));
     const bAdd = btn(enviando ? 'Enviando…' : 'Adicionar', { icone: 'mais', prim: true, disabled: enviando > 0, onclick: () => entrada.click() });
-    const bExcluir = btn('Excluir', { icone: 'lixo', perigo: true, disabled: !sel || enviando > 0, onclick: ev => armar(ev.currentTarget, async () => {
+    bExcluir = btn('Excluir', { icone: 'lixo', perigo: true, disabled: !sel || enviando > 0, onclick: ev => armar(ev.currentTarget, async () => {
       const a = p.arquivos.find(x => x.id === sel);
       if (!a) return;
       try { await Arquivos.apagar(a); } catch (e) { toast('Não foi possível excluir o arquivo agora.'); return; }
