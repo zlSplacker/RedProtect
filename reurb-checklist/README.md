@@ -44,6 +44,8 @@ A barra de menus do topo segue o S.R.I.:
   - *Endereço Residencial*, *Endereço Profissional* (CEP, tipo, logradouro, número, complemento, bairro, município) e *Filiação* (pai e mãe);
   - *Observação*, com a opção de mostrar um aviso sempre que o cadastro for consultado.
   
+  Ao lado do **Salvar** fica o botão **Arquivos**, igual ao do protocolo (lista à esquerda com *Adicionar* e *Excluir*, visualização à direita; um clique mostra, dois cliques abrem no computador), mas os arquivos ficam guardados no próprio cadastro da pessoa — cada indicador tem os seus. Na pessoa nova, os arquivos entram no cadastro junto com o *Salvar*; ao excluir a pessoa, os arquivos dela são apagados.
+
   No fim do cadastro fica o botão **Salvar**: a pessoa nova só é gravada quando você clica nele, e a janela volta para a lista do Indicador Pessoal. O botão *Excluir pessoa* só aparece em pessoas já salvas.
 
   No arquivo aberto no navegador, a lupa do CEP preenche o endereço automaticamente (ViaCEP).

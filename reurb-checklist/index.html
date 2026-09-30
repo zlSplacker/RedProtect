@@ -1030,9 +1030,7 @@ function normalizarProtocolo(p) {
     financeiro: normalizarFinanceiro(p.financeiro),
     exigencias: Array.isArray(p.exigencias) ? p.exigencias.filter(x => x && String(x.texto || '').trim()).map(x => ({ id: String(x.id || uid('ex')), texto: String(x.texto), emitidaEm: String(x.emitidaEm || ''), cumpridaEm: String(x.cumpridaEm || '') })) : [],
     partes: Array.isArray(p.partes) ? p.partes.filter(x => x && x.pessoaId).map(x => ({ pessoaId: String(x.pessoaId), qualidade: String(x.qualidade || 'Beneficiário') })) : [],
-    arquivos: Array.isArray(p.arquivos) ? p.arquivos.filter(x => x && x.ref).map(x => ({
-      id: String(x.id || uid('a')), nome: String(x.nome || 'arquivo'), tamanho: Number(x.tamanho) || 0, tipo: String(x.tipo || ''),
-      em: String(x.em || ''), ref: String(x.ref), via: x.via === 'asset' ? 'asset' : 'local', embrulhado: !!x.embrulhado })) : [],
+    arquivos: normalizarArquivos(p.arquivos),
     minutas: Array.isArray(p.minutas) ? p.minutas.filter(x => x && x.id).map(x => ({
       id: String(x.id), modelo: String(x.modelo || ''), titulo: String(x.titulo || ''), html: String(x.html || ''),
       criadaEm: String(x.criadaEm || ''), atualizadaEm: String(x.atualizadaEm || '') })) : [],
@@ -1107,6 +1105,12 @@ const TIPOS_LOGRADOURO = ['Rua', 'Avenida', 'Travessa', 'Alameda', 'Praça', 'Ro
 const NACIONALIDADES = ['Brasileira', 'Brasileira naturalizada', 'Argentina', 'Boliviana', 'Chilena', 'Colombiana', 'Haitiana', 'Paraguaia', 'Peruana', 'Uruguaia', 'Venezuelana', 'Portuguesa', 'Espanhola', 'Italiana', 'Alemã', 'Japonesa', 'Chinesa'];
 const ENDERECO_VAZIO = { cep: '', tipo: '', logradouro: '', numero: '', complemento: '', bairro: '', municipio: '' };
 const normEndereco = e => Object.fromEntries(Object.keys(ENDERECO_VAZIO).map(k => [k, txt((e || {})[k])]));
+// arquivos anexados (protocolo e Indicador Pessoal): o registro guarda só a lista; o conteúdo fica no armazenamento de arquivos
+function normalizarArquivos(l) {
+  return Array.isArray(l) ? l.filter(x => x && x.ref).map(x => ({
+    id: String(x.id || uid('a')), nome: String(x.nome || 'arquivo'), tamanho: Number(x.tamanho) || 0, tipo: String(x.tipo || ''),
+    em: String(x.em || ''), ref: String(x.ref), via: x.via === 'asset' ? 'asset' : 'local', embrulhado: !!x.embrulhado })) : [];
+}
 function normalizarPessoa(p) {
   p = p || {};
   // cadastros antigos: filiação num campo só ("pai e mãe"), endereço e contato numa linha
@@ -1125,7 +1129,7 @@ function normalizarPessoa(p) {
     enderecoResidencial: normEndereco(p.enderecoResidencial || (p.endereco ? { logradouro: p.endereco } : null)),
     enderecoProfissional: normEndereco(p.enderecoProfissional),
     pai: txt(pai), mae: txt(mae),
-    observacoes: txt(p.observacoes), avisoObservacao: !!p.avisoObservacao,
+    observacoes: txt(p.observacoes), avisoObservacao: !!p.avisoObservacao, arquivos: normalizarArquivos(p.arquivos),
     criadoEm: p.criadoEm || agora(), atualizadoEm: p.atualizadoEm || agora()
   };
 }
@@ -2390,8 +2394,11 @@ function visualizador(caixa) {
   return { abrir, vazio, limpar: () => { geracao++; soltarUrl(); } };
 }
 // janela Arquivos: à esquerda a lista (com Adicionar e Excluir), à direita a visualização; dois cliques abrem o arquivo
-function blocoArquivos(p) {
-  const lado = h('section', { class: 'dl dl-arquivos', 'aria-label': 'Arquivos do protocolo' });
+function blocoArquivos(p, op = {}) {
+  // protocolo: grava o protocolo e registra nos andamentos; a pessoa passa o próprio jeito de gravar
+  const salvar = op.salvar || (() => Store.put('protocolos', p, 0));
+  const registrar = op.registrar || (msg => registrarAndamento(p, msg));
+  const lado = h('section', { class: 'dl dl-arquivos', 'aria-label': op.rotulo || 'Arquivos do protocolo' });
   const visor = h('section', { class: 'arq-visor', 'aria-label': 'Visualização' });
   const raiz = h('div', { class: 'arq-grade' }, lado, visor);
   const vis = visualizador(visor);
@@ -2424,8 +2431,8 @@ function blocoArquivos(p) {
       if (!a) return;
       try { await Arquivos.apagar(a); } catch (e) { toast('Não foi possível excluir o arquivo agora.'); return; }
       p.arquivos = p.arquivos.filter(x => x !== a);
-      registrarAndamento(p, `Arquivo “${a.nome}” excluído.`);
-      Store.put('protocolos', p, 0);
+      registrar(`Arquivo “${a.nome}” excluído.`);
+      salvar();
       sel = null;
       desenhar();
     }) });
@@ -2441,8 +2448,8 @@ function blocoArquivos(p) {
         const r = await Arquivos.guardar(f);
         const a = Object.assign({ id: uid('a'), nome: f.name, tamanho: f.size, tipo: f.type, em: agora() }, r);
         p.arquivos.push(a);
-        registrarAndamento(p, `Arquivo “${f.name}” anexado.`);
-        Store.put('protocolos', p, 0);
+        registrar(`Arquivo “${f.name}” anexado.`);
+        salvar();
         ultimo = a;
       } catch (e) { toast(erroArquivo(e, f.name)); }
       enviando--; desenhar();
@@ -3457,6 +3464,7 @@ function excluirPessoa(pe) {
     if (pr.partes.some(x => x.pessoaId === pe.id)) { pr.partes = pr.partes.filter(x => x.pessoaId !== pe.id); Store.put('protocolos', pr, 0); }
   }
   for (const x of Object.values(D().pessoas)) if (x.conjugeId === pe.id) { x.conjugeId = ''; Store.put('pessoas', x, 0); }
+  for (const a of pe.arquivos) Arquivos.apagar(a).catch(() => {});
   excluirRegistro('pessoas', pe, 'Pessoa excluída.');
 }
 function excluirRegistro(col, obj, msg) {
@@ -3592,6 +3600,12 @@ function renderPessoa(pe) {
   const painelPe = h('div', { id: 'pe-painel', role: 'tabpanel', 'aria-labelledby': 'pe-aba-' + ui.abaPe },
     ui.abaPe === 'propriedade' ? blocoPropriedade() : ui.abaPe === 'informacoes' ? blocoInformacoes() : h('div', { class: 'reg-pilha compacta' }, blocos));
 
+  // Arquivos da pessoa: a mesma janela do protocolo, com os arquivos guardados no próprio indicador
+  // (na pessoa ainda não salva, a lista entra no cadastro no Salvar)
+  const abrirArquivosPe = () => {
+    const b = blocoArquivos(pe, { rotulo: 'Arquivos da pessoa', registrar: () => {}, salvar: () => { if (D().pessoas[pe.id]) Store.put('pessoas', pe, 0); } });
+    abrirDialogo({ titulo: 'Arquivos', conteudo: b.el, aoFechar: () => { b.limpar(); renderDetalhe(); }, atualizar: b.desenhar, cls: 'arq' });
+  };
   const aviso = pe.avisoObservacao && pe.observacoes.trim()
     ? h('p', { class: 'nota' }, ico('aviso'), h('span', null, h('strong', null, 'Observação: '), pe.observacoes)) : null;
   d.replaceChildren(
@@ -3603,7 +3617,7 @@ function renderPessoa(pe) {
     ...(aviso ? [aviso] : []),
     barraPe,
     painelPe,
-    h('div', { class: 'reg-rodape' }, btn('Salvar', { icone: 'check', prim: true, onclick: () => {
+    h('div', { class: 'reg-rodape' }, btn('Arquivos', { icone: 'anexo', onclick: abrirArquivosPe }), btn('Salvar', { icone: 'check', prim: true, onclick: () => {
       const outro = D().pessoas[pe.conjugeId];
       if (outro && !outro.conjugeId) { outro.conjugeId = pe.id; Store.put('pessoas', outro, 0); }
       gravarVinculosPendentes(pe);
