@@ -48,6 +48,17 @@ Tudo começa na **Recepção de Título**, que cria o protocolo. No topo da fich
 
 - **Exigência**: registro das exigências do protocolo (texto e data de emissão), com marcação de cumprida e cópia das pendentes em texto. O botão mostra quantas estão pendentes, e cada registro ou cumprimento entra nos andamentos.
 - **Arquivos**: documentos do protocolo (PDF, imagens, Word, Excel…). À esquerda fica a lista, com os botões **Adicionar** (um ou vários arquivos; também dá para arrastá-los para a janela) e **Excluir**; à direita, a visualização: dois cliques num arquivo o abrem ali. Mostra PDF, imagens, vídeos, textos, Word (.docx) e planilhas (Excel, ODS, CSV, com uma aba por planilha); os outros tipos, e o Word/Excel sem internet, ficam com o botão **Baixar**. Cada anexo e cada exclusão entram nos andamentos. Na página publicada os arquivos ficam guardados com a própria página, até 20 MB cada (15 MB para tipos que não sejam PDF, imagem ou vídeo); no `index.html`, ficam no navegador em que foram anexados. O backup em JSON leva a lista, mas não o conteúdo dos arquivos.
+- **Minuta**: criação dos documentos da Reurb. À esquerda a lista das minutas do protocolo (**Adicionar** e **Excluir**); à direita, o editor, como uma folha A4. *Adicionar* mostra os modelos:
+  - *Instauração*: requerimento de instauração e decreto de instauração;
+  - *Notificações*: notificação de titulares e confinantes (uma por proprietário ou confrontante adicionado) e edital de notificação;
+  - *Instrução*: termo de oitiva e parecer jurídico (com as pendências do checklist aplicado ao protocolo);
+  - *Projeto e aprovação*: Projeto de Regularização Fundiária (PRF, com os elementos do art. 35 e o quadro de unidades) e decreto de aprovação e conclusão;
+  - *Titulação e registro*: Certidão de Regularização Fundiária (CRF, com o conteúdo do art. 41 e a listagem dos ocupantes) e ofício ao Registro de Imóveis;
+  - documento em branco.
+
+  O texto já sai preenchido com os dados do protocolo, das pessoas (qualificação completa, com concordância de gênero) e dos imóveis; o que falta aparece **[entre colchetes]**, destacado em amarelo, e a barra mostra quantos campos faltam. Um clique no campo o seleciona para digitar por cima. A barra tem negrito, itálico, sublinhado e alinhamento; colar traz só o texto. Tudo é salvo automaticamente, e **Baixar Word** gera o `.docx` (abre no Word e no LibreOffice Writer). No `index.html` há também **Imprimir**. Criação e exclusão entram nos andamentos.
+
+  > Os modelos são pontos de partida: confira a redação e os dispositivos legais com a legislação vigente e a lei municipal antes de usar.
 - **Dados**: as abas **Indicador Real** (imóveis) e **Indicador Pessoal** (pessoas, com sua qualidade). Abaixo das abas fica só a lista do que foi adicionado ao protocolo e, depois de uma linha, os botões **Adicionar** e **Excluir**. *Adicionar* abre a janela de pesquisa do indicador (Pessoal ou Real): pesquise e dê dois cliques no nome (ou Enter) para adicioná-lo ao protocolo — a pesquisa fecha e o protocolo volta à frente com o item marcado na lista. Quem já está no protocolo aparece marcado na pesquisa; *Nova pessoa* e *Novo imóvel* ali já ligam o cadastro novo ao protocolo. A pessoa entra como *Beneficiário*. Para excluir, clique na linha e depois em *Excluir* (confirmando no segundo clique). Um duplo clique na linha abre o cadastro.
 
 Na página, abaixo da barra, fica a linha de abas **Recepção**, **Andamentos**, **Financeiro** e **Checklists**. Cada aba mostra só o seu conteúdo, e o protocolo abre em *Recepção*:

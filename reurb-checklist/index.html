@@ -479,7 +479,9 @@ select.inp{padding-right:28px}
 .modal.arq .modal-corpo{flex:1;min-height:0;padding:14px;display:block}
 .arq-grade{height:100%;min-height:320px;display:grid;grid-template-columns:minmax(220px,320px) minmax(0,1fr);gap:14px;border-radius:8px;outline:2px dashed transparent;outline-offset:4px}
 .arq-grade.soltar{outline-color:var(--acento)}
-.arq-grade>.dl{align-content:start;overflow:auto;min-height:0}
+.arq-grade>.dl{display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.arq-grade>.dl>.dl-lista{flex:0 1 auto;min-height:0;overflow:auto}
+.arq-grade>.dl>.dl-bts{flex:none}
 .dl-linha.aberto .dl-nome{color:var(--acento-texto)}
 .dl-linha.aberto{box-shadow:inset 3px 0 0 var(--acento)}
 .arq-visor{min-height:0;display:flex;flex-direction:column;border:1px solid var(--linha);border-radius:8px;background:var(--sup2);overflow:hidden}
@@ -502,7 +504,32 @@ select.inp{padding-right:28px}
 .arq-planilha{overflow:auto}
 .arq-planilha table{border-collapse:collapse;background:#fff;color:#1b1b1b;font:12.5px/1.4 var(--f-ui)}
 .arq-planilha td{border:1px solid #d3d3d3;padding:3px 8px;white-space:nowrap}
+/* Minutas: editor com a folha do documento */
+.min-editor .arq-visor-cab{flex-wrap:wrap}
+.min-titulo{flex:1 1 220px;min-width:0;font-weight:600;height:32px}
+.min-barra{flex:none;display:flex;align-items:center;gap:2px;padding:4px 8px;border-bottom:1px solid var(--linha);background:var(--sup)}
+.min-fmt{width:30px;height:28px;display:grid;place-items:center;border:0;border-radius:5px;background:transparent;color:var(--tinta);font:15px/1 var(--f-serif)}
+.min-fmt:hover{background:var(--sup2)}
+.min-fmt svg{width:16px;height:16px}
+.min-sep{width:1px;height:18px;background:var(--linha);margin:0 6px}
+.min-faltam{margin-left:auto;font-size:12px;color:var(--aviso);font-weight:600}
+.min-corpo{background:var(--linha2)}
+.min-folha{background:#fff;color:#111;max-width:21cm;min-height:100%;margin:0 auto;padding:2.2cm 2cm 2cm 2.5cm;box-shadow:0 1px 4px rgba(0,0,0,.25);font:12pt/1.5 "Times New Roman",Times,serif;outline:none}
+.min-folha p{margin:0 0 6pt}
+.min-folha p.t{text-align:justify;text-indent:1.25cm}
+.min-folha ul,.min-folha ol{margin:0 0 6pt;padding-left:1cm;text-align:justify}
+.min-folha table{border-collapse:collapse;width:100%;font-size:10pt;margin:0 0 6pt}
+.min-folha td,.min-folha th{border:1px solid #808080;padding:2pt 4pt;vertical-align:top}
+.min-folha .quebra{border-top:1px dashed #9aa;margin:18pt -2cm 18pt -2.5cm;height:0}
+.campo-vazio{background:#fff0a0;border-radius:2px}
+.min-modelos section+section{margin-top:14px}
+.min-modelos h3{margin:0 0 6px;font:600 12px var(--f-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--tinta3)}
+.min-modelos-grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.min-modelo{display:flex;align-items:center;gap:10px;text-align:left;border:1px solid var(--linha);background:var(--sup);border-radius:8px;padding:10px 12px;font-weight:600;color:var(--tinta)}
+.min-modelo:hover{border-color:var(--acento);background:var(--acento-suave)}
+.min-modelo svg{width:20px;height:20px;flex:none;color:var(--acento)}
 @container (max-width:720px){
+  .min-folha{padding:1cm}
   .arq-grade{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,auto) minmax(300px,1fr)}
   .arq-grade>.dl{max-height:38vh}
   .arq-doc{padding:20px}
@@ -680,6 +707,10 @@ const ICONES = {
   minimizar: '<path d="M6 17h12"/>',
   maximizar: '<rect x="6" y="6" width="12" height="12" rx="1"/>',
   restaurar: '<rect x="5" y="9" width="10" height="10" rx="1"/><path d="M9 9V6a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-3"/>',
+  minuta: '<path d="M13 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4"/><path d="M13 3v5h5v2"/><path d="M8 12h5M8 16h3"/><path d="M14 21v-2.5l5-5 2.5 2.5-5 5z"/>',
+  alinharEsq: '<path d="M4 6h16M4 10h10M4 14h16M4 18h10"/>',
+  alinharCentro: '<path d="M4 6h16M7 10h10M4 14h16M7 18h10"/>',
+  justificar: '<path d="M4 6h16M4 10h16M4 14h16M4 18h16"/>',
   anexo: '<path d="M20.5 11.5l-8.2 8.2a5 5 0 0 1-7.1-7.1l8.6-8.6a3.4 3.4 0 0 1 4.8 4.8l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4l7.9-7.9"/>',
   ladoALado: '<rect x="3" y="5" width="8" height="14" rx="1"/><rect x="13" y="5" width="8" height="14" rx="1"/>'
 };
@@ -950,6 +981,9 @@ function normalizarProtocolo(p) {
     arquivos: Array.isArray(p.arquivos) ? p.arquivos.filter(x => x && x.ref).map(x => ({
       id: String(x.id || uid('a')), nome: String(x.nome || 'arquivo'), tamanho: Number(x.tamanho) || 0, tipo: String(x.tipo || ''),
       em: String(x.em || ''), ref: String(x.ref), via: x.via === 'asset' ? 'asset' : 'local', embrulhado: !!x.embrulhado })) : [],
+    minutas: Array.isArray(p.minutas) ? p.minutas.filter(x => x && x.id).map(x => ({
+      id: String(x.id), modelo: String(x.modelo || ''), titulo: String(x.titulo || ''), html: String(x.html || ''),
+      criadaEm: String(x.criadaEm || ''), atualizadaEm: String(x.atualizadaEm || '') })) : [],
     exemplo: !!p.exemplo,
     criadoEm: p.criadoEm || agora(),
     atualizadoEm: p.atualizadoEm || agora()
@@ -1860,6 +1894,10 @@ function renderProtocolo(p) {
     botaoJanela('arquivos', 'Arquivos', 'anexo', () => {
       const b = blocoArquivos(p);
       abrirDialogo({ titulo: 'Arquivos', conteudo: b.el, aoFechar: () => { b.limpar(); renderDetalhe(); }, atualizar: b.desenhar, cls: 'arq' });
+    }),
+    botaoJanela('minuta', 'Minuta', 'minuta', () => {
+      const b = blocoMinutas(p);
+      abrirDialogo({ titulo: 'Minutas', conteudo: b.el, aoFechar: renderDetalhe, atualizar: b.desenhar, cls: 'arq' });
     }));
   const cab = h('div', { class: 'cab' },
     h('div', { class: 'cab-txt' }, voltarBtn(), chips), acoes);
@@ -2281,6 +2319,392 @@ function blocoArquivos(p) {
   raiz.addEventListener('drop', ev => { ev.preventDefault(); raiz.classList.remove('soltar'); enviar([...ev.dataTransfer.files]); });
   desenhar();
   return { el: raiz, desenhar, limpar: vis.limpar };
+}
+/* ---------- minutas do protocolo (decretos, notificações, termos, PRF, CRF…) ----------
+   Cada modelo monta o texto com os dados do protocolo, das partes e dos imóveis; o que falta aparece
+   destacado entre colchetes para completar. O texto fica salvo no protocolo e sai em Word (.docx). */
+const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+const dataExtenso = iso => { const [y, m, d] = String(iso || hoje()).slice(0, 10).split('-').map(Number); return `${d} de ${MESES[m - 1]} de ${y}`; };
+const falta = rot => `<span class="campo-vazio">[${esc(rot)}]</span>`;
+const ou = (valor, rot) => (valor && String(valor).trim() ? esc(valor) : falta(rot));
+function dadosMinuta(p) {
+  const partes = p.partes.map(x => ({ pe: D().pessoas[x.pessoaId], qualidade: x.qualidade })).filter(x => x.pe);
+  const imoveis = imoveisDoProtocolo(p.id);
+  const analise = analisesDoProtocolo(p.id)[0] || null;
+  const [cidade, uf] = String(p.municipio || '').split('/').map(s => s.trim());
+  const nucleo = (analise && analise.ident.nucleo) || (imoveis.find(i => i.nucleo) || {}).nucleo || '';
+  const local = (imoveis.find(i => i.logradouro) || {}).logradouro || '';
+  const comQualidade = (...q) => partes.filter(x => q.includes(x.qualidade));
+  return { p, partes, imoveis, analise, cidade: cidade || '', uf: uf || '', nucleo, local, comQualidade, ano: hoje().slice(0, 4) };
+}
+function enderecoTexto(e) {
+  if (!e || !e.logradouro) return '';
+  return [[e.tipo, e.logradouro].filter(Boolean).join(' ') + (e.numero ? ', nº ' + e.numero : ''), e.complemento, e.bairro && 'bairro ' + e.bairro, e.municipio, e.cep && 'CEP ' + e.cep].filter(Boolean).join(', ');
+}
+// "Casado(a)", "Viúvo(a)"… concordam com o sexo cadastrado
+const estadoCivilDe = pe => String(pe.estadoCivil || '').replace(/o\(a\)/g, pe.sexo === 'Feminino' ? 'a' : pe.sexo === 'Masculino' ? 'o' : 'o(a)');
+// "MARIA DA SILVA, brasileira, casada, professora, RG nº…, CPF nº…, residente e domiciliada na…"
+function qualificacao(pe) {
+  if (!pe) return falta('NOME E QUALIFICAÇÃO');
+  const nome = `<b>${ou((pe.nome || '').toUpperCase(), 'NOME')}</b>`;
+  if (pe.tipo === 'juridica') return `${nome}, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº ${ou(pe.documento, 'CNPJ')}, com sede na ${ou(enderecoTexto(pe.enderecoResidencial), 'ENDEREÇO DA SEDE')}`;
+  const fem = pe.sexo === 'Feminino', mas = pe.sexo === 'Masculino';
+  const gen = (f, m, ambos) => (fem ? f : mas ? m : ambos);
+  return [nome,
+    ou((pe.nacionalidade || '').toLowerCase(), 'nacionalidade'),
+    ou(estadoCivilDe(pe).toLowerCase(), 'estado civil'),
+    ou((pe.profissao || '').toLowerCase(), 'profissão'),
+    `${gen('portadora', 'portador', 'portador(a)')} do RG nº ${ou(pe.rg, 'RG')}`,
+    `${gen('inscrita', 'inscrito', 'inscrito(a)')} no CPF sob o nº ${ou(pe.documento, 'CPF')}`,
+    `${gen('residente e domiciliada', 'residente e domiciliado', 'residente e domiciliado(a)')} na ${ou(enderecoTexto(pe.enderecoResidencial), 'ENDEREÇO')}`].join(', ');
+}
+function unidadeImovel(i) {
+  if (i.tipo === 'rural') return i.denominacao || (i.matricula ? 'Matrícula ' + i.matricula : 'Imóvel rural');
+  if (i.tipo === 'condominio') return [i.condominio, i.bloco && 'Bloco ' + i.bloco, i.unidade && 'Unidade ' + i.unidade].filter(Boolean).join(', ') || 'Unidade';
+  return [i.quadra && 'Quadra ' + i.quadra, i.lote && 'Lote ' + i.lote].filter(Boolean).join(', ') || tituloImovel(i);
+}
+const listaImoveis = d => d.imoveis.length
+  ? '<ul>' + d.imoveis.map(i => `<li>${esc(unidadeImovel(i))}${i.matricula ? ` — Matrícula nº ${esc(i.matricula)}${i.origem ? ' (' + esc(ORIGENS_IMOVEL[i.origem]) + ')' : ''}` : ''}${i.area ? ` — área de ${esc(i.area)} m²` : ''}</li>`).join('') + '</ul>'
+  : `<p class="t">${falta('RELAÇÃO DAS MATRÍCULAS E TRANSCRIÇÕES ATINGIDAS')}</p>`;
+const matriculas = d => { const m = d.imoveis.filter(i => i.matricula).map(i => 'nº ' + i.matricula); return m.length ? esc(m.join(', ')) : falta('MATRÍCULA(S)'); };
+const localData = d => `<p style="text-align:right">${ou(d.cidade, 'MUNICÍPIO')}, ${dataExtenso()}.</p>`;
+const assinatura = (nome, cargo) => `<p style="text-align:center"><br>_______________________________________<br>${nome}${cargo ? '<br>' + cargo : ''}</p>`;
+const cabMunicipio = d => `<p style="text-align:center"><b>MUNICÍPIO DE ${ou(d.cidade.toUpperCase(), 'MUNICÍPIO')}${d.uf ? ' – ' + esc(d.uf.toUpperCase()) : ''}</b></p>`;
+const MODALIDADE = falta('Reurb-S ou Reurb-E');
+
+const MODELOS_MINUTA = [
+  { id: 'requerimento', grupo: 'Instauração', nome: 'Requerimento de instauração da Reurb', gerar: d => {
+    const req = d.comQualidade('Requerente')[0];
+    return `<p style="text-align:center"><b>EXCELENTÍSSIMO(A) SENHOR(A) PREFEITO(A) DO MUNICÍPIO DE ${ou(d.cidade.toUpperCase(), 'MUNICÍPIO')}${d.uf ? '/' + esc(d.uf.toUpperCase()) : ''}</b></p>
+<p class="t">${req ? qualificacao(req.pe) : `<b>${ou(d.p.interessado.toUpperCase(), 'REQUERENTE')}</b>, ${falta('QUALIFICAÇÃO DO REQUERENTE')}`}, vem, respeitosamente, com fundamento nos arts. 14 e 32 da Lei nº 13.465, de 11 de julho de 2017, e no Decreto nº 9.310, de 15 de março de 2018, requerer a <b>instauração de procedimento de Regularização Fundiária Urbana (Reurb)</b> do núcleo urbano informal denominado <b>${ou(d.nucleo, 'NOME DO NÚCLEO')}</b>, localizado em ${ou(d.local, 'LOCALIZAÇÃO')}, neste Município.</p>
+<p class="t">O núcleo urbano informal é ocupado por ${falta('NÚMERO')} famílias e encontra-se consolidado, de difícil reversão, considerados o tempo da ocupação, a natureza das edificações, a localização das vias de circulação e a presença de equipamentos públicos, nos termos do art. 11, III, da Lei nº 13.465/2017.</p>
+<p class="t">Requer seja a Reurb classificada na modalidade ${MODALIDADE}, nos termos do art. 13 da Lei nº 13.465/2017, pelas razões seguintes: ${falta('JUSTIFICATIVA DA MODALIDADE')}.</p>
+<p class="t">Instruem o presente requerimento os seguintes documentos:</p>
+<ul><li>${falta('documento de identificação do requerente')}</li><li>${falta('planta ou croqui de localização do núcleo')}</li><li>Certidões das matrículas atingidas: ${matriculas(d)}</li><li>${falta('outros documentos')}</li></ul>
+<p class="t">Nestes termos, pede deferimento.</p>
+${localData(d)}${assinatura(req ? esc(req.pe.nome) : ou(d.p.interessado, 'REQUERENTE'), 'Requerente')}`;
+  } },
+  { id: 'decreto-instauracao', grupo: 'Instauração', nome: 'Decreto de instauração da Reurb', gerar: d => `${cabMunicipio(d)}
+<p style="text-align:center"><b>DECRETO Nº ${falta('Nº')}, DE ${dataExtenso().toUpperCase()}</b></p>
+<p style="margin-left:40%;text-align:justify"><i>Instaura o procedimento de Regularização Fundiária Urbana (Reurb) do núcleo urbano informal ${ou(d.nucleo, 'NOME DO NÚCLEO')} e classifica sua modalidade.</i></p>
+<p class="t">O(A) PREFEITO(A) DO MUNICÍPIO DE ${ou(d.cidade.toUpperCase(), 'MUNICÍPIO')}, no uso das atribuições que lhe confere a Lei Orgânica do Município, tendo em vista o disposto nos arts. 13, 28, 30 e 32 da Lei Federal nº 13.465, de 11 de julho de 2017, e no Decreto Federal nº 9.310, de 15 de março de 2018, e o que consta do Protocolo nº ${esc(d.p.numero)},</p>
+<p style="text-align:center"><b>DECRETA:</b></p>
+<p class="t"><b>Art. 1º</b> Fica instaurado o procedimento de Regularização Fundiária Urbana (Reurb) do núcleo urbano informal denominado ${ou(d.nucleo, 'NOME DO NÚCLEO')}, localizado em ${ou(d.local, 'LOCALIZAÇÃO')}, conforme perímetro descrito no Anexo Único deste Decreto.</p>
+<p class="t"><b>Art. 2º</b> A Reurb de que trata este Decreto fica classificada na modalidade ${MODALIDADE}, nos termos do art. 13 da Lei nº 13.465/2017.</p>
+<p class="t"><b>Art. 3º</b> Serão notificados os titulares de domínio, os responsáveis pela implantação do núcleo urbano informal, os confinantes e os terceiros eventualmente interessados, para, querendo, apresentarem impugnação no prazo de 30 (trinta) dias, nos termos do art. 31 da Lei nº 13.465/2017.</p>
+<p class="t"><b>Art. 4º</b> Compete ao(à) ${falta('ÓRGÃO MUNICIPAL RESPONSÁVEL')} o processamento administrativo do procedimento, a elaboração ou a análise do projeto de regularização fundiária e as demais providências previstas na legislação.</p>
+<p class="t"><b>Art. 5º</b> Este Decreto entra em vigor na data de sua publicação.</p>
+${localData(d)}${assinatura(falta('NOME'), 'Prefeito(a) Municipal')}` },
+  { id: 'notificacao', grupo: 'Notificações', nome: 'Notificação de titulares e confinantes', gerar: d => {
+    const dest = d.comQualidade('Proprietário', 'Confrontante');
+    const uma = x => `${cabMunicipio(d)}
+<p style="text-align:center"><b>NOTIFICAÇÃO</b><br>Regularização Fundiária Urbana – Protocolo nº ${esc(d.p.numero)}</p>
+<p class="t">A(o) ${x ? qualificacao(x.pe) : falta('NOME E QUALIFICAÇÃO DO NOTIFICADO')}.</p>
+<p class="t">O MUNICÍPIO DE ${ou(d.cidade.toUpperCase(), 'MUNICÍPIO')}, nos termos do art. 31 da Lei nº 13.465, de 11 de julho de 2017, <b>NOTIFICA</b> Vossa Senhoria de que foi instaurado procedimento de Regularização Fundiária Urbana (Reurb) do núcleo urbano informal ${ou(d.nucleo, 'NOME DO NÚCLEO')}, localizado em ${ou(d.local, 'LOCALIZAÇÃO')}, que abrange o(s) imóvel(is) objeto da(s) matrícula(s) ${matriculas(d)}, em relação ao(s) qual(is) Vossa Senhoria figura como ${x ? (x.qualidade === 'Confrontante' ? 'confinante' : 'titular de domínio') : falta('titular de domínio / confinante')}.</p>
+<p class="t">Fica Vossa Senhoria ciente de que poderá apresentar impugnação no prazo de 30 (trinta) dias, contados do recebimento desta notificação, e de que a ausência de manifestação no prazo será interpretada como concordância com a Reurb.</p>
+<p class="t">A impugnação e os documentos que a instruírem deverão ser protocolados em ${falta('ÓRGÃO E ENDEREÇO PARA PROTOCOLO')}, onde o projeto e o procedimento estão disponíveis para consulta.</p>
+${localData(d)}${assinatura(falta('NOME'), falta('CARGO'))}`;
+    return (dest.length ? dest : [null]).map(uma).join('<p class="quebra"></p>');
+  } },
+  { id: 'edital', grupo: 'Notificações', nome: 'Edital de notificação', gerar: d => `${cabMunicipio(d)}
+<p style="text-align:center"><b>EDITAL DE NOTIFICAÇÃO Nº ${falta('Nº')}/${d.ano}</b><br>Regularização Fundiária Urbana – Núcleo ${ou(d.nucleo, 'NOME DO NÚCLEO')}</p>
+<p class="t">O MUNICÍPIO DE ${ou(d.cidade.toUpperCase(), 'MUNICÍPIO')} torna público, nos termos do art. 31 da Lei nº 13.465, de 11 de julho de 2017, que tramita o procedimento de Regularização Fundiária Urbana (Reurb) do núcleo urbano informal ${ou(d.nucleo, 'NOME DO NÚCLEO')}, localizado em ${ou(d.local, 'LOCALIZAÇÃO')}, Protocolo nº ${esc(d.p.numero)}, e <b>NOTIFICA</b> os titulares de domínio, confinantes e terceiros eventualmente interessados, não encontrados ou desconhecidos, para, querendo, apresentarem impugnação no prazo de 30 (trinta) dias, contados da publicação deste edital.</p>
+<p class="t">O núcleo abrange os seguintes imóveis:</p>
+${listaImoveis(d)}
+<p class="t">A ausência de manifestação no prazo será interpretada como concordância com a Reurb. As impugnações deverão ser protocoladas em ${falta('ÓRGÃO E ENDEREÇO PARA PROTOCOLO')}.</p>
+${localData(d)}${assinatura(falta('NOME'), falta('CARGO'))}` },
+  { id: 'oitiva', grupo: 'Instrução', nome: 'Termo de oitiva', gerar: d => {
+    const oc = d.comQualidade('Ocupante', 'Beneficiário')[0];
+    return `<p style="text-align:center"><b>TERMO DE OITIVA</b><br>Regularização Fundiária Urbana – Protocolo nº ${esc(d.p.numero)} – Núcleo ${ou(d.nucleo, 'NOME DO NÚCLEO')}</p>
+<p class="t">Aos ${dataExtenso()}, em ${falta('LOCAL')}, compareceu ${oc ? qualificacao(oc.pe) : falta('NOME E QUALIFICAÇÃO DO(A) DECLARANTE')}, ocupante do imóvel ${d.imoveis[0] ? esc(unidadeImovel(d.imoveis[0])) : falta('IDENTIFICAÇÃO DO IMÓVEL')}, integrante do núcleo urbano informal acima indicado, que, ciente de que suas declarações instruem o procedimento de Reurb, declarou:</p>
+<ol><li>que ocupa o imóvel desde ${falta('MÊS/ANO')}, de forma mansa, pacífica e ininterrupta, sem oposição de quem quer que seja;</li>
+<li>que utiliza o imóvel para ${falta('moradia / outra finalidade')};</li>
+<li>que ${falta('não')} é proprietário(a), concessionário(a) ou foreiro(a) de outro imóvel urbano ou rural;</li>
+<li>que ${falta('não')} foi contemplado(a) anteriormente com legitimação de posse ou fundiária de imóvel urbano;</li>
+<li>que a composição familiar é ${falta('COMPOSIÇÃO FAMILIAR')} e a renda familiar mensal é de ${falta('RENDA')};</li>
+<li>que ${falta('não')} tem conhecimento de conflitos ou disputas sobre o imóvel ou suas divisas; ${falta('OUTRAS DECLARAÇÕES')}.</li></ol>
+<p class="t">Nada mais foi dito. Lido e achado conforme, vai assinado pelo(a) declarante, pelo(a) responsável pela oitiva e pelas testemunhas.</p>
+${assinatura(oc ? esc(oc.pe.nome) : falta('NOME'), 'Declarante')}${assinatura(falta('NOME'), 'Responsável pela oitiva')}${assinatura(falta('NOME'), 'Testemunha')}${assinatura(falta('NOME'), 'Testemunha')}`;
+  } },
+  { id: 'parecer', grupo: 'Instrução', nome: 'Parecer jurídico', gerar: d => {
+    const a = d.analise, est = a && estatisticas(a.modelo, a.respostas);
+    const pend = est && est.pendencias.length
+      ? '<ol>' + est.pendencias.map(info => `<li><b>${esc(info.no.texto)}</b>${info.no.providencia ? ' Providência: ' + esc(info.no.providencia) + '.' : ''}${info.no.fundamento ? ' Fundamento: ' + esc(info.no.fundamento) + '.' : ''}</li>`).join('') + '</ol>'
+      : `<p class="t">${a ? 'A análise do checklist não apontou pendências nos itens respondidos.' : falta('PENDÊNCIAS IDENTIFICADAS')}</p>`;
+    return `<p style="text-align:center"><b>PARECER JURÍDICO Nº ${falta('Nº')}/${d.ano}</b></p>
+<p><b>Protocolo:</b> ${esc(d.p.numero)}<br><b>Interessado:</b> ${ou(d.p.interessado, 'INTERESSADO')}<br><b>Assunto:</b> Regularização Fundiária Urbana – Núcleo ${ou(d.nucleo, 'NOME DO NÚCLEO')}${d.cidade ? ' – ' + esc(d.p.municipio) : ''}</p>
+<p><b>I – RELATÓRIO</b></p>
+<p class="t">${ou(d.p.descricao, 'RELATO DO PEDIDO E DOS DOCUMENTOS APRESENTADOS')}</p>
+<p><b>II – FUNDAMENTAÇÃO</b></p>
+<p class="t">A Regularização Fundiária Urbana (Reurb) é disciplinada pela Lei nº 13.465, de 11 de julho de 2017, regulamentada pelo Decreto nº 9.310, de 15 de março de 2018, e abrange medidas jurídicas, urbanísticas, ambientais e sociais destinadas à incorporação dos núcleos urbanos informais ao ordenamento territorial urbano e à titulação de seus ocupantes (art. 9º).</p>
+<p class="t">${falta('ANÁLISE DO CASO: consolidação do núcleo, modalidade, titularidade, restrições ambientais, infraestrutura essencial')}</p>
+<p class="t">Da análise realizada resultam as seguintes pendências:</p>
+${pend}
+<p><b>III – CONCLUSÃO</b></p>
+<p class="t">${falta('CONCLUSÃO E ENCAMINHAMENTOS')}</p>
+<p class="t">É o parecer, salvo melhor juízo.</p>
+${localData(d)}${assinatura(falta('NOME'), falta('OAB/UF Nº'))}`;
+  } },
+  { id: 'prf', grupo: 'Projeto e aprovação', nome: 'Projeto de Regularização Fundiária (PRF)', gerar: d => {
+    const ocup = d.comQualidade('Ocupante', 'Beneficiário');
+    const quadro = d.imoveis.length || ocup.length
+      ? `<table><tr><th>Unidade</th><th>Matrícula</th><th>Área (m²)</th><th>Ocupante(s)</th></tr>${(d.imoveis.length ? d.imoveis : [null]).map(i => {
+        const nomes = i ? i.vinculos.map(v => (D().pessoas[v.pessoaId] || {}).nome).filter(Boolean) : ocup.map(x => x.pe.nome);
+        return `<tr><td>${i ? esc(unidadeImovel(i)) : falta('UNIDADE')}</td><td>${i && i.matricula ? esc(i.matricula) : ''}</td><td>${i && i.area ? esc(i.area) : ''}</td><td>${nomes.length ? esc(nomes.join('; ')) : falta('OCUPANTE')}</td></tr>`;
+      }).join('')}</table>`
+      : `<p class="t">${falta('QUADRO DE UNIDADES E OCUPANTES')}</p>`;
+    const sec = (n, titulo, texto) => `<p><b>${n}. ${titulo}</b></p><p class="t">${texto}</p>`;
+    return `<p style="text-align:center"><b>PROJETO DE REGULARIZAÇÃO FUNDIÁRIA</b><br>Núcleo ${ou(d.nucleo, 'NOME DO NÚCLEO')} – ${ou(d.p.municipio, 'MUNICÍPIO/UF')}</p>
+<p class="t">Projeto elaborado nos termos dos arts. 35 e 36 da Lei nº 13.465, de 11 de julho de 2017, no âmbito do Protocolo nº ${esc(d.p.numero)}.</p>
+${sec(1, 'IDENTIFICAÇÃO', `Núcleo urbano informal ${ou(d.nucleo, 'NOME DO NÚCLEO')}, localizado em ${ou(d.local, 'LOCALIZAÇÃO')}, modalidade ${MODALIDADE}, área total de ${falta('ÁREA')} m², com ${falta('NÚMERO')} unidades.`)}
+${sec(2, 'LEVANTAMENTO PLANIALTIMÉTRICO E CADASTRAL', `Levantamento georreferenciado elaborado por ${falta('RESPONSÁVEL TÉCNICO')}, ${falta('ART/RRT Nº')}, que demonstra as unidades, as construções, o sistema viário, as áreas públicas, os acidentes geográficos e os demais elementos caracterizadores do núcleo.`)}
+<p><b>3. PLANTA DO PERÍMETRO E MATRÍCULAS ATINGIDAS</b></p>
+${listaImoveis(d)}
+${sec(4, 'ESTUDO PRELIMINAR DAS DESCONFORMIDADES', `Situação jurídica, urbanística e ambiental do núcleo: ${falta('DESCRIÇÃO')}.`)}
+${sec(5, 'PROJETO URBANÍSTICO', `Indicação das áreas ocupadas, do sistema viário e das unidades imobiliárias, existentes ou projetadas; das unidades construídas; das áreas destinadas a uso público; e das eventuais áreas já usucapidas, conforme o art. 36 da Lei nº 13.465/2017: ${falta('DESCRIÇÃO')}.`)}
+${sec(6, 'MEMORIAIS DESCRITIVOS', falta('MEMORIAIS DESCRITIVOS DO PERÍMETRO E DAS UNIDADES'))}
+${sec(7, 'SOLUÇÕES AMBIENTAIS, URBANÍSTICAS E DE REASSENTAMENTO', falta('PROPOSTAS DE SOLUÇÃO'))}
+${sec(8, 'ESTUDO TÉCNICO DE SITUAÇÃO DE RISCO', falta('quando houver área de risco; ou "Não se aplica"'))}
+${sec(9, 'ESTUDO TÉCNICO AMBIENTAL', falta('quando houver área de preservação permanente ou unidade de conservação; ou "Não se aplica"'))}
+${sec(10, 'CRONOGRAMA FÍSICO DE SERVIÇOS E OBRAS DE INFRAESTRUTURA ESSENCIAL', falta('CRONOGRAMA'))}
+${sec(11, 'TERMO DE COMPROMISSO', `Termo de compromisso a ser assinado pelos responsáveis, públicos ou privados, pelo cumprimento do cronograma: ${falta('RESPONSÁVEIS')}.`)}
+<p><b>12. QUADRO DE UNIDADES E OCUPANTES</b></p>
+${quadro}
+${localData(d)}${assinatura(falta('RESPONSÁVEL TÉCNICO'), falta('CREA/CAU Nº'))}`;
+  } },
+  { id: 'decreto-aprovacao', grupo: 'Projeto e aprovação', nome: 'Decreto de aprovação e conclusão da Reurb', gerar: d => `${cabMunicipio(d)}
+<p style="text-align:center"><b>DECRETO Nº ${falta('Nº')}, DE ${dataExtenso().toUpperCase()}</b></p>
+<p style="margin-left:40%;text-align:justify"><i>Aprova o Projeto de Regularização Fundiária do núcleo urbano informal ${ou(d.nucleo, 'NOME DO NÚCLEO')}, conclui a Reurb e determina a expedição da Certidão de Regularização Fundiária.</i></p>
+<p class="t">O(A) PREFEITO(A) DO MUNICÍPIO DE ${ou(d.cidade.toUpperCase(), 'MUNICÍPIO')}, no uso de suas atribuições e com fundamento nos arts. 28, V, 30 e 40 da Lei Federal nº 13.465, de 11 de julho de 2017, e considerando o que consta do Protocolo nº ${esc(d.p.numero)},</p>
+<p style="text-align:center"><b>DECRETA:</b></p>
+<p class="t"><b>Art. 1º</b> Fica aprovado o Projeto de Regularização Fundiária do núcleo urbano informal ${ou(d.nucleo, 'NOME DO NÚCLEO')}, localizado em ${ou(d.local, 'LOCALIZAÇÃO')}, classificado na modalidade ${MODALIDADE}.</p>
+<p class="t"><b>Art. 2º</b> Ficam identificados os ocupantes das unidades imobiliárias regularizadas, conforme listagem anexa, e reconhecidos os direitos reais que lhes são conferidos por ${falta('legitimação fundiária / outro instituto')}.</p>
+<p class="t"><b>Art. 3º</b> A execução das obras de infraestrutura essencial e das compensações urbanísticas e ambientais observará o cronograma e o termo de compromisso integrantes do projeto, sob responsabilidade de ${falta('RESPONSÁVEIS')}.</p>
+<p class="t"><b>Art. 4º</b> Expeça-se a Certidão de Regularização Fundiária (CRF), a ser encaminhada ao Cartório de Registro de Imóveis para registro, nos termos dos arts. 41 e 42 da Lei nº 13.465/2017.</p>
+<p class="t"><b>Art. 5º</b> Este Decreto entra em vigor na data de sua publicação.</p>
+${localData(d)}${assinatura(falta('NOME'), 'Prefeito(a) Municipal')}` },
+  { id: 'crf', grupo: 'Titulação e registro', nome: 'Certidão de Regularização Fundiária (CRF)', gerar: d => {
+    const ocup = d.comQualidade('Beneficiário', 'Ocupante');
+    const unidadeDe = pe => { const i = d.imoveis.find(x => x.vinculos.some(v => v.pessoaId === pe.id)); return i ? unidadeImovel(i) : ''; };
+    const tabela = `<table><tr><th>Unidade</th><th>Ocupante</th><th>Estado civil</th><th>Profissão</th><th>CPF</th><th>RG</th><th>Filiação</th><th>Direito real</th></tr>${(ocup.length ? ocup : [null]).map(x => x
+      ? `<tr><td>${ou(unidadeDe(x.pe), 'UNIDADE')}</td><td>${esc(x.pe.nome)}</td><td>${ou(estadoCivilDe(x.pe), '—')}</td><td>${ou(x.pe.profissao, '—')}</td><td>${ou(x.pe.documento, 'CPF')}</td><td>${ou(x.pe.rg, 'RG')}</td><td>${ou([x.pe.pai, x.pe.mae].filter(Boolean).join(' e '), 'FILIAÇÃO')}</td><td>${falta('legitimação fundiária')}</td></tr>`
+      : `<tr><td>${falta('UNIDADE')}</td><td>${falta('NOME')}</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`).join('')}</table>`;
+    return `${cabMunicipio(d)}
+<p style="text-align:center"><b>CERTIDÃO DE REGULARIZAÇÃO FUNDIÁRIA – CRF Nº ${falta('Nº')}/${d.ano}</b></p>
+<p class="t">O MUNICÍPIO DE ${ou(d.cidade.toUpperCase(), 'MUNICÍPIO')} <b>CERTIFICA</b>, nos termos dos arts. 11, V, e 41 da Lei nº 13.465, de 11 de julho de 2017, que o núcleo urbano informal abaixo identificado foi objeto de Regularização Fundiária Urbana, com projeto aprovado pelo Decreto nº ${falta('Nº')}, no âmbito do Protocolo nº ${esc(d.p.numero)}.</p>
+<p class="t"><b>I – Nome do núcleo:</b> ${ou(d.nucleo, 'NOME DO NÚCLEO')}.</p>
+<p class="t"><b>II – Localização:</b> ${ou(d.local, 'LOCALIZAÇÃO')}, ${ou(d.p.municipio, 'MUNICÍPIO/UF')}; matrícula(s) de origem ${matriculas(d)}.</p>
+<p class="t"><b>III – Modalidade:</b> ${MODALIDADE}.</p>
+<p class="t"><b>IV – Responsáveis pelas obras e serviços constantes do cronograma:</b> ${falta('RESPONSÁVEIS')}.</p>
+<p class="t"><b>V – Unidades regularizadas:</b> ${d.imoveis.length ? esc(d.imoveis.map(unidadeImovel).join('; ')) : falta('INDICAÇÃO NUMÉRICA DAS UNIDADES')}.</p>
+<p class="t"><b>VI – Ocupantes e direitos reais conferidos:</b></p>
+${tabela}
+${localData(d)}${assinatura(falta('NOME'), falta('CARGO'))}`;
+  } },
+  { id: 'oficio-registro', grupo: 'Titulação e registro', nome: 'Ofício ao Registro de Imóveis', gerar: d => `${cabMunicipio(d)}
+<p>Ofício nº ${falta('Nº')}/${d.ano}</p>
+${localData(d)}
+<p>A(o) Senhor(a) Oficial do Registro de Imóveis da Comarca de ${falta('COMARCA')}</p>
+<p><b>Assunto:</b> Registro da CRF e do Projeto de Regularização Fundiária – Núcleo ${ou(d.nucleo, 'NOME DO NÚCLEO')}</p>
+<p class="t">Senhor(a) Oficial,</p>
+<p class="t">Com fundamento nos arts. 42 e seguintes da Lei nº 13.465, de 11 de julho de 2017, encaminhamos para registro a Certidão de Regularização Fundiária nº ${falta('Nº')}, acompanhada do projeto de regularização fundiária aprovado, relativos ao núcleo urbano informal ${ou(d.nucleo, 'NOME DO NÚCLEO')}, que atinge a(s) matrícula(s) ${matriculas(d)}.</p>
+<p class="t">Requeremos a abertura das matrículas das unidades imobiliárias e o registro dos direitos reais conferidos aos ocupantes indicados na CRF. ${falta('Tratando-se de Reurb-S, os atos registrais são isentos de custas e emolumentos, nos termos do art. 13, § 1º, da Lei nº 13.465/2017.')}</p>
+<p class="t">Atenciosamente,</p>
+${assinatura(falta('NOME'), falta('CARGO'))}` },
+  { id: 'branco', grupo: 'Outro', nome: 'Documento em branco', gerar: () => '<p class="t"></p>' }
+];
+
+/* Word (.docx) gerado aqui mesmo: parágrafos, negrito, itálico, sublinhado, alinhamento, listas e tabelas */
+function crc32(u8) {
+  let c, tab = crc32.tab;
+  if (!tab) { tab = crc32.tab = new Uint32Array(256); for (let n = 0; n < 256; n++) { c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; tab[n] = c >>> 0; } }
+  c = 0xFFFFFFFF;
+  for (let i = 0; i < u8.length; i++) c = tab[(c ^ u8[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+function zipar(arqs, tipo) {
+  const enc = new TextEncoder(), partes = [], central = [];
+  let off = 0;
+  for (const a of arqs) {
+    const nome = enc.encode(a.nome), dados = typeof a.dados === 'string' ? enc.encode(a.dados) : a.dados, crc = crc32(dados);
+    const loc = new DataView(new ArrayBuffer(30));
+    loc.setUint32(0, 0x04034b50, true); loc.setUint16(4, 20, true); loc.setUint16(6, 0x0800, true); loc.setUint16(8, 0, true);
+    loc.setUint16(10, 0, true); loc.setUint16(12, 0x21, true); loc.setUint32(14, crc, true);
+    loc.setUint32(18, dados.length, true); loc.setUint32(22, dados.length, true); loc.setUint16(26, nome.length, true); loc.setUint16(28, 0, true);
+    const cen = new DataView(new ArrayBuffer(46));
+    cen.setUint32(0, 0x02014b50, true); cen.setUint16(4, 20, true); cen.setUint16(6, 20, true); cen.setUint16(8, 0x0800, true); cen.setUint16(10, 0, true);
+    cen.setUint16(12, 0, true); cen.setUint16(14, 0x21, true); cen.setUint32(16, crc, true); cen.setUint32(20, dados.length, true); cen.setUint32(24, dados.length, true);
+    cen.setUint16(28, nome.length, true); cen.setUint32(42, off, true);
+    partes.push(new Uint8Array(loc.buffer), nome, dados);
+    central.push(new Uint8Array(cen.buffer), nome);
+    off += 30 + nome.length + dados.length;
+  }
+  const tamCentral = central.reduce((s, x) => s + x.length, 0);
+  const fim = new DataView(new ArrayBuffer(22));
+  fim.setUint32(0, 0x06054b50, true); fim.setUint16(8, arqs.length, true); fim.setUint16(10, arqs.length, true);
+  fim.setUint32(12, tamCentral, true); fim.setUint32(16, off, true);
+  return new Blob([...partes, ...central, new Uint8Array(fim.buffer)], { type: tipo });
+}
+function minutaDocx(html) {
+  const t = document.createElement('template');
+  t.innerHTML = html;
+  const xe = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const LARG = 9071; // largura útil da folha A4 com margens de 3 cm e 2 cm, em twips
+  const run = (txt, f) => `<w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>${f.b ? '<w:b/>' : ''}${f.i ? '<w:i/>' : ''}<w:sz w:val="${f.sz || 24}"/><w:szCs w:val="${f.sz || 24}"/>${f.hl ? '<w:highlight w:val="yellow"/>' : ''}${f.u ? '<w:u w:val="single"/>' : ''}</w:rPr><w:t xml:space="preserve">${xe(txt)}</w:t></w:r>`;
+  const runs = (no, f) => {
+    let out = '';
+    for (const n of no.childNodes) {
+      if (n.nodeType === 3) { const txt = n.nodeValue.replace(/\s+/g, ' '); if (txt) out += run(txt, f); continue; }
+      if (n.nodeType !== 1) continue;
+      if (n.tagName === 'BR') { out += '<w:r><w:br/></w:r>'; continue; }
+      const g = Object.assign({}, f), st = n.style;
+      if (/^(B|STRONG)$/.test(n.tagName) || st.fontWeight === 'bold' || +st.fontWeight >= 600) g.b = true;
+      if (/^(I|EM)$/.test(n.tagName) || st.fontStyle === 'italic') g.i = true;
+      if (n.tagName === 'U' || /underline/.test(st.textDecoration)) g.u = true;
+      if (n.classList.contains('campo-vazio')) g.hl = true;
+      out += runs(n, g);
+    }
+    return out;
+  };
+  const pPr = (el, extra = {}) => {
+    const st = el.style || {}, al = extra.jc || ({ center: 'center', right: 'right', justify: 'both', left: 'left' })[st.textAlign] || (el.classList && el.classList.contains('t') ? 'both' : '');
+    const ml = /%$/.test(st.marginLeft || '') ? Math.round(LARG * parseFloat(st.marginLeft) / 100) : 0;
+    const primeira = el.classList && el.classList.contains('t') ? 709 : 0;
+    return `<w:pPr><w:spacing w:after="120" w:line="360" w:lineRule="auto"/>${ml || primeira || extra.ind ? `<w:ind w:left="${ml + (extra.ind || 0)}"${primeira ? ' w:firstLine="709"' : ''}${extra.ind ? ' w:hanging="283"' : ''}/>` : ''}${al ? `<w:jc w:val="${al}"/>` : ''}</w:pPr>`;
+  };
+  const par = (el, f = {}, extra = {}, prefixo = '') => `<w:p>${pPr(el, extra)}${prefixo ? run(prefixo, f) : ''}${runs(el, f)}</w:p>`;
+  const blocos = [];
+  const tabela = tb => {
+    const linhas = [...tb.querySelectorAll('tr')];
+    const cols = Math.max(1, ...linhas.map(r => r.children.length));
+    const borda = t => `<w:${t} w:val="single" w:sz="4" w:space="0" w:color="808080"/>`;
+    return `<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/><w:tblBorders>${['top', 'left', 'bottom', 'right', 'insideH', 'insideV'].map(borda).join('')}</w:tblBorders></w:tblPr><w:tblGrid>${`<w:gridCol w:w="${Math.floor(LARG / cols)}"/>`.repeat(cols)}</w:tblGrid>${linhas.map(r => `<w:tr>${[...r.children].map(c => `<w:tc><w:tcPr><w:tcW w:w="0" w:type="auto"/></w:tcPr><w:p><w:pPr><w:spacing w:after="0"/></w:pPr>${runs(c, { b: c.tagName === 'TH', sz: 20 })}</w:p></w:tc>`).join('')}</w:tr>`).join('')}</w:tbl>`;
+  };
+  const andar = raiz => {
+    let solto = null;
+    const fecharSolto = () => { if (solto) { blocos.push(par(solto)); solto = null; } };
+    for (const n of [...raiz.childNodes]) {
+      const bloco = n.nodeType === 1 && /^(P|DIV|H1|H2|H3|H4|UL|OL|TABLE|BLOCKQUOTE)$/.test(n.tagName);
+      if (!bloco) {
+        if (n.nodeType === 3 && !n.nodeValue.trim() && !solto) continue;
+        if (!solto) solto = document.createElement('p');
+        solto.append(n.cloneNode(true));
+        continue;
+      }
+      fecharSolto();
+      if (n.classList.contains('quebra')) { blocos.push('<w:p><w:r><w:br w:type="page"/></w:r></w:p>'); continue; }
+      if (n.tagName === 'TABLE') { blocos.push(tabela(n)); continue; }
+      if (n.tagName === 'UL' || n.tagName === 'OL') { [...n.children].forEach((li, k) => blocos.push(par(li, {}, { jc: 'both', ind: 567 }, n.tagName === 'OL' ? `${k + 1}. ` : '• '))); continue; }
+      if (n.tagName === 'DIV' && n.querySelector('p,div,ul,ol,table,h1,h2,h3')) { andar(n); continue; }
+      const h = /^H(\d)$/.exec(n.tagName);
+      blocos.push(h ? par(n, { b: true, sz: h[1] === '1' ? 28 : 26 }, { jc: n.style.textAlign ? '' : 'center' }) : par(n));
+    }
+    fecharSolto();
+  };
+  andar(t.content);
+  if (!blocos.length || blocos[blocos.length - 1].startsWith('<w:tbl>')) blocos.push('<w:p/>');
+  const doc = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${blocos.join('')}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1701" w:right="1134" w:bottom="1134" w:left="1701" w:header="709" w:footer="709" w:gutter="0"/></w:sectPr></w:body></w:document>`;
+  return zipar([
+    { nome: '[Content_Types].xml', dados: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>' },
+    { nome: '_rels/.rels', dados: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>' },
+    { nome: 'word/document.xml', dados: doc }
+  ], 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+}
+const nomeArquivoMinuta = (m, p) => `${m.titulo || 'Minuta'} - Protocolo ${p.numero.replace('/', '-')}`.replace(/[\\/:*?"<>|]+/g, ' ').trim();
+const ESTILO_FOLHA = 'body{margin:0}.folha{font:12pt/1.5 "Times New Roman",Times,serif;color:#000;max-width:16cm;margin:0 auto;padding:1cm 0}.folha p{margin:0 0 6pt}.folha p.t{text-align:justify;text-indent:1.25cm}.folha ul,.folha ol{margin:0 0 6pt;padding-left:1cm;text-align:justify}.folha table{border-collapse:collapse;width:100%;font-size:10pt;margin:0 0 6pt}.folha td,.folha th{border:1px solid #808080;padding:2pt 4pt;vertical-align:top}.folha .quebra{page-break-after:always;height:0;margin:0}@page{size:A4;margin:3cm 2cm 2cm 3cm}';
+function imprimirMinuta(m) {
+  const w = window.open('', '_blank');
+  if (!w) { toast('O navegador bloqueou a janela de impressão. Use Baixar Word e imprima pelo Word.'); return; }
+  w.document.open();
+  w.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${esc(m.titulo)}</title><style>${ESTILO_FOLHA}.campo-vazio{background:#fff3a3}</style></head><body><div class="folha">${m.html}</div></body></html>`);
+  w.document.close();
+  w.focus();
+  setTimeout(() => w.print(), 300);
+}
+// janela Minuta: à esquerda a lista (Adicionar e Excluir), à direita o editor; dois cliques abrem a minuta
+function blocoMinutas(p) {
+  const lado = h('section', { class: 'dl', 'aria-label': 'Minutas do protocolo' });
+  const editor = h('section', { class: 'arq-visor min-editor', 'aria-label': 'Minuta' });
+  const raiz = h('div', { class: 'arq-grade' }, lado, editor);
+  let sel = null, aberta = null, escolhendo = false;
+  const vazio = () => editor.replaceChildren(h('p', { class: 'arq-vazio' }, 'Nenhuma minuta aberta.'));
+  const escolherModelo = () => {
+    escolhendo = true; aberta = null; desenhar();
+    const grupos = [...new Set(MODELOS_MINUTA.map(x => x.grupo))];
+    editor.replaceChildren(
+      h('div', { class: 'arq-visor-cab' }, h('span', { class: 'arq-visor-nome' }, 'Nova minuta'),
+        btn('Cancelar', { fant: true, sm: true, onclick: () => { escolhendo = false; vazio(); desenhar(); } })),
+      h('div', { class: 'arq-visor-corpo min-modelos' }, grupos.map(g => h('section', null, h('h3', null, g),
+        h('div', { class: 'min-modelos-grade' }, MODELOS_MINUTA.filter(x => x.grupo === g).map(x => h('button', { type: 'button', class: 'min-modelo', onclick: () => criar(x) }, ico('minuta'), h('span', null, x.nome))))))));
+  };
+  const criar = modelo => {
+    const m = { id: uid('mi'), modelo: modelo.id, titulo: modelo.nome, html: modelo.gerar(dadosMinuta(p)), criadaEm: agora(), atualizadaEm: agora() };
+    p.minutas.push(m);
+    registrarAndamento(p, `Minuta “${m.titulo}” criada.`);
+    Store.put('protocolos', p, 0);
+    escolhendo = false;
+    abrir(m);
+  };
+  const abrir = m => {
+    sel = aberta = m.id; escolhendo = false; desenhar();
+    const salvar = () => { m.atualizadaEm = agora(); Store.put('protocolos', p); };
+    const titulo = h('input', { class: 'inp min-titulo', 'aria-label': 'Título da minuta', value: m.titulo });
+    titulo.addEventListener('input', () => { m.titulo = titulo.value; salvar(); desenhar(); });
+    const folha = h('div', { class: 'min-folha', contenteditable: 'true', spellcheck: 'true', 'aria-label': 'Texto da minuta' }, htmlSeguro(m.html));
+    const faltam = h('span', { class: 'min-faltam' });
+    const contar = () => { const n = folha.querySelectorAll('.campo-vazio').length; faltam.textContent = n ? plural(n, 'campo a preencher', 'campos a preencher') : ''; };
+    // o destaque de um campo entre colchetes some quando ele é preenchido
+    folha.addEventListener('input', () => {
+      for (const s of folha.querySelectorAll('.campo-vazio')) if (!/^\[[^\]]*\]$/.test(s.textContent.trim())) s.classList.remove('campo-vazio');
+      m.html = folha.innerHTML; contar(); salvar();
+    });
+    // um clique num campo entre colchetes seleciona o campo inteiro, para digitar por cima
+    folha.addEventListener('click', ev => {
+      const s = ev.target.closest && ev.target.closest('.campo-vazio');
+      if (!s || !getSelection().isCollapsed) return;
+      const r = document.createRange(); r.selectNodeContents(s);
+      const selec = getSelection(); selec.removeAllRanges(); selec.addRange(r);
+    });
+    // colar sempre como texto simples, para não trazer a formatação de outro programa
+    folha.addEventListener('paste', ev => { ev.preventDefault(); document.execCommand('insertText', false, ev.clipboardData.getData('text/plain')); });
+    const cmd = (rot, icone, c, v) => h('button', { type: 'button', class: 'min-fmt', title: rot, 'aria-label': rot, onmousedown: ev => ev.preventDefault(), onclick: () => { document.execCommand(c, false, v); folha.focus(); m.html = folha.innerHTML; salvar(); } }, icone);
+    const barra = h('div', { class: 'min-barra', role: 'toolbar', 'aria-label': 'Formatação' },
+      cmd('Negrito', h('b', null, 'N'), 'bold'), cmd('Itálico', h('i', null, 'I'), 'italic'), cmd('Sublinhado', h('u', null, 'S'), 'underline'),
+      h('span', { class: 'min-sep' }),
+      cmd('Alinhar à esquerda', ico('alinharEsq'), 'justifyLeft'), cmd('Centralizar', ico('alinharCentro'), 'justifyCenter'), cmd('Justificar', ico('justificar'), 'justifyFull'),
+      faltam);
+    editor.replaceChildren(
+      h('div', { class: 'arq-visor-cab' }, titulo,
+        !Store.emArtifact ? btn('Imprimir', { icone: 'imprimir', sm: true, onclick: () => imprimirMinuta(m) }) : null,
+        btn('Baixar Word', { icone: 'baixar', sm: true, prim: true, onclick: () => baixar(nomeArquivoMinuta(m, p) + '.docx', minutaDocx(m.html)) })),
+      barra,
+      h('div', { class: 'arq-visor-corpo min-corpo' }, folha));
+    contar();
+  };
+  const desenhar = () => {
+    if (!p.minutas.some(m => m.id === sel)) sel = null;
+    if (aberta && !p.minutas.some(m => m.id === aberta)) { aberta = null; vazio(); }
+    const linhas = p.minutas.map(m => h('button', {
+      type: 'button', class: 'dl-linha' + (m.id === aberta ? ' aberto' : ''), 'aria-pressed': String(m.id === sel), title: 'Dois cliques abrem a minuta',
+      onclick: ev => { sel = m.id; for (const b of linhas) b.setAttribute('aria-pressed', String(b === ev.currentTarget)); bExcluir.disabled = false; },
+      ondblclick: () => { if (m.id !== aberta) abrir(m); },
+      onkeydown: ev => { if (ev.key === 'Enter') { ev.preventDefault(); if (m.id !== aberta) abrir(m); } }
+    }, h('span', { class: 'dl-nome' }, m.titulo || 'Minuta sem título'), h('small', null, fmtData(m.atualizadaEm))));
+    const bExcluir = btn('Excluir', { icone: 'lixo', perigo: true, disabled: !sel, onclick: ev => armar(ev.currentTarget, () => {
+      const m = p.minutas.find(x => x.id === sel);
+      if (!m) return;
+      p.minutas = p.minutas.filter(x => x !== m);
+      registrarAndamento(p, `Minuta “${m.titulo}” excluída.`);
+      Store.put('protocolos', p, 0);
+      sel = null;
+      desenhar();
+    }) });
+    lado.replaceChildren(h('div', { class: 'dl-lista' }, linhas.length ? linhas : h('p', { class: 'dica' }, 'Nenhuma minuta.')),
+      h('div', { class: 'dl-bts' }, btn('Adicionar', { icone: 'mais', prim: true, disabled: escolhendo, onclick: escolherModelo }), bExcluir));
+  };
+  vazio();
+  desenhar();
+  return { el: raiz, desenhar };
 }
 function blocoFinanceiro(p, aoMudar) {
   const f = p.financeiro;
