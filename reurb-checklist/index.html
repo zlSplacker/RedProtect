@@ -473,8 +473,40 @@ select.inp{padding-right:28px}
 .dl-linha small{color:var(--tinta3);font-size:12.5px}
 .dl-linha .chip{margin-left:auto}
 .dl-bts{display:flex;gap:8px;padding-top:12px}
-.dl-arquivos{border-radius:8px;outline:2px dashed transparent;outline-offset:6px}
-.dl-arquivos.soltar{outline-color:var(--acento)}
+/* janela Arquivos: lista à esquerda, visualização à direita, ocupando a janela do protocolo */
+.modal.arq{padding:10px}
+.modal.arq .modal-painel{height:100%;display:flex;flex-direction:column}
+.modal.arq .modal-corpo{flex:1;min-height:0;padding:14px;display:block}
+.arq-grade{height:100%;min-height:320px;display:grid;grid-template-columns:minmax(220px,320px) minmax(0,1fr);gap:14px;border-radius:8px;outline:2px dashed transparent;outline-offset:4px}
+.arq-grade.soltar{outline-color:var(--acento)}
+.arq-grade>.dl{align-content:start;overflow:auto;min-height:0}
+.dl-linha.aberto .dl-nome{color:var(--acento-texto)}
+.dl-linha.aberto{box-shadow:inset 3px 0 0 var(--acento)}
+.arq-visor{min-height:0;display:flex;flex-direction:column;border:1px solid var(--linha);border-radius:8px;background:var(--sup2);overflow:hidden}
+.arq-visor-cab{flex:none;display:flex;align-items:center;gap:10px;padding:6px 8px 6px 12px;border-bottom:1px solid var(--linha);background:var(--sup)}
+.arq-visor-nome{flex:1;min-width:0;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.arq-visor-corpo{flex:1;min-height:0;overflow:auto;padding:16px}
+.arq-visor-corpo.sem-margem{padding:0;overflow:hidden}
+.arq-visor>.arq-vazio{margin:auto}
+.arq-vazio{color:var(--tinta3);text-align:center;padding:32px 16px;margin:0}
+.arq-pdf{display:block;width:100%;height:100%;border:0}
+.arq-paginas{display:grid;gap:12px;justify-items:center}
+.arq-pagina{display:block;max-width:100%;height:auto;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.arq-img,.arq-video{display:block;max-width:100%;margin:0 auto}
+.arq-texto{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:12.5px/1.5 var(--f-mono);color:var(--tinta)}
+.arq-doc{background:#fff;color:#1b1b1b;max-width:820px;margin:0 auto;padding:40px 48px;box-shadow:0 1px 4px rgba(0,0,0,.2);font:15px/1.6 var(--f-serif)}
+.arq-doc img{max-width:100%;height:auto}
+.arq-doc table{border-collapse:collapse;margin:8px 0}
+.arq-doc td,.arq-doc th{border:1px solid #bbb;padding:4px 6px}
+.arq-abas{margin:0 0 8px}
+.arq-planilha{overflow:auto}
+.arq-planilha table{border-collapse:collapse;background:#fff;color:#1b1b1b;font:12.5px/1.4 var(--f-ui)}
+.arq-planilha td{border:1px solid #d3d3d3;padding:3px 8px;white-space:nowrap}
+@container (max-width:720px){
+  .arq-grade{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,auto) minmax(300px,1fr)}
+  .arq-grade>.dl{max-height:38vh}
+  .arq-doc{padding:20px}
+}
 .vinc-linha.tab-linha{grid-template-columns:minmax(0,1fr) 170px auto}
 @container (max-width:640px){.vinc-linha.tab-linha{grid-template-columns:minmax(0,1fr) auto}.vinc-linha.tab-linha>.inp{grid-column:1/-1}}
 @container (max-width:640px){.vinc-linha{grid-template-columns:minmax(0,1fr) auto}.vinc-linha select{grid-column:1/-1;grid-row:2}}
@@ -1259,11 +1291,11 @@ function fecharDialogo(semRender) {
   const alvo = dl.volta && dl.volta.isConnected ? dl.volta : (dl.voltaId && document.getElementById(dl.voltaId));
   if (alvo && !semRender) alvo.focus();
 }
-function abrirDialogo({ titulo, conteudo, aoFechar, atualizar, largura }) {
+function abrirDialogo({ titulo, conteudo, aoFechar, atualizar, largura, cls }) {
   fecharDialogo(true);
   const id = uid('jt');
   const bFechar = btn('Fechar', { icone: 'x', onclick: () => fecharDialogo() });
-  const el = h('div', { class: 'modal janela', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': id },
+  const el = h('div', { class: 'modal janela' + (cls ? ' ' + cls : ''), role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': id },
     h('div', { class: 'modal-painel', style: largura ? 'max-width:' + largura : null },
       h('div', { class: 'modal-cab' }, h('h2', { id }, titulo), bFechar),
       h('div', { class: 'modal-corpo' }, conteudo)));
@@ -1827,7 +1859,7 @@ function renderProtocolo(p) {
     botaoJanela('dados', 'Dados', 'dados', () => abrirDados()),
     botaoJanela('arquivos', 'Arquivos', 'anexo', () => {
       const b = blocoArquivos(p);
-      abrirDialogo({ titulo: 'Arquivos', conteudo: b.el, aoFechar: renderDetalhe, atualizar: b.desenhar, largura: '900px' });
+      abrirDialogo({ titulo: 'Arquivos', conteudo: b.el, aoFechar: () => { b.limpar(); renderDetalhe(); }, atualizar: b.desenhar, cls: 'arq' });
     }));
   const cab = h('div', { class: 'cab' },
     h('div', { class: 'cab-txt' }, voltarBtn(), chips), acoes);
@@ -2070,30 +2102,146 @@ function erroArquivo(e, nome) {
   if (c === 'rate_limited') return 'Muitos envios seguidos. Aguarde um pouco e tente de novo.';
   return `Não foi possível anexar “${nome}”.`;
 }
-async function abrirArquivo(a) {
+// Baixar: entrega o arquivo como foi anexado
+async function baixarArquivo(a) {
   let blob = null;
   try { blob = await Arquivos.obter(a); } catch (e) { blob = null; }
   if (!blob) { toast(a.via === 'local' ? 'Este arquivo foi anexado em outro navegador ou computador.' : 'Não foi possível abrir o arquivo.'); return; }
   if (Store.emArtifact) { baixar(a.nome, blob); return; }
   const url = URL.createObjectURL(blob);
-  // PDF, imagem, vídeo e texto abrem numa aba; os outros tipos são baixados
-  if (/^(application\/pdf|image\/|video\/|text\/plain)/.test(blob.type) && window.open(url, '_blank')) { setTimeout(() => URL.revokeObjectURL(url), 60000); return; }
   const l = h('a', { href: url, download: a.nome });
   document.body.append(l); l.click(); l.remove();
   setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
-// janela Arquivos: a lista, uma linha e os botões Adicionar e Excluir; também aceita arquivos arrastados
+/* visualização: PDF, imagens, vídeo, texto, Word (.docx) e planilhas (Excel, ODS, CSV).
+   As bibliotecas de PDF, Word e planilha vêm da CDN na primeira vez que são usadas. */
+const CDN = 'https://cdnjs.cloudflare.com/ajax/libs/';
+const scripts = {};
+const carregarScript = url => scripts[url] || (scripts[url] = new Promise((ok, falha) => {
+  const el = document.createElement('script');
+  el.src = url;
+  el.onload = ok;
+  el.onerror = () => { delete scripts[url]; el.remove(); falha(new Error('script')); };
+  document.head.append(el);
+}));
+// HTML vindo de um documento: sem scripts, eventos ou links javascript:
+function htmlSeguro(html) {
+  const t = document.createElement('template');
+  t.innerHTML = html;
+  for (const el of t.content.querySelectorAll('script,style,iframe,frame,object,embed,link,meta,base,form,input,button,textarea,select')) el.remove();
+  for (const el of t.content.querySelectorAll('*')) for (const at of [...el.attributes]) {
+    const n = at.name.toLowerCase(), v = at.value.trim().toLowerCase();
+    if (n.startsWith('on') || ((n === 'href' || n === 'src' || n === 'xlink:href') && (v.startsWith('javascript:') || (v.startsWith('data:') && !(n === 'src' && v.startsWith('data:image/')))))) el.removeAttribute(at.name);
+  }
+  for (const a of t.content.querySelectorAll('a[href]')) { a.target = '_blank'; a.rel = 'noopener noreferrer'; }
+  return t.content;
+}
+const extensao = nome => (String(nome).split('.').pop() || '').toLowerCase();
+const MAX_PAGINAS = 60, MAX_LINHAS = 2000;
+function visualizador(caixa) {
+  let geracao = 0, url = null;
+  const soltarUrl = () => { if (url) { URL.revokeObjectURL(url); url = null; } };
+  const novaUrl = blob => { soltarUrl(); url = URL.createObjectURL(blob); return url; };
+  const aviso = texto => h('p', { class: 'arq-vazio' }, texto);
+  const vazio = () => { geracao++; soltarUrl(); caixa.replaceChildren(aviso('Nenhum arquivo aberto.')); };
+  async function verPdf(blob, corpo, cancelado) {
+    // no index.html, o leitor de PDF do próprio navegador; na página publicada, PDF.js desenha as páginas
+    if (!Store.emArtifact) {
+      corpo.classList.add('sem-margem');
+      corpo.replaceChildren(h('iframe', { class: 'arq-pdf', src: novaUrl(blob), title: 'PDF' }));
+      return;
+    }
+    await carregarScript(CDN + 'pdf.js/3.11.174/pdf.worker.min.js');
+    await carregarScript(CDN + 'pdf.js/3.11.174/pdf.min.js');
+    const lib = window.pdfjsLib;
+    lib.GlobalWorkerOptions.workerSrc = CDN + 'pdf.js/3.11.174/pdf.worker.min.js';
+    const doc = await lib.getDocument({ data: new Uint8Array(await blob.arrayBuffer()), isEvalSupported: false }).promise;
+    const pags = h('div', { class: 'arq-paginas' });
+    corpo.replaceChildren(pags);
+    const largura = Math.max(240, Math.min(corpo.clientWidth - 32, 1100)), dpr = window.devicePixelRatio || 1;
+    const total = Math.min(doc.numPages, MAX_PAGINAS);
+    for (let n = 1; n <= total; n++) {
+      if (cancelado()) { doc.destroy(); return; }
+      const pg = await doc.getPage(n);
+      const escala = largura / pg.getViewport({ scale: 1 }).width;
+      const vp = pg.getViewport({ scale: escala * dpr });
+      const cv = h('canvas', { class: 'arq-pagina', width: String(Math.floor(vp.width)), height: String(Math.floor(vp.height)), style: `width:${Math.floor(vp.width / dpr)}px`, 'aria-label': 'Página ' + n });
+      pags.append(cv);
+      await pg.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
+    }
+    if (doc.numPages > total) pags.append(aviso(`Mostrando ${total} de ${doc.numPages} páginas. Use Baixar para ver o documento inteiro.`));
+  }
+  async function verDocx(blob, corpo) {
+    await carregarScript(CDN + 'mammoth/1.6.0/mammoth.browser.min.js');
+    const r = await window.mammoth.convertToHtml({ arrayBuffer: await blob.arrayBuffer() });
+    corpo.replaceChildren(h('div', { class: 'arq-doc' }, htmlSeguro(r.value)));
+  }
+  async function verPlanilha(blob, corpo) {
+    await carregarScript(CDN + 'xlsx/0.18.5/xlsx.full.min.js');
+    const X = window.XLSX;
+    const wb = X.read(await blob.arrayBuffer(), { type: 'array' });
+    const tabela = h('div', { class: 'arq-planilha' });
+    const abas = h('div', { class: 'pr-abas arq-abas', role: 'tablist' });
+    const mostrar = nome => {
+      const ws = wb.Sheets[nome], ref = ws['!ref'];
+      let nota = null;
+      if (ref) {
+        // planilhas enormes: só as primeiras linhas
+        const r = X.utils.decode_range(ref);
+        if (r.e.r - r.s.r + 1 > MAX_LINHAS) { ws['!ref'] = X.utils.encode_range({ s: r.s, e: { r: r.s.r + MAX_LINHAS - 1, c: r.e.c } }); nota = `Mostrando ${MAX_LINHAS} de ${r.e.r - r.s.r + 1} linhas.`; }
+      }
+      tabela.replaceChildren(ref ? htmlSeguro(X.utils.sheet_to_html(ws, { header: '', footer: '' })) : aviso('Planilha vazia.'), nota ? aviso(nota) : '');
+      if (ref) ws['!ref'] = ref;
+      for (const b of abas.children) b.setAttribute('aria-selected', String(b.dataset.aba === nome));
+    };
+    for (const nome of wb.SheetNames) abas.append(h('button', { type: 'button', class: 'pr-aba', role: 'tab', 'data-aba': nome, onclick: () => mostrar(nome) }, nome));
+    corpo.replaceChildren(wb.SheetNames.length > 1 ? abas : '', tabela);
+    mostrar(wb.SheetNames[0]);
+  }
+  async function abrir(a) {
+    const minha = ++geracao;
+    soltarUrl();
+    const corpo = h('div', { class: 'arq-visor-corpo' }, aviso('Abrindo…'));
+    caixa.replaceChildren(h('div', { class: 'arq-visor-cab' },
+      h('span', { class: 'arq-visor-nome', title: a.nome }, a.nome),
+      btn('Baixar', { icone: 'baixar', sm: true, onclick: () => baixarArquivo(a) })), corpo);
+    let blob = null;
+    try { blob = await Arquivos.obter(a); } catch (e) { blob = null; }
+    if (minha !== geracao) return;
+    if (!blob) { corpo.replaceChildren(aviso(a.via === 'local' ? 'Este arquivo foi anexado em outro navegador ou computador.' : 'Não foi possível abrir o arquivo.')); return; }
+    const ext = extensao(a.nome), tipo = blob.type || a.tipo || '';
+    try {
+      if (ext === 'pdf' || tipo === 'application/pdf') await verPdf(blob, corpo, () => minha !== geracao);
+      else if (/^image\//.test(tipo) || ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg'].includes(ext)) corpo.replaceChildren(h('img', { class: 'arq-img', src: novaUrl(blob), alt: a.nome }));
+      else if (/^video\//.test(tipo) || ['mp4', 'webm'].includes(ext)) corpo.replaceChildren(h('video', { class: 'arq-video', controls: true, src: novaUrl(blob) }));
+      else if (ext === 'docx') await verDocx(blob, corpo);
+      else if (['xlsx', 'xlsm', 'xls', 'ods', 'csv'].includes(ext)) await verPlanilha(blob, corpo);
+      else if (/^text\//.test(tipo) || ['txt', 'md', 'json', 'xml', 'log'].includes(ext)) corpo.replaceChildren(h('pre', { class: 'arq-texto' }, (await blob.slice(0, 1024 * 1024).text())));
+      else corpo.replaceChildren(aviso('Este tipo de arquivo não tem visualização aqui. Use Baixar para abri-lo.'));
+    } catch (e) {
+      if (minha === geracao) corpo.replaceChildren(aviso('Não foi possível mostrar este arquivo aqui. Use Baixar para abri-lo.'));
+    }
+  }
+  vazio();
+  return { abrir, vazio, limpar: () => { geracao++; soltarUrl(); } };
+}
+// janela Arquivos: à esquerda a lista (com Adicionar e Excluir), à direita a visualização; dois cliques abrem o arquivo
 function blocoArquivos(p) {
-  const raiz = h('section', { class: 'dl dl-arquivos' });
+  const lado = h('section', { class: 'dl dl-arquivos', 'aria-label': 'Arquivos do protocolo' });
+  const visor = h('section', { class: 'arq-visor', 'aria-label': 'Visualização' });
+  const raiz = h('div', { class: 'arq-grade' }, lado, visor);
+  const vis = visualizador(visor);
   const entrada = h('input', { type: 'file', multiple: true, hidden: true });
-  let sel = null, enviando = 0;
+  let sel = null, aberto = null, enviando = 0;
+  const abrir = a => { sel = aberto = a.id; desenhar(); vis.abrir(a); };
   const desenhar = () => {
     if (!p.arquivos.some(a => a.id === sel)) sel = null;
+    if (aberto && !p.arquivos.some(a => a.id === aberto)) { aberto = null; vis.vazio(); }
     const linhas = p.arquivos.map(a => h('button', {
-      type: 'button', class: 'dl-linha', 'aria-pressed': String(a.id === sel), title: 'Duplo clique abre o arquivo',
+      type: 'button', class: 'dl-linha' + (a.id === aberto ? ' aberto' : ''), 'aria-pressed': String(a.id === sel), title: 'Dois cliques abrem o arquivo',
       onclick: ev => { sel = a.id; for (const b of linhas) b.setAttribute('aria-pressed', String(b === ev.currentTarget)); bExcluir.disabled = false; },
-      ondblclick: () => abrirArquivo(a),
-      onkeydown: ev => { if (ev.key === 'Enter') { ev.preventDefault(); abrirArquivo(a); } }
+      ondblclick: () => abrir(a),
+      onkeydown: ev => { if (ev.key === 'Enter') { ev.preventDefault(); abrir(a); } }
     }, h('span', { class: 'dl-nome' }, a.nome), h('small', null, [tamanhoArquivo(a.tamanho), fmtData(a.em)].filter(Boolean).join(' · '))));
     const bAdd = btn(enviando ? 'Enviando…' : 'Adicionar', { icone: 'mais', prim: true, disabled: enviando > 0, onclick: () => entrada.click() });
     const bExcluir = btn('Excluir', { icone: 'lixo', perigo: true, disabled: !sel || enviando > 0, onclick: ev => armar(ev.currentTarget, async () => {
@@ -2106,12 +2254,13 @@ function blocoArquivos(p) {
       sel = null;
       desenhar();
     }) });
-    raiz.replaceChildren(h('div', { class: 'dl-lista' }, linhas.length ? linhas : h('p', { class: 'dica' }, 'Nenhum arquivo.')),
+    lado.replaceChildren(h('div', { class: 'dl-lista' }, linhas.length ? linhas : h('p', { class: 'dica' }, 'Nenhum arquivo.')),
       h('div', { class: 'dl-bts' }, bAdd, bExcluir), entrada);
   };
   const enviar = async fs => {
     if (!fs.length || enviando) return;
     enviando = fs.length; desenhar();
+    let ultimo = null;
     for (const f of fs) {
       try {
         const r = await Arquivos.guardar(f);
@@ -2119,17 +2268,19 @@ function blocoArquivos(p) {
         p.arquivos.push(a);
         registrarAndamento(p, `Arquivo “${f.name}” anexado.`);
         Store.put('protocolos', p, 0);
-        sel = a.id;
+        ultimo = a;
       } catch (e) { toast(erroArquivo(e, f.name)); }
       enviando--; desenhar();
     }
+    // o último arquivo anexado já aparece na visualização
+    if (ultimo) abrir(ultimo);
   };
   entrada.addEventListener('change', () => { const fs = [...entrada.files]; entrada.value = ''; enviar(fs); });
   raiz.addEventListener('dragover', ev => { if ([...ev.dataTransfer.types].includes('Files')) { ev.preventDefault(); raiz.classList.add('soltar'); } });
   raiz.addEventListener('dragleave', ev => { if (!raiz.contains(ev.relatedTarget)) raiz.classList.remove('soltar'); });
   raiz.addEventListener('drop', ev => { ev.preventDefault(); raiz.classList.remove('soltar'); enviar([...ev.dataTransfer.files]); });
   desenhar();
-  return { el: raiz, desenhar };
+  return { el: raiz, desenhar, limpar: vis.limpar };
 }
 function blocoFinanceiro(p, aoMudar) {
   const f = p.financeiro;
