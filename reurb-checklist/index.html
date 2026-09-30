@@ -1099,6 +1099,9 @@ function opcoesTabela(id, atual) {
 }
 const txt = v => String(v ?? '');
 const SEXOS = ['Feminino', 'Masculino'];
+// o que a pessoa é no processo da Reurb (Indicador Pessoal); vale para todos os protocolos em que ela é parte
+const QUALIDADES_PESSOA = ['Beneficiário', 'Intimado', 'Proprietário', 'Confrontante', 'Ocupante', 'Requerente', 'Outro'];
+const qualidadeParte = x => (D().pessoas[x.pessoaId] || {}).qualidade || x.qualidade;
 const REGIMES = ['Comunhão parcial de bens', 'Comunhão universal de bens', 'Separação convencional de bens', 'Separação obrigatória de bens', 'Participação final nos aquestos'];
 const TIPOS_LOGRADOURO = ['Rua', 'Avenida', 'Travessa', 'Alameda', 'Praça', 'Rodovia', 'Estrada', 'Linha', 'Viela', 'Chácara', 'Sítio', 'Outro'];
 const NACIONALIDADES = ['Brasileira', 'Brasileira naturalizada', 'Argentina', 'Boliviana', 'Chilena', 'Colombiana', 'Haitiana', 'Paraguaia', 'Peruana', 'Uruguaia', 'Venezuelana', 'Portuguesa', 'Espanhola', 'Italiana', 'Alemã', 'Japonesa', 'Chinesa'];
@@ -1114,7 +1117,7 @@ function normalizarPessoa(p) {
   }
   return {
     id: txt(p.id) || uid('pe'), tipo: p.tipo === 'juridica' ? 'juridica' : 'fisica',
-    nome: txt(p.nome), nomeSocial: txt(p.nomeSocial), dataNasc: txt(p.dataNasc), dataObito: txt(p.dataObito),
+    nome: txt(p.nome), nomeSocial: txt(p.nomeSocial), qualidade: txt(p.qualidade), dataNasc: txt(p.dataNasc), dataObito: txt(p.dataObito),
     documento: txt(p.documento), rg: txt(p.rg), passaporte: txt(p.passaporte), sexo: txt(p.sexo),
     telefone: txt(p.telefone ?? p.contato), celular: txt(p.celular), email: txt(p.email), cnh: txt(p.cnh), profissao: txt(p.profissao),
     estadoCivil: txt(p.estadoCivil), nacionalidade: txt(p.nacionalidade), naturalidade: txt(p.naturalidade), certidaoNascimento: txt(p.certidaoNascimento),
@@ -1489,7 +1492,7 @@ function renderItens() {
       h('span', { class: 'item-tit' }, TABELAS[id].nome), h('span', { class: 'item-meta' }, plural(tabela(id).itens.length, 'opção', 'opções')))));
   } else if (aba === 'pessoas') {
     const todas = pessoasOrdenadas();
-    const vis = todas.filter(p => !termo || norm([p.nome, p.nomeSocial, p.documento, p.rg, p.passaporte, p.cnh, p.email].join(' ')).includes(termo)
+    const vis = todas.filter(p => !termo || norm([p.nome, p.qualidade, p.documento, p.rg, p.passaporte, p.cnh, p.email].join(' ')).includes(termo)
       || (termo.replace(/\D/g, '') && String(p.documento).replace(/\D/g, '').includes(termo.replace(/\D/g, ''))));
     for (const p of vis) {
       const n = imoveisDaPessoa(p.id).length;
@@ -1949,7 +1952,7 @@ const QUALIDADES_PROT = ['Requerente', 'Beneficiário', 'Ocupante', 'Proprietár
 const imoveisDoProtocolo = id => imoveisOrdenados().filter(i => i.protocoloId === id);
 /* pessoas do protocolo: as partes vinculadas diretamente e as que vêm pelos imóveis do protocolo */
 function pessoasDoProtocolo(p) {
-  const diretas = p.partes.map(x => ({ pessoa: D().pessoas[x.pessoaId], qualidade: x.qualidade })).filter(x => x.pessoa);
+  const diretas = p.partes.map(x => ({ pessoa: D().pessoas[x.pessoaId], qualidade: qualidadeParte(x) })).filter(x => x.pessoa);
   const pelosImoveis = [];
   for (const i of imoveisDoProtocolo(p.id)) for (const v of i.vinculos) {
     const pe = D().pessoas[v.pessoaId];
@@ -2138,7 +2141,7 @@ function renderProtocolo(p) {
     const linhas = [
       // do outro lado da linha, a propriedade que está no cadastro da parte
       ...partes.map(({ x, pe }) => ({
-        id: 'pe:' + pe.id, nome: pe.nome || 'Sem nome', chip: x.qualidade, abrir: () => irPara('pessoas', pe.id),
+        id: 'pe:' + pe.id, nome: pe.nome || 'Sem nome', chip: qualidadeParte(x), abrir: () => irPara('pessoas', pe.id),
         info: pe.documento, prop: imoveisDaPessoa(pe.id).map(v => descImovel(v.imovel))
       })),
       // imóvel do protocolo sem nenhuma parte ligada a ele
@@ -2459,7 +2462,7 @@ const dataExtenso = iso => { const [y, m, d] = String(iso || hoje()).slice(0, 10
 const falta = rot => `<span class="campo-vazio">[${esc(rot)}]</span>`;
 const ou = (valor, rot) => (valor && String(valor).trim() ? esc(valor) : falta(rot));
 function dadosMinuta(p) {
-  const partes = p.partes.map(x => ({ pe: D().pessoas[x.pessoaId], qualidade: x.qualidade })).filter(x => x.pe);
+  const partes = p.partes.map(x => ({ pe: D().pessoas[x.pessoaId], qualidade: qualidadeParte(x) })).filter(x => x.pe);
   const imoveis = imoveisDoProtocolo(p.id);
   const analise = analisesDoProtocolo(p.id)[0] || null;
   const [cidade, uf] = String(p.municipio || '').split('/').map(s => s.trim());
@@ -2547,8 +2550,8 @@ const CAMPOS_MINUTA = [
   } },
   { id: 'qualificacaoPartes', rot: 'Qualificação de todas as partes', grupo: 'Pessoas', bloco: true, v: d => (d.partes.length ? '<ul>' + d.partes.map(x => `<li>${qualificacao(x.pe)} (${esc(x.qualidade)})</li>`).join('') + '</ul>' : `<p class="t">${falta('PARTES')}</p>`) },
   { id: 'tabelaOcupantes', rot: 'Tabela de ocupantes (CRF)', grupo: 'Pessoas', bloco: true, v: tabelaOcupantes },
-  { id: 'qualificacaoNotificado', rot: 'Qualificação do notificado', grupo: 'Notificação: uma cópia por proprietário ou confrontante', v: (d, c) => (c.notificado ? qualificacao(c.notificado.pe) : falta('NOME E QUALIFICAÇÃO DO NOTIFICADO')) },
-  { id: 'condicaoNotificado', rot: 'Condição do notificado', grupo: 'Notificação: uma cópia por proprietário ou confrontante', v: (d, c) => (c.notificado ? (c.notificado.qualidade === 'Confrontante' ? 'confinante' : 'titular de domínio') : falta('titular de domínio / confinante')) },
+  { id: 'qualificacaoNotificado', rot: 'Qualificação do notificado', grupo: 'Notificação: uma cópia por proprietário, confrontante ou intimado', v: (d, c) => (c.notificado ? qualificacao(c.notificado.pe) : falta('NOME E QUALIFICAÇÃO DO NOTIFICADO')) },
+  { id: 'condicaoNotificado', rot: 'Condição do notificado', grupo: 'Notificação: uma cópia por proprietário, confrontante ou intimado', v: (d, c) => (c.notificado && c.notificado.qualidade !== 'Intimado' ? (c.notificado.qualidade === 'Confrontante' ? 'confinante' : 'titular de domínio') : falta('titular de domínio / confinante')) },
   { id: 'pendencias', rot: 'Pendências do checklist', grupo: 'Análise', bloco: true, v: pendenciasChecklist }
 ];
 const CAMPO_MINUTA = Object.fromEntries(CAMPOS_MINUTA.map(c => [c.id.toLowerCase(), c]));
@@ -2594,7 +2597,7 @@ function preencherUma(html, d, ctx) {
 function preencherModelo(html, d) {
   const base = comoEtiquetas(html);
   const repete = /data-campo="(qualificacaoNotificado|condicaoNotificado)"/.test(base);
-  const dest = repete ? d.comQualidade('Proprietário', 'Confrontante') : [];
+  const dest = repete ? d.comQualidade('Proprietário', 'Confrontante', 'Intimado') : [];
   return (dest.length ? dest : [null]).map(n => preencherUma(base, d, { notificado: n })).join('<p class="quebra"></p>');
 }
 const cab = '<p style="text-align:center"><b>MUNICÍPIO DE {{CIDADE}} – {{UF}}</b></p>';
@@ -3475,9 +3478,9 @@ function renderPessoa(pe) {
 
   // dados pessoais
   const dados = pj
-    ? [c('nome', 'Razão social', 8), c('documento', 'CNPJ', 4, 'text', { mascara: 'cnpj', validar: validarCnpj }),
+    ? [c('nome', 'Razão social', 6), c('documento', 'CNPJ', 3, 'text', { mascara: 'cnpj', validar: validarCnpj }), c('qualidade', 'Qualidade', 3, 'select', { opcoes: QUALIDADES_PESSOA }),
       c('telefone', 'Telefone', 3, 'text', { mascara: 'tel' }), c('celular', 'Celular', 3, 'text', { mascara: 'cel' }), c('email', 'E-mail', 6, 'text', { inputmode: 'email' })]
-    : [c('nome', 'Nome', 5), c('nomeSocial', 'Nome social', 3), c('dataNasc', 'Data de nascimento', 2, 'date'), c('dataObito', 'Data de óbito', 2, 'date'),
+    : [c('nome', 'Nome', 5), c('qualidade', 'Qualidade', 3, 'select', { opcoes: QUALIDADES_PESSOA }), c('dataNasc', 'Data de nascimento', 2, 'date'), c('dataObito', 'Data de óbito', 2, 'date'),
       c('documento', 'CPF', 2, 'text', { mascara: 'cpf', validar: validarCpf }), c('rg', 'RG', 2), c('passaporte', 'Passaporte', 2),
       c('sexo', 'Sexo', 2, 'select', { opcoes: SEXOS }), c('telefone', 'Telefone', 2, 'text', { mascara: 'tel' }), c('celular', 'Celular', 2, 'text', { mascara: 'cel' }),
       c('email', 'E-mail', 4, 'text', { inputmode: 'email' }), c('cnh', 'CNH', 3), c('profissao', 'Profissão', 5),
