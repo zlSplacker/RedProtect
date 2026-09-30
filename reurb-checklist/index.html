@@ -178,6 +178,12 @@ body.arrastando .jan-corpo{pointer-events:none}
 .btn-ico{padding:0;width:32px;min-height:32px;height:32px}
 .btn[data-armado]{background:var(--pend);border-color:var(--pend);color:var(--sobre-pend);width:auto;padding:0 10px}
 .btn-sm{min-height:28px;padding:4px 9px;font-size:12.5px}
+.btn-discreto{color:var(--tinta3);font-weight:500}
+.btn-discreto:hover:not(:disabled){color:var(--pend);background:var(--pend-suave)}
+.btn-discreto svg{width:14px;height:14px}
+.btn-discreto[data-armado]{background:var(--pend-suave);border-color:transparent;color:var(--pend);padding:4px 9px}
+.jan.ver-detalhe .detalhe:has(>.pe-prot){display:flex;flex-direction:column;min-height:100cqh;padding-bottom:12px}
+.pe-prot{margin-top:auto;display:flex;justify-content:flex-end;padding-top:14px}
 .campo{display:grid;gap:5px;min-width:0}
 .rot{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--tinta3)}
 .inp{width:100%;border:1px solid var(--linha);background:var(--sup);border-radius:7px;padding:8px 10px;font-size:14px;line-height:1.4;min-width:0}
@@ -1905,8 +1911,10 @@ function renderProtocolo(p) {
     renderItens(); renderDetalhe();
   });
   const acoes = h('div', { class: 'acoes' },
-    btn('Aplicar checklist', { icone: 'check', prim: true, onclick: () => abrirNovaAnalise(null, p.id) }),
-    btn('Excluir protocolo', { icone: 'lixo', fant: true, perigo: true, onclick: ev => armar(ev.currentTarget, () => {
+    btn('Aplicar checklist', { icone: 'check', prim: true, onclick: () => abrirNovaAnalise(null, p.id) }));
+  // excluir fica no canto inferior direito da janela, discreto
+  const pe = h('div', { class: 'pe-prot' },
+    btn('Excluir protocolo', { icone: 'lixo', fant: true, sm: true, cls: 'btn-discreto', onclick: ev => armar(ev.currentTarget, () => {
       for (const i of imoveisDoProtocolo(p.id)) { i.protocoloId = ''; Store.put('imoveis', i, 0); }
       for (const a of p.arquivos) Arquivos.apagar(a).catch(() => {});
       Store.remover('protocolos', p.id); ui.sel.protocolos = null; garantirSelecao(); mostrarDetalhe(false); renderTudo();
@@ -2092,7 +2100,7 @@ function renderProtocolo(p) {
   desenharPainel();
   // o quadro Dados do protocolo aparece só na aba Recepção
   blocos.splice(blocos.indexOf(quadroDados), 1, barraAbas, painel);
-  d.replaceChildren(...blocos);
+  d.replaceChildren(h('div', { class: 'prot-conteudo' }, blocos), pe);
 }
 /* ---------- arquivos anexados ao protocolo ----------
    Na página publicada o conteúdo vai para o armazenamento de arquivos da própria página (assets);
