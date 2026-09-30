@@ -490,6 +490,12 @@ select.inp{padding-right:28px}
 .dl-nome{font-weight:600;min-width:0;overflow-wrap:anywhere}
 .dl-linha small{color:var(--tinta3);font-size:12.5px}
 .dl-linha .chip{margin-left:auto}
+/* Partes/Imóveis: a propriedade da parte do outro lado da linha */
+.dl-linha:has(>.dl-dir){flex-wrap:wrap;row-gap:2px}
+.dl-dir{margin-left:auto;display:flex;align-items:center;gap:12px}
+.dl-dir .chip{margin-left:0}
+.dl-prop{display:flex;flex-direction:column;align-items:flex-end;text-align:right;font-size:13px;font-weight:600;color:var(--tinta2)}
+.dl-prop.sem-prop{font-weight:400;color:var(--tinta3)}
 .dl-bts{display:flex;gap:8px;padding-top:12px}
 /* janela Arquivos: lista à esquerda, visualização à direita, ocupando a janela do protocolo */
 .modal.arq{padding:10px}
@@ -2130,9 +2136,10 @@ function renderProtocolo(p) {
     const partes = p.partes.map(x => ({ x, pe: D().pessoas[x.pessoaId] })).filter(y => y.pe);
     const idsPartes = new Set(partes.map(y => y.pe.id));
     const linhas = [
+      // do outro lado da linha, a propriedade que está no cadastro da parte
       ...partes.map(({ x, pe }) => ({
         id: 'pe:' + pe.id, nome: pe.nome || 'Sem nome', chip: x.qualidade, abrir: () => irPara('pessoas', pe.id),
-        info: [pe.documento, ...imoveisDaPessoa(pe.id).filter(v => !v.imovel.protocoloId || v.imovel.protocoloId === p.id).map(v => descImovel(v.imovel))].filter(Boolean).join(' · ')
+        info: pe.documento, prop: imoveisDaPessoa(pe.id).map(v => descImovel(v.imovel))
       })),
       // imóvel do protocolo sem nenhuma parte ligada a ele
       ...imoveisDoProtocolo(p.id).filter(i => !i.vinculos.some(v => idsPartes.has(v.pessoaId))).map(i => ({
@@ -2149,7 +2156,12 @@ function renderProtocolo(p) {
         bExcluir.disabled = false;
       },
       ondblclick: l.abrir
-    }, h('span', { class: 'dl-nome' }, l.nome), l.info ? h('small', null, l.info) : null, l.chip ? h('span', { class: 'chip chip-acento' }, l.chip) : null));
+    }, h('span', { class: 'dl-nome' }, l.nome), l.info ? h('small', null, l.info) : null,
+      // do outro lado: a propriedade da parte e a qualidade, juntas (no estreito descem juntas para a linha de baixo)
+      l.prop ? h('span', { class: 'dl-dir' },
+        h('span', { class: 'dl-prop' + (l.prop.length ? '' : ' sem-prop') }, l.prop.length ? l.prop.map(t => h('span', null, t)) : 'Sem propriedade'),
+        h('span', { class: 'chip chip-acento' }, l.chip))
+        : l.chip ? h('span', { class: 'chip chip-acento' }, l.chip) : null));
     const bExcluir = btn('Excluir', { icone: 'lixo', perigo: true, disabled: !selDados.partes, onclick: ev => armar(ev.currentTarget, () => {
       const [tipo, id] = selDados.partes.split(':');
       if (tipo === 'pe') tirarParte(p, id);
