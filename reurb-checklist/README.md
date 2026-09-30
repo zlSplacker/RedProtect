@@ -35,7 +35,7 @@ A barra de menus do topo segue o S.R.I.:
   - *Rural*: denominação, localidade, área (ha), CCIR, NIRF/CIB, CAR e certificação SIGEF;
   - *Condomínio*: condomínio, unidade, bloco, vaga, fração ideal, área privativa e área total.
 
-  No fim do cadastro fica o botão **Salvar**: o imóvel novo só é gravado quando você clica nele (fechar a janela antes descarta o cadastro), e a janela volta para a lista do Indicador Real. O botão *Excluir imóvel* fica embaixo, à esquerda do *Salvar*, discreto como o *Excluir protocolo*, e só aparece em imóveis já salvos (confirma no segundo clique).
+  No fim do cadastro fica o botão **Salvar**: o imóvel novo só é gravado quando você clica nele (fechar a janela antes descarta o cadastro), e a janela volta para a lista do Indicador Real. O botão *Excluir imóvel* fica embaixo, à esquerda do *Salvar*, no mesmo tamanho e formato dos outros botões do rodapé, e só aparece em imóveis já salvos (confirma no segundo clique).
 - **Indicadores → Pessoal → Pesquisar / Pessoa Física / Pessoa Jurídica**: pesquisa e cadastro das pessoas, no mesmo formato do S.R.I.:
   - *Informações*: terceira aba, ao lado de *Propriedade*. Mostra, só para consulta, os protocolos em que a pessoa está (*Protocolo | Município | Interessado*, com a situação). Não tem botão de adicionar: quando a pessoa é adicionada a um protocolo, o número dele aparece aqui sozinho. Dois cliques abrem o protocolo;
   - *Propriedade*: no alto do cadastro ficam as abas **Cadastro** (os dados abaixo), **Propriedade** e **Informações**, como as do protocolo. *Propriedade* mostra os imóveis vinculados à pessoa, com **Adicionar** e **Excluir**. *Adicionar* abre a pesquisa do Indicador Real: dois cliques no imóvel (ou Enter) o vinculam como *Proprietário*, a pesquisa fecha e a pessoa volta à frente já nessa aba. *Novo imóvel* ali já vincula o imóvel novo ao salvar. Na pessoa ainda não salva, os vínculos só são gravados no **Salvar** dela. Um duplo clique na linha abre o cadastro do imóvel;
@@ -46,7 +46,7 @@ A barra de menus do topo segue o S.R.I.:
   
   Ao lado do **Salvar** fica o botão **Arquivos**, igual ao do protocolo (lista à esquerda com *Adicionar* e *Excluir*, visualização à direita; um clique mostra, dois cliques abrem no computador), mas os arquivos ficam guardados no próprio cadastro da pessoa — cada indicador tem os seus. Na pessoa nova, os arquivos entram no cadastro junto com o *Salvar*; ao excluir a pessoa, os arquivos dela são apagados.
 
-  No fim do cadastro fica o botão **Salvar**: a pessoa nova só é gravada quando você clica nele, e a janela volta para a lista do Indicador Pessoal. O botão *Excluir pessoa* fica embaixo, à esquerda, discreto como o *Excluir protocolo*, e só aparece em pessoas já salvas (confirma no segundo clique).
+  No fim do cadastro fica o botão **Salvar**: a pessoa nova só é gravada quando você clica nele, e a janela volta para a lista do Indicador Pessoal. O botão *Excluir pessoa* fica embaixo, à esquerda, no mesmo tamanho e formato dos outros botões do rodapé, e só aparece em pessoas já salvas (confirma no segundo clique).
 
   No arquivo aberto no navegador, a lupa do CEP preenche o endereço automaticamente (ViaCEP).
 

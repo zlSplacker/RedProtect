@@ -440,7 +440,10 @@ select.inp:disabled{background:var(--sup2);color:var(--tinta2);cursor:default;op
 .reg-pilha{display:grid;gap:20px}
 .reg-pilha>.ident{margin:0}
 .reg-rodape{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--linha)}
-.reg-rodape .reg-excluir{margin-right:auto}
+/* rodapé dos indicadores: todos os botões no mesmo tamanho; o Excluir só muda a cor do texto */
+.reg-rodape .reg-excluir{margin-right:auto;color:var(--tinta2)}
+.reg-rodape .reg-excluir:hover:not(:disabled){color:var(--pend);border-color:color-mix(in srgb,var(--pend) 40%,transparent)}
+.reg-rodape .reg-excluir[data-armado]{background:var(--pend-suave);border-color:color-mix(in srgb,var(--pend) 40%,transparent);color:var(--pend);padding:7px 12px}
 /* cadastro compacto (Indicador Pessoal): um só quadro, seções separadas por uma linha */
 .reg-pilha.compacta{gap:0;background:var(--sup);border:1px solid var(--linha);border-radius:10px}
 .compacta>.ident,.compacta>.bloco{border:0;border-radius:0;background:transparent;padding:10px 14px;margin:0}
@@ -3624,9 +3627,9 @@ function renderPessoa(pe) {
     ...(aviso ? [aviso] : []),
     barraPe,
     painelPe,
-    // embaixo: Excluir à esquerda, discreto como o do protocolo (pessoa nova ainda não existe: não há o que excluir)
+    // embaixo: Excluir à esquerda, no mesmo tamanho e formato dos outros botões (pessoa nova ainda não existe: não há o que excluir)
     h('div', { class: 'reg-rodape' },
-      D().pessoas[pe.id] && btn('Excluir pessoa', { icone: 'lixo', fant: true, sm: true, cls: 'btn-discreto reg-excluir', onclick: ev => armar(ev.currentTarget, () => excluirPessoa(pe)) }),
+      D().pessoas[pe.id] && btn('Excluir pessoa', { icone: 'lixo', cls: 'reg-excluir', onclick: ev => armar(ev.currentTarget, () => excluirPessoa(pe)) }),
       btn('Arquivos', { icone: 'anexo', onclick: abrirArquivosPe }), btn('Salvar', { icone: 'check', prim: true, onclick: () => {
       const outro = D().pessoas[pe.conjugeId];
       if (outro && !outro.conjugeId) { outro.conjugeId = pe.id; Store.put('pessoas', outro, 0); }
@@ -3708,9 +3711,9 @@ function renderImovel(im) {
       h('div', { class: 'cab-txt' }, voltarBtn(), h('span', { class: 'sobre' }, 'Indicador Real · ' + TIPOS_IMOVEL[im.tipo]), titulo, sub, linksProt)),
     h('div', { class: 'reg-pilha' },
       h('fieldset', { class: 'ident' }, h('legend', null, 'Identificação do imóvel'), campos)),
-    // embaixo: Excluir à esquerda, discreto como o do protocolo (imóvel novo ainda não existe: não há o que excluir)
+    // embaixo: Excluir à esquerda, no mesmo tamanho e formato dos outros botões (imóvel novo ainda não existe: não há o que excluir)
     h('div', { class: 'reg-rodape' },
-      D().imoveis[im.id] && btn('Excluir imóvel', { icone: 'lixo', fant: true, sm: true, cls: 'btn-discreto reg-excluir', onclick: ev => armar(ev.currentTarget, () => excluirRegistro('imoveis', im, 'Imóvel excluído.')) }),
+      D().imoveis[im.id] && btn('Excluir imóvel', { icone: 'lixo', cls: 'reg-excluir', onclick: ev => armar(ev.currentTarget, () => excluirRegistro('imoveis', im, 'Imóvel excluído.')) }),
       btn('Salvar', { icone: 'check', prim: true, onclick: () => salvarRegistro('imoveis', im, 'Imóvel salvo.') })));
 }
 
