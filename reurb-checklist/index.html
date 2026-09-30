@@ -1314,8 +1314,7 @@ const analisesDoProtocolo = id => analisesOrdenadas().filter(a => a.protocoloId 
 const numNat = (a, b) => String(a).localeCompare(String(b), 'pt-BR', { numeric: true, sensitivity: 'base' });
 const pessoasOrdenadas = () => Object.values(D().pessoas).sort((a, b) => numNat(a.nome, b.nome));
 const imoveisOrdenados = () => Object.values(D().imoveis).sort((a, b) => numNat(tituloImovel(a), tituloImovel(b)) || numNat(a.matricula, b.matricula));
-/* registro novo ainda não salvo (um por janela): a pessoa entra no armazenamento quando algo é digitado;
-   o imóvel, só no botão Salvar */
+/* registro novo ainda não salvo (um por janela): só entra no armazenamento no botão Salvar */
 function registroSel(col) {
   const id = ui.sel[col], r = ui.rascunho;
   return D()[col][id] || (r && r.col === col && r.obj.id === id ? r.obj : null);
@@ -1334,7 +1333,7 @@ function garantirSelecao() {
   if (!registroSel('imoveis')) ui.sel.imoveis = (imoveisOrdenados()[0] || {}).id || null;
   if (!D().protocolos[ui.sel.protocolos]) ui.sel.protocolos = (protocolosOrdenados()[0] || {}).id || null;
   if (!D().analises[ui.sel.analises]) ui.sel.analises = (analisesOrdenadas()[0] || {}).id || null;
-  if (!D().modelos[ui.sel.modelos]) ui.sel.modelos = (modelosOrdenados()[0] || {}).id || null;
+  if (!registroSel('modelos')) ui.sel.modelos = (modelosOrdenados()[0] || {}).id || null;
 }
 /* dentro da janela: a lista (pesquisa) ou a ficha aberta */
 function mostrarDetalhe(sim) { J.el.classList.toggle('ver-detalhe', !!sim); }
@@ -1553,7 +1552,7 @@ function renderDetalhe() {
   } else if (aba === 'protocolos' && ui.criando) renderNovoProtocolo();
   else if (aba === 'analises' && ui.criando) renderNovaAnalise();
   else {
-    const r = D()[aba][ui.sel[aba]];
+    const r = aba === 'modelos' ? registroSel(aba) : D()[aba][ui.sel[aba]];
     if (!r) return semRegistro();
     ({ protocolos: renderProtocolo, analises: renderAnalise, modelos: renderModelo })[aba](r);
   }
@@ -2922,9 +2921,10 @@ function renderModelosMinuta() {
   const editor = h('section', { class: 'arq-visor min-editor', 'aria-label': 'Modelo' });
   d.replaceChildren(h('div', { class: 'arq-grade mm-grade' }, lado, editor));
   const vazio = () => editor.replaceChildren(h('p', { class: 'arq-vazio' }, 'Nenhum modelo aberto.'));
-  const acharModelo = id => modelosMinuta().find(m => m.id === id);
+  // modelo novo (ou cópia) fica em rascunho até o Salvar
+  const acharModelo = id => (u.mmRascunho && u.mmRascunho.id === id ? u.mmRascunho : modelosMinuta().find(m => m.id === id));
   const novo = base => {
-    const m = gravarModeloMinuta({ id: uid('mm'), nome: base ? 'Cópia de ' + base.nome : 'Novo modelo', grupo: 'Meus modelos', html: base ? comoEtiquetas(base.html) : '<p class="t"><br></p>' });
+    const m = u.mmRascunho = { id: uid('mm'), nome: base ? 'Cópia de ' + base.nome : 'Novo modelo', grupo: 'Meus modelos', html: base ? comoEtiquetas(base.html) : '<p class="t"><br></p>' };
     abrir(m);
     const n = editor.querySelector('.min-titulo');
     if (n) { n.focus(); n.select(); }
@@ -2940,17 +2940,25 @@ function renderModelosMinuta() {
           h('h3', { class: 'mm-copiar' }, 'Ou copiar um modelo existente'))));
   };
   const abrir = m => {
-    u.mmAberto = u.mmSel = m.id; u.mmEscolhendo = false; desenhar();
+    if (u.mmRascunho && u.mmRascunho !== m) u.mmRascunho = null;
+    const rascunho = u.mmRascunho === m;
+    u.mmAberto = m.id; u.mmSel = rascunho ? null : m.id; u.mmEscolhendo = false; desenhar();
     const restaurar = h('span', { class: 'mm-restaurar' });
     const mostrarRestaurar = () => restaurar.replaceChildren(m.pronto && m.editado ? btn('Restaurar original', { icone: 'voltar', sm: true, onclick: ev => armar(ev.currentTarget, () => {
       Store.remover('modelosMinuta', m.id);
       abrir(acharModelo(m.id));
     }) }) : '');
     const salvar = () => {
+      if (u.mmRascunho === m) return;
       const doc = gravarModeloMinuta(m);
       m.criadoEm = doc.criadoEm;
       if (m.pronto && !m.editado) { m.editado = true; mostrarRestaurar(); desenhar(); }
     };
+    const bSalvar = btn('Salvar', { icone: 'check', prim: true, sm: true, onclick: () => {
+      if (u.mmRascunho === m) { u.mmRascunho = null; gravarModeloMinuta(m); abrir(acharModelo(m.id)); }
+      else if (!m.pronto || m.editado) gravarModeloMinuta(m);
+      toast('Modelo salvo.');
+    } });
     const nome = h('input', { class: 'inp min-titulo', 'aria-label': 'Nome do modelo', value: m.nome });
     nome.addEventListener('input', () => { m.nome = nome.value; salvar(); desenhar(); });
     const grupos = h('datalist', { id: 'mm-grupos' }, [...new Set(modelosMinuta().map(x => x.grupo))].map(g => h('option', { value: g })));
@@ -2960,7 +2968,7 @@ function renderModelosMinuta() {
     const ed = editorTexto({ html: comoEtiquetas(m.html), campos: true, aoMudar: html => { m.html = html; salvar(); } });
     mostrarRestaurar();
     editor.replaceChildren(
-      h('div', { class: 'arq-visor-cab min-cab' }, nome, grupo, grupos, ed.barra, restaurar),
+      h('div', { class: 'arq-visor-cab min-cab' }, nome, grupo, grupos, ed.barra, restaurar, bSalvar),
       h('div', { class: 'arq-visor-corpo min-corpo' }, ed.folha));
   };
   const desenhar = () => {
@@ -3264,7 +3272,7 @@ const validarCnpj = v => (String(v).replace(/\D/g, '').length === 14 && !cnpjVal
 function novoRegistro(col, base, aoSalvar, naMesma) {
   const obj = col === 'pessoas' ? normalizarPessoa(base || {}) : normalizarImovel(base || {});
   if (!(naMesma && J && ui.aba === col)) abrirJanela({ aba: col });
-  ui.rascunho = { col, obj, aoSalvar, noBotao: col === 'imoveis' };
+  ui.rascunho = { col, obj, aoSalvar, noBotao: true };
   ui.criando = false; ui.sel[col] = obj.id;
   mostrarDetalhe(true);
   renderTudo();
@@ -3359,7 +3367,7 @@ function renderPessoa(pe) {
       if (antigo && antigo.conjugeId === pe.id) { antigo.conjugeId = ''; Store.put('pessoas', antigo, 0); }
       pe.conjugeId = novoId;
       const outro = D().pessoas[novoId];
-      if (outro && !outro.conjugeId) { outro.conjugeId = pe.id; Store.put('pessoas', outro, 0); }
+      if (outro && !outro.conjugeId && D().pessoas[pe.id]) { outro.conjugeId = pe.id; Store.put('pessoas', outro, 0); }
       conjuge.value = novoId;
       aoMudar('conjugeId');
     };
@@ -3419,7 +3427,8 @@ function renderPessoa(pe) {
   d.replaceChildren(
     h('div', { class: 'cab' },
       h('div', { class: 'cab-txt' }, voltarBtn(), h('span', { class: 'sobre' }, 'Indicador Pessoal'), linksProt),
-      h('div', { class: 'acoes' },
+      // pessoa nova ainda não existe (só é gravada no Salvar): não há o que excluir
+      D().pessoas[pe.id] && h('div', { class: 'acoes' },
         btn('Excluir pessoa', { icone: 'lixo', fant: true, perigo: true, onclick: ev => armar(ev.currentTarget, () => {
           for (const i of Object.values(D().imoveis)) {
             if (i.vinculos.some(v => v.pessoaId === pe.id)) { i.vinculos = i.vinculos.filter(v => v.pessoaId !== pe.id); Store.put('imoveis', i, 0); }
@@ -3431,7 +3440,12 @@ function renderPessoa(pe) {
           excluirRegistro('pessoas', pe, 'Pessoa excluída.');
         }) }))),
     ...(aviso ? [aviso] : []),
-    h('div', { class: 'reg-pilha compacta' }, blocos));
+    h('div', { class: 'reg-pilha compacta' }, blocos),
+    h('div', { class: 'reg-rodape' }, btn('Salvar', { icone: 'check', prim: true, onclick: () => {
+      const outro = D().pessoas[pe.conjugeId];
+      if (outro && !outro.conjugeId) { outro.conjugeId = pe.id; Store.put('pessoas', outro, 0); }
+      salvarRegistro('pessoas', pe, 'Pessoa salva.');
+    } })));
 }
 /* consulta de CEP (ViaCEP); só no arquivo aberto no navegador, a página publicada não acessa outros sites */
 async function buscarCep(end, pref, cep, depois) {
@@ -3514,7 +3528,7 @@ function renderImovel(im) {
 
 /* ---------- editor de modelo ---------- */
 const edAbertos = new Set();
-function salvarModelo(m, atraso) { Store.put('modelos', m, atraso ?? 900); }
+function salvarModelo(m, atraso) { if (!(ui.rascunho && ui.rascunho.obj === m)) Store.put('modelos', m, atraso ?? 900); }
 function renderModelo(m) {
   const d = $('#detalhe');
   const nome = h('input', { class: 'ed-nome', id: 'ed-nome', 'aria-label': 'Nome do checklist', placeholder: 'Nome do checklist', value: m.nome });
@@ -3523,12 +3537,14 @@ function renderModelo(m) {
   desc.addEventListener('input', () => { m.descricao = desc.value; autoAltura(desc); salvarModelo(m); });
   requestAnimationFrame(() => autoAltura(desc));
   const meta = h('p', { class: 'ed-meta', id: 'ed-meta' });
+  // modelo novo (ainda não salvo): só visualizar; o resto depois do Salvar
+  const salvo = !!D().modelos[m.id];
   const acoes = h('div', { class: 'acoes' },
     btn('Visualizar', { icone: 'olho', prim: true, onclick: () => visualizar(m) }),
-    btn('Nova análise', { icone: 'mais', onclick: () => abrirNovaAnalise(m.id) }),
-    btn('Clonar', { icone: 'copiar', onclick: () => clonarModelo(m) }),
-    btn('Exportar JSON', { icone: 'baixar', onclick: () => baixar(`checklist-${slug(m.nome)}.json`, JSON.stringify({ formato: 'checklist-modelo', versao: 1, modelo: limparModelo(m) }, null, 2)) }),
-    btn('Excluir', { icone: 'lixo', fant: true, perigo: true, onclick: ev => armar(ev.currentTarget, () => { Store.remover('modelos', m.id); ui.sel.modelos = null; garantirSelecao(); mostrarDetalhe(false); renderTudo(); toast('Modelo excluído. As análises feitas com ele continuam disponíveis.'); }) })
+    salvo && btn('Nova análise', { icone: 'mais', onclick: () => abrirNovaAnalise(m.id) }),
+    salvo && btn('Clonar', { icone: 'copiar', onclick: () => clonarModelo(m) }),
+    salvo && btn('Exportar JSON', { icone: 'baixar', onclick: () => baixar(`checklist-${slug(m.nome)}.json`, JSON.stringify({ formato: 'checklist-modelo', versao: 1, modelo: limparModelo(m) }, null, 2)) }),
+    salvo && btn('Excluir', { icone: 'lixo', fant: true, perigo: true, onclick: ev => armar(ev.currentTarget, () => { Store.remover('modelos', m.id); ui.sel.modelos = null; garantirSelecao(); mostrarDetalhe(false); renderTudo(); toast('Modelo excluído. As análises feitas com ele continuam disponíveis.'); }) })
   );
   const arv = h('div', { class: 'ed-arvore', id: 'ed-arvore' });
   const fim = h('div', { class: 'ed-add ed-fim' },
@@ -3537,8 +3553,9 @@ function renderModelo(m) {
   d.replaceChildren(
     h('div', { class: 'cab' }, h('div', { class: 'cab-txt' }, voltarBtn(), h('span', { class: 'sobre' }, 'Modelo de checklist'), nome), acoes),
     h('div', { class: 'ed-topo' }, desc, meta,
-      h('p', { class: 'nota nota-info', style: 'margin:0' }, ico('info'), h('span', null, 'Tudo é salvo automaticamente. As mudanças valem para as próximas análises; as já iniciadas mantêm a versão com que começaram, até você atualizá-las.'))),
-    arv, fim);
+      salvo && h('p', { class: 'nota nota-info', style: 'margin:0' }, ico('info'), h('span', null, 'As mudanças valem para as próximas análises; as já iniciadas mantêm a versão com que começaram, até você atualizá-las.'))),
+    arv, fim,
+    h('div', { class: 'reg-rodape' }, btn('Salvar', { icone: 'check', prim: true, onclick: () => salvarRegistro('modelos', m, 'Modelo salvo.') })));
   renderArvore(m);
   atualizarMeta(m);
 }
@@ -3688,12 +3705,19 @@ function noEditor(m, idx, no, lista, pai) {
 function limparModelo(m) {
   return { id: m.id, nome: m.nome, descricao: m.descricao, perguntas: clone(m.perguntas) };
 }
-function criarModelo() {
-  const m = normalizarModelo({ id: uid('m'), nome: 'Novo checklist', perguntas: [novaPergunta()] });
-  Store.put('modelos', m, 0);
-  mostrarModelo(m);
+// modelo novo ou cópia: fica em rascunho na janela e só é gravado no Salvar
+function rascunhoModelo(m) {
+  if (!J || ui.aba !== 'modelos') abrirJanela({ aba: 'modelos' });
+  ui.rascunho = { col: 'modelos', obj: m, noBotao: true };
+  ui.sel.modelos = m.id; ui.criando = false;
+  mostrarDetalhe(true);
+  renderTudo();
+  rolarTopo();
   const j = J;
   requestAnimationFrame(() => { usar(j); const n = $('#ed-nome'); if (n) { n.focus(); n.select(); } });
+}
+function criarModelo() {
+  rascunhoModelo(normalizarModelo({ id: uid('m'), nome: 'Novo checklist', perguntas: [novaPergunta()] }));
 }
 // na janela de modelos troca a tela; de outro lugar abre uma janela
 function mostrarModelo(m) {
@@ -3704,11 +3728,7 @@ function mostrarModelo(m) {
   rolarTopo();
 }
 function clonarModelo(m) {
-  const c = normalizarModelo(Object.assign(limparModelo(m), { id: uid('m'), nome: 'Cópia de ' + m.nome, criadoEm: null, atualizadoEm: null }));
-  Store.put('modelos', c, 0);
-  ui.sel.modelos = c.id;
-  renderTudo();
-  toast('Modelo clonado.');
+  rascunhoModelo(normalizarModelo(Object.assign(limparModelo(m), { id: uid('m'), nome: 'Cópia de ' + m.nome, criadoEm: null, atualizadoEm: null })));
 }
 function adicionarModelo(bruto) {
   const m = normalizarModelo(clone(bruto));
@@ -4103,7 +4123,7 @@ function tituloJanela() {
     return a ? a.modelo.nome : 'Análises';
   }
   if (aba === 'modelos') {
-    const m = det && D().modelos[ui.sel.modelos];
+    const m = det && registroSel('modelos');
     return m ? 'Modelo de checklist' : 'Modelos de checklist';
   }
   if (aba === 'modelosMinuta') return 'Modelos de Minuta';
