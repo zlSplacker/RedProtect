@@ -63,9 +63,8 @@ Tudo começa na **Recepção de Título**, que cria o protocolo. No topo da fich
   O texto já sai preenchido com os dados do protocolo, das pessoas (qualificação completa, com concordância de gênero) e dos imóveis; o que falta aparece **[entre colchetes]**, destacado em amarelo, e a barra mostra quantos campos faltam. Um clique no campo o seleciona para digitar por cima. A barra tem negrito, itálico, sublinhado e alinhamento; colar traz só o texto. Tudo é salvo automaticamente, e **Baixar Word** gera o `.docx` (abre no Word e no LibreOffice Writer). No `index.html` há também **Imprimir**. Criação e exclusão entram nos andamentos.
 
   > Os modelos são pontos de partida: confira a redação e os dispositivos legais com a legislação vigente e a lei municipal antes de usar.
-- **Dados**: as abas **Indicador Real** (imóveis) e **Indicador Pessoal** (pessoas, com sua qualidade). Abaixo das abas fica só a lista do que foi adicionado ao protocolo e, depois de uma linha, os botões **Adicionar** e **Excluir**. *Adicionar* abre a janela de pesquisa do indicador (Pessoal ou Real): pesquise e dê dois cliques no nome (ou Enter) para adicioná-lo ao protocolo — a pesquisa fecha e o protocolo volta à frente com o item marcado na lista. Quem já está no protocolo aparece marcado na pesquisa; *Nova pessoa* e *Novo imóvel* ali já ligam o cadastro novo ao protocolo. A pessoa entra como *Beneficiário*. Para excluir, clique na linha e depois em *Excluir* (confirmando no segundo clique). Um duplo clique na linha abre o cadastro.
 
-Na página, abaixo da barra, fica a linha de abas **Recepção**, **Andamentos**, **Financeiro** e **Checklists**. Cada aba mostra só o seu conteúdo, e o protocolo abre em *Recepção*:
+Na página, abaixo da barra, fica a linha de abas **Recepção**, **Andamentos**, **Financeiro**, **Checklists** e **Dados**. Cada aba mostra só o seu conteúdo, e o protocolo abre em *Recepção*:
 
 | Aba | O que tem |
 | --- | --- |
@@ -73,6 +72,7 @@ Na página, abaixo da barra, fica a linha de abas **Recepção**, **Andamentos**
 | **Andamentos** | Histórico datado; registra sozinho a abertura, as mudanças de situação e os checklists aplicados. |
 | **Financeiro** | Honorários contratados e lançamentos (recebimentos e despesas, com data, descrição e valor), com o resumo de recebido, a receber, despesas e saldo. |
 | **Checklists** | Análises aplicadas ao protocolo, com progresso e pendências, e o botão *Aplicar checklist*. |
+| **Dados** | As abas **Indicador Real** (imóveis) e **Indicador Pessoal** (pessoas, com sua qualidade). Abaixo das abas fica só a lista do que foi adicionado ao protocolo e, depois de uma linha, os botões **Adicionar** e **Excluir**. *Adicionar* abre a janela de pesquisa do indicador (Pessoal ou Real): pesquise e dê dois cliques no nome (ou Enter) para adicioná-lo ao protocolo — a pesquisa fecha e o protocolo volta à frente com o item marcado na lista. Quem já está no protocolo aparece marcado na pesquisa; *Nova pessoa* e *Novo imóvel* ali já ligam o cadastro novo ao protocolo. A pessoa entra como *Beneficiário*. Para excluir, clique na linha e depois em *Excluir* (confirmando no segundo clique). Um duplo clique na linha abre o cadastro. |
 
 Imóveis, pessoas e análises mostram um botão *Protocolo 0000/AAAA*, que abre (ou traz para a frente) a janela do protocolo de origem.
 

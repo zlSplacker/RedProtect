@@ -1952,7 +1952,6 @@ function renderProtocolo(p) {
     h('span', { class: 'cont', hidden: !pendentesExig }, String(pendentesExig)));
   const barraProt = h('div', { class: 'barra-prot', role: 'toolbar', 'aria-label': 'Protocolo ' + p.numero },
     bExig,
-    botaoJanela('dados', 'Dados', 'dados', () => abrirDados()),
     botaoJanela('arquivos', 'Arquivos', 'anexo', () => {
       const b = blocoArquivos(p);
       abrirDialogo({ titulo: 'Arquivos', conteudo: b.el, aoFechar: () => { b.limpar(); renderDetalhe(); }, atualizar: b.desenhar, cls: 'arq' });
@@ -2001,19 +2000,16 @@ function renderProtocolo(p) {
   const painel = h('div', { id: 'pr-painel', role: 'tabpanel' });
   const barraAbas = h('div', { class: 'pr-abas', role: 'tablist', 'aria-label': 'Conteúdo do protocolo' });
   // linha de abas do protocolo: cada aba mostra só o seu conteúdo
-  const ABAS_PROT = [['dados', 'Recepção'], ['andamentos', 'Andamentos'], ['financeiro', 'Financeiro'], ['checklists', 'Checklists']];
-  // imóveis e pessoas ficam dentro do quadro Dados do protocolo
+  const ABAS_PROT = [['dados', 'Recepção'], ['andamentos', 'Andamentos'], ['financeiro', 'Financeiro'], ['checklists', 'Checklists'], ['indicadores', 'Dados']];
+  // imóveis e pessoas ficam na aba Dados, ao lado de Checklists
   const ABAS_DADOS = [['imoveis', 'Indicador Real'], ['pessoas', 'Indicador Pessoal']];
-  if (ui.abaProt === 'imoveis' || ui.abaProt === 'pessoas') { ui.abaDados = ui.abaProt; ui.abaProt = 'dados'; }
+  if (ui.abaProt === 'imoveis' || ui.abaProt === 'pessoas') { ui.abaDados = ui.abaProt; ui.abaProt = 'indicadores'; }
   if (!ABAS_PROT.some(([k]) => k === ui.abaProt)) ui.abaProt = 'dados';
   if (!ABAS_DADOS.some(([k]) => k === ui.abaDados)) ui.abaDados = 'imoveis';
   const barraDados = h('div', { class: 'pr-abas sub-abas', role: 'tablist', 'aria-label': 'Imóveis e pessoas do protocolo' });
   const painelDados = h('div', { id: 'pr-painel-dados', role: 'tabpanel' });
-  // janela Dados: indicadores real e pessoal do protocolo
-  const abrirDados = () => {
-    abrirDialogo({ titulo: 'Dados', conteudo: h('div', { class: 'dados-sub' }, barraDados, painelDados), aoFechar: renderDetalhe, atualizar: () => { desenharAbas(); desenharPainel(); }, largura: '1000px' });
-    desenharAbas(); desenharPainel();
-  };
+  // aba Dados: indicadores real e pessoal do protocolo
+  const blocoDados = h('section', { class: 'bloco' }, h('div', { class: 'dados-sub' }, barraDados, painelDados));
   const contagem = k => ({ imoveis: imoveisDoProtocolo(p.id).length, pessoas: p.partes.filter(x => D().pessoas[x.pessoaId]).length })[k];
   const desenharAbas = () => {
     barraAbas.replaceChildren(...ABAS_PROT.map(([k, rot]) => h('button', {
@@ -2071,7 +2067,7 @@ function renderProtocolo(p) {
     })) : h('p', { class: 'dica' }, 'Nenhum checklist aplicado.'),
     h('div', null, btn('Aplicar checklist', { icone: 'mais', sm: true, onclick: () => escolherChecklist(p) })));
 
-  // janela Dados: abaixo das abas fica só o que foi adicionado; depois, uma linha com Adicionar e Excluir
+  // aba Dados: abaixo das abas fica só o que foi adicionado; depois, uma linha com Adicionar e Excluir
   const selDados = ui.selDados || (ui.selDados = { imoveis: null, pessoas: null });
   const jProt = J;
   // Adicionar abre a pesquisa do indicador (Pessoal ou Real); dois cliques num nome o adicionam aqui
@@ -2116,7 +2112,7 @@ function renderProtocolo(p) {
 
   const desenharPainel = () => {
     painel.setAttribute('aria-labelledby', idJ('pr-aba-' + ui.abaProt));
-    painel.replaceChildren({ dados: () => quadroDados, andamentos: () => blocoAnd, financeiro: () => blocoFinanceiro(p, atualizarContagens), checklists: () => blocoVinc }[ui.abaProt]());
+    painel.replaceChildren({ dados: () => quadroDados, andamentos: () => blocoAnd, financeiro: () => blocoFinanceiro(p, atualizarContagens), checklists: () => blocoVinc, indicadores: () => blocoDados }[ui.abaProt]());
     painelDados.setAttribute('aria-labelledby', idJ('pr-aba-' + ui.abaDados));
     painelDados.replaceChildren(ui.abaDados === 'pessoas' ? blocoPessoas() : blocoImoveis());
   };
