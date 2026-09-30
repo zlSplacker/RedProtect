@@ -1539,17 +1539,10 @@ function renderItens() {
     const todos = protocolosOrdenados();
     const vis = todos.filter(p => !termo || norm([p.numero, p.municipio, p.interessado].join(' ')).includes(termo));
     for (const p of vis) {
-      const [sitRot, sitCls] = SITUACOES[p.situacao];
-      const campo = (rot, valor) => h('span', { class: 'prot-campo', title: rot + ': ' + valor.textContent }, h('span', { class: 'rot-in' }, rot + ':'), valor);
-      itens.push(h('li', null, h('button', {
-        type: 'button', class: 'item item-prot', 'aria-current': String(!ui.criando && p.id === ui.sel.protocolos),
+      itens.push(h('li', null, linhaProtocolo(p, {
+        'aria-current': String(!ui.criando && p.id === ui.sel.protocolos),
         onclick: () => { ui.sel.protocolos = p.id; ui.criando = false; mostrarDetalhe(true); renderItens(); renderDetalhe(); rolarTopo(); }
-      },
-        campo('Protocolo', h('span', { class: 'item-num' }, p.numero)),
-        campo('Município', h('b', null, p.municipio || '—')),
-        campo('Interessado', h('b', null, p.interessado || '—')),
-        h('span', { class: 'chip ' + sitCls }, sitRot)
-      )));
+      })));
     }
     if (!todos.length) itens.push(h('li', { class: 'lat-vazio' }, 'Nenhum protocolo aberto.'));
     else if (!vis.length) itens.push(h('li', { class: 'lat-vazio' }, 'Nenhum protocolo corresponde ao filtro.'));
@@ -1960,6 +1953,16 @@ function pessoasDoProtocolo(p) {
   }
   const unicas = new Set([...diretas, ...pelosImoveis].map(x => x.pessoa.id));
   return { diretas, pelosImoveis, total: unicas.size };
+}
+// linha Protocolo | Município | Interessado ... Situação
+function linhaProtocolo(p, attrs) {
+  const [sitRot, sitCls] = SITUACOES[p.situacao];
+  const campo = (rot, valor) => h('span', { class: 'prot-campo', title: rot + ': ' + valor.textContent }, h('span', { class: 'rot-in' }, rot + ':'), valor);
+  return h('button', Object.assign({ type: 'button', class: 'item item-prot' }, attrs),
+    campo('Protocolo', h('span', { class: 'item-num' }, p.numero)),
+    campo('Município', h('b', null, p.municipio || '—')),
+    campo('Interessado', h('b', null, p.interessado || '—')),
+    h('span', { class: 'chip ' + sitCls }, sitRot));
 }
 function protocolosDaPessoa(id) {
   return protocolosOrdenados().filter(p => p.partes.some(x => x.pessoaId === id) || imoveisDoProtocolo(p.id).some(i => i.vinculos.some(v => v.pessoaId === id)));
@@ -3465,12 +3468,8 @@ function excluirRegistro(col, obj, msg) {
 function renderPessoa(pe) {
   const d = $('#detalhe');
   const pj = pe.tipo === 'juridica';
-  const linksProt = h('div');
-  const atualizarLinks = () => linksProt.replaceChildren(botoesProtocolo(protocolosDaPessoa(pe.id)) || '');
-  atualizarLinks();
   const aoMudar = () => {
     gravarRegistro('pessoas', pe);
-    atualizarLinks();
     renderItens();
   };
   const c = (k, rot, span, tipo = 'text', opts = {}) => campoReg(pe, 'pe', k, rot, tipo, Object.assign({ aoMudar, span }, opts));
@@ -3571,8 +3570,19 @@ function renderPessoa(pe) {
     desenhar();
     return corpo;
   };
-  // abas no alto do cadastro, como as do protocolo: Cadastro (os dados) e Propriedade (imóveis vinculados)
-  const ABAS_PE = [['cadastro', 'Cadastro'], ['propriedade', 'Propriedade']];
+  // Informações: os protocolos em que a pessoa está; entram sozinhos quando ela é adicionada a um protocolo (só consulta)
+  const blocoInformacoes = () => {
+    const prots = D().pessoas[pe.id] ? protocolosDaPessoa(pe.id) : [];
+    const abrir = id => irPara('protocolos', id);
+    return h('section', { class: 'bloco' }, prots.length
+      ? h('ul', { class: 'itens' }, prots.map(p => h('li', null, linhaProtocolo(p, {
+        title: 'Duplo clique abre o protocolo', ondblclick: () => abrir(p.id),
+        onkeydown: ev => { if (ev.key === 'Enter') { ev.preventDefault(); abrir(p.id); } }
+      }))))
+      : h('p', { class: 'dica' }, 'Nenhum protocolo vinculado.'));
+  };
+  // abas no alto do cadastro, como as do protocolo: Cadastro (os dados), Propriedade (imóveis) e Informações (protocolos)
+  const ABAS_PE = [['cadastro', 'Cadastro'], ['propriedade', 'Propriedade'], ['informacoes', 'Informações']];
   if (!ABAS_PE.some(([k]) => k === ui.abaPe)) ui.abaPe = 'cadastro';
   const barraPe = h('div', { class: 'pr-abas pe-abas', role: 'tablist', 'aria-label': 'Indicador Pessoal' },
     ABAS_PE.map(([k, rot]) => h('button', {
@@ -3580,13 +3590,13 @@ function renderPessoa(pe) {
       onclick: () => { ui.abaPe = k; renderDetalhe(); }
     }, rot)));
   const painelPe = h('div', { id: 'pe-painel', role: 'tabpanel', 'aria-labelledby': 'pe-aba-' + ui.abaPe },
-    ui.abaPe === 'propriedade' ? blocoPropriedade() : h('div', { class: 'reg-pilha compacta' }, blocos));
+    ui.abaPe === 'propriedade' ? blocoPropriedade() : ui.abaPe === 'informacoes' ? blocoInformacoes() : h('div', { class: 'reg-pilha compacta' }, blocos));
 
   const aviso = pe.avisoObservacao && pe.observacoes.trim()
     ? h('p', { class: 'nota' }, ico('aviso'), h('span', null, h('strong', null, 'Observação: '), pe.observacoes)) : null;
   d.replaceChildren(
     h('div', { class: 'cab' },
-      h('div', { class: 'cab-txt' }, voltarBtn(), h('span', { class: 'sobre' }, 'Indicador Pessoal'), linksProt),
+      h('div', { class: 'cab-txt' }, voltarBtn(), h('span', { class: 'sobre' }, 'Indicador Pessoal')),
       // pessoa nova ainda não existe (só é gravada no Salvar): não há o que excluir
       D().pessoas[pe.id] && h('div', { class: 'acoes' },
         btn('Excluir pessoa', { icone: 'lixo', fant: true, perigo: true, onclick: ev => armar(ev.currentTarget, () => excluirPessoa(pe)) }))),
