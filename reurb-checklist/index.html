@@ -443,6 +443,7 @@ select.inp{padding-right:28px}
 .compacta .btn-ico{width:26px;height:26px;min-height:26px}
 .compacta .pr-abas{margin:0 0 4px}
 .compacta .pr-aba{padding:5px 10px;font-size:13px}
+.pe-abas .pr-aba{font-size:13px;padding:8px 12px}
 .compacta .check{font-size:13px}
 .compacta .item{padding:7px 10px}
 /* grade de 12 colunas para fichas densas, como no S.R.I. */
@@ -745,7 +746,6 @@ const ICONES = {
   alinharEsq: '<path d="M4 6h16M4 10h10M4 14h16M4 18h10"/>',
   alinharCentro: '<path d="M4 6h16M7 10h10M4 14h16M7 18h10"/>',
   justificar: '<path d="M4 6h16M4 10h16M4 14h16M4 18h16"/>',
-  casa: '<path d="M3 11l9-7 9 7M5 9.5V20h14V9.5M10 20v-6h4v6"/>',
   anexo: '<path d="M20.5 11.5l-8.2 8.2a5 5 0 0 1-7.1-7.1l8.6-8.6a3.4 3.4 0 0 1 4.8 4.8l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4l7.9-7.9"/>',
   ladoALado: '<rect x="3" y="5" width="8" height="14" rx="1"/><rect x="13" y="5" width="8" height="14" rx="1"/>'
 };
@@ -1429,7 +1429,7 @@ function renderItens() {
   const lista = $('#itens');
   const itens = [];
   if (Store.modo === 'carregando' || aba === 'modelosMinuta') { lista.replaceChildren(); atualizarTitulo(); return; }
-  const abrirItem = (col, id) => () => { ui.sel[col] = id; ui.criando = false; mostrarDetalhe(true); renderItens(); renderDetalhe(); rolarTopo(); };
+  const abrirItem = (col, id) => () => { ui.sel[col] = id; ui.criando = false; if (col === 'pessoas') ui.abaPe = 'cadastro'; mostrarDetalhe(true); renderItens(); renderDetalhe(); rolarTopo(); };
   // janela aberta pelo Adicionar (do protocolo ou da Propriedade de uma pessoa): um clique marca, dois cliques (ou Enter) adicionam
   const sel = ui.selecionar && D().protocolos[ui.selecionar.protocoloId];
   const dono = ui.selecionar && ui.selecionar.pessoaId ? pessoaAlvo(ui.selecionar) : null;
@@ -3256,7 +3256,7 @@ function vincularAPessoa(id) {
   if (!vincularImovel(pe, id)) { toast(tituloImovel(i) + ' já está vinculado.'); return; }
   fecharJanela(J);
   const jo = s.origem;
-  if (jo && jo.el.isConnected) { jo.ui.selProp = id; redesenhar(jo); ativar(jo); focarJanela(jo); }
+  if (jo && jo.el.isConnected) { jo.ui.selProp = id; jo.ui.abaPe = 'propriedade'; redesenhar(jo); ativar(jo); focarJanela(jo); }
   toast(tituloImovel(i) + ' vinculado.');
 }
 function tituloImovel(i) {
@@ -3315,6 +3315,7 @@ function novoRegistro(col, base, aoSalvar, naMesma) {
   const obj = col === 'pessoas' ? normalizarPessoa(base || {}) : normalizarImovel(base || {});
   if (!(naMesma && J && ui.aba === col)) abrirJanela({ aba: col });
   ui.rascunho = { col, obj, aoSalvar, noBotao: true };
+  ui.abaPe = 'cadastro';
   ui.criando = false; ui.sel[col] = obj.id;
   mostrarDetalhe(true);
   renderTudo();
@@ -3461,8 +3462,8 @@ function renderPessoa(pe) {
     if (j) { ativar(j); focarJanela(j); return; }
     abrirJanela({ aba: 'imoveis', selecionar: { pessoaId: pe.id, pessoa: pe, origem: jPe } });
   };
-  const abrirPropriedade = () => {
-    const corpo = h('div');
+  const blocoPropriedade = () => {
+    const corpo = h('section', { class: 'bloco' });
     const desenhar = () => {
       const linhas = propriedadesDe(pe);
       if (!linhas.some(x => x.imovel.id === ui.selProp)) ui.selProp = null;
@@ -3476,15 +3477,23 @@ function renderPessoa(pe) {
       const bExcluir = btn('Excluir', { icone: 'lixo', perigo: true, disabled: !ui.selProp, onclick: ev => armar(ev.currentTarget, () => {
         desvincularImovel(pe, ui.selProp); ui.selProp = null; desenhar(); renderItens();
       }) });
-      corpo.replaceChildren(h('section', { class: 'dl' },
+      corpo.replaceChildren(h('div', { class: 'dl' },
         h('div', { class: 'dl-lista' }, botoes.length ? botoes : h('p', { class: 'dica' }, 'Nenhum imóvel vinculado.')),
         h('div', { class: 'dl-bts' }, btn('Adicionar', { icone: 'mais', prim: true, onclick: abrirPesquisaImovel }), bExcluir)));
     };
-    abrirDialogo({ titulo: 'Propriedade', conteudo: corpo, atualizar: desenhar, largura: '900px' });
     desenhar();
+    return corpo;
   };
-  const barraPe = h('div', { class: 'barra-prot', role: 'toolbar', 'aria-label': 'Indicador Pessoal' },
-    h('button', { type: 'button', class: 'bp', id: 'pe-bt-propriedade', 'aria-haspopup': 'dialog', onclick: abrirPropriedade }, ico('casa'), 'Propriedade'));
+  // abas no alto do cadastro, como as do protocolo: Cadastro (os dados) e Propriedade (imóveis vinculados)
+  const ABAS_PE = [['cadastro', 'Cadastro'], ['propriedade', 'Propriedade']];
+  if (!ABAS_PE.some(([k]) => k === ui.abaPe)) ui.abaPe = 'cadastro';
+  const barraPe = h('div', { class: 'pr-abas pe-abas', role: 'tablist', 'aria-label': 'Indicador Pessoal' },
+    ABAS_PE.map(([k, rot]) => h('button', {
+      type: 'button', class: 'pr-aba', role: 'tab', id: 'pe-aba-' + k, 'aria-controls': 'pe-painel', 'aria-selected': String(ui.abaPe === k),
+      onclick: () => { ui.abaPe = k; renderDetalhe(); }
+    }, rot)));
+  const painelPe = h('div', { id: 'pe-painel', role: 'tabpanel', 'aria-labelledby': 'pe-aba-' + ui.abaPe },
+    ui.abaPe === 'propriedade' ? blocoPropriedade() : h('div', { class: 'reg-pilha compacta' }, blocos));
 
   const aviso = pe.avisoObservacao && pe.observacoes.trim()
     ? h('p', { class: 'nota' }, ico('aviso'), h('span', null, h('strong', null, 'Observação: '), pe.observacoes)) : null;
@@ -3505,7 +3514,7 @@ function renderPessoa(pe) {
         }) }))),
     ...(aviso ? [aviso] : []),
     barraPe,
-    h('div', { class: 'reg-pilha compacta' }, blocos),
+    painelPe,
     h('div', { class: 'reg-rodape' }, btn('Salvar', { icone: 'check', prim: true, onclick: () => {
       const outro = D().pessoas[pe.conjugeId];
       if (outro && !outro.conjugeId) { outro.conjugeId = pe.id; Store.put('pessoas', outro, 0); }
