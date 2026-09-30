@@ -1864,8 +1864,10 @@ function renderNovaAnalise() {
 }
 
 // Aplicar checklist no protocolo: aparecem só os nomes dos checklists; escolher um já abre a análise para responder
+// (modelo em branco, ainda sem nenhuma pergunta escrita no cadastro, não entra na lista)
+const temPerguntas = lista => lista.some(n => (n.tipo !== 'secao' && String(n.texto || '').trim()) || temPerguntas(n.filhos || []));
 function escolherChecklist(p) {
-  const modelos = modelosOrdenados();
+  const modelos = modelosOrdenados().filter(m => temPerguntas(m.perguntas));
   abrirDialogo({ titulo: 'Aplicar checklist', largura: '520px', aoFechar: renderDetalhe,
     conteudo: modelos.length
       ? h('ul', { class: 'vinc esc-check' }, modelos.map(m => h('li', null, h('button', { type: 'button', class: 'item', onclick: () => aplicarChecklist(p, m) }, h('span', { class: 'item-tit' }, m.nome)))))
