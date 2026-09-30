@@ -476,18 +476,32 @@ select.inp{padding-right:28px}
 /* janela Arquivos: lista à esquerda, visualização à direita, ocupando a janela do protocolo */
 .modal.arq{padding:10px}
 .modal.arq .modal-painel{height:100%;display:flex;flex-direction:column}
-.modal.arq .modal-corpo{flex:1;min-height:0;padding:14px;display:block}
-.arq-grade{height:100%;min-height:320px;display:grid;grid-template-columns:minmax(220px,320px) minmax(0,1fr);gap:14px;border-radius:8px;outline:2px dashed transparent;outline-offset:4px}
+.modal.arq .modal-corpo{flex:1;min-height:0;padding:0;display:block}
+.arq-grade{height:100%;min-height:0;display:grid;grid-template-columns:minmax(190px,250px) minmax(0,1fr);gap:0;outline:2px dashed transparent;outline-offset:-4px}
+.arq-grade>.dl{background:var(--sup);border-right:1px solid var(--linha);padding:8px}
+.arq-grade .dl-lista{gap:2px;padding-bottom:8px}
+.arq-grade .dl-linha{flex-direction:column;align-items:flex-start;gap:0;padding:5px 9px;border-color:transparent;border-radius:6px;background:transparent;font-size:13px}
+.arq-grade .dl-linha:hover{background:var(--sup2);border-color:transparent}
+.arq-grade .dl-linha[aria-pressed="true"]{background:var(--acento-suave);border-color:transparent}
+.arq-grade .dl-linha small{font-size:11.5px}
+.arq-grade .dl-bts{gap:6px;padding-top:8px}
+.arq-grade .dl-bts .btn{min-height:28px;padding:4px 10px;font-size:12.5px}
+/* Arquivos e Minutas ocupam a janela do protocolo inteira, sem moldura */
+.jan .modal.arq{padding:0;background:var(--chao)}
+.modal.arq .modal-painel{border-radius:0;box-shadow:none}
+.modal.arq .modal-cab{align-items:center;padding:3px 6px 3px 12px}
+.modal.arq .modal-cab h2{margin:0;font:600 13px/1.2 var(--f-ui);color:var(--tinta2)}
+.modal.arq .modal-cab .btn{min-height:26px;padding:3px 9px;font-size:12px}
 .arq-grade.soltar{outline-color:var(--acento)}
 .arq-grade>.dl{display:flex;flex-direction:column;min-height:0;overflow:hidden}
 .arq-grade>.dl>.dl-lista{flex:0 1 auto;min-height:0;overflow:auto}
 .arq-grade>.dl>.dl-bts{flex:none}
 .dl-linha.aberto .dl-nome{color:var(--acento-texto)}
 .dl-linha.aberto{box-shadow:inset 3px 0 0 var(--acento)}
-.arq-visor{min-height:0;display:flex;flex-direction:column;border:1px solid var(--linha);border-radius:8px;background:var(--sup2);overflow:hidden}
-.arq-visor-cab{flex:none;display:flex;align-items:center;gap:10px;padding:6px 8px 6px 12px;border-bottom:1px solid var(--linha);background:var(--sup)}
+.arq-visor{min-height:0;display:flex;flex-direction:column;background:var(--sup2);overflow:hidden}
+.arq-visor-cab{flex:none;display:flex;align-items:center;gap:8px;padding:4px 8px 4px 10px;border-bottom:1px solid var(--linha);background:var(--sup)}
 .arq-visor-nome{flex:1;min-width:0;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.arq-visor-corpo{flex:1;min-height:0;overflow:auto;padding:16px}
+.arq-visor-corpo{flex:1;min-height:0;overflow:auto;padding:12px}
 .arq-visor-corpo.sem-margem{padding:0;overflow:hidden}
 .arq-visor>.arq-vazio{margin:auto}
 .arq-vazio{color:var(--tinta3);text-align:center;padding:32px 16px;margin:0}
@@ -505,26 +519,28 @@ select.inp{padding-right:28px}
 .arq-planilha table{border-collapse:collapse;background:#fff;color:#1b1b1b;font:12.5px/1.4 var(--f-ui)}
 .arq-planilha td{border:1px solid #d3d3d3;padding:3px 8px;white-space:nowrap}
 /* Minutas: editor com a folha do documento */
-.min-editor .arq-visor-cab{flex-wrap:wrap}
-.min-titulo{flex:1 1 220px;min-width:0;font-weight:600;height:32px}
-.min-barra{flex:none;display:flex;align-items:center;gap:2px;padding:4px 8px;border-bottom:1px solid var(--linha);background:var(--sup)}
-.min-fmt{width:30px;height:28px;display:grid;place-items:center;border:0;border-radius:5px;background:transparent;color:var(--tinta);font:15px/1 var(--f-serif)}
+.min-cab{flex-wrap:wrap;row-gap:4px}
+.min-titulo{flex:1 1 180px;min-width:0;font-weight:600;height:30px;border-color:transparent;background:transparent}
+.min-titulo:hover,.min-titulo:focus{border-color:var(--linha);background:var(--sup)}
+.min-barra{flex:none;display:flex;align-items:center;gap:1px}
+.min-fmt{width:28px;height:28px;display:grid;place-items:center;border:0;border-radius:5px;background:transparent;color:var(--tinta);font:15px/1 var(--f-serif)}
 .min-fmt:hover{background:var(--sup2)}
 .min-fmt svg{width:16px;height:16px}
-.min-sep{width:1px;height:18px;background:var(--linha);margin:0 6px}
-.min-faltam{margin-left:auto;font-size:12px;color:var(--aviso);font-weight:600}
-.min-corpo{background:var(--linha2)}
-.min-folha{background:#fff;color:#111;max-width:21cm;min-height:100%;margin:0 auto;padding:2.2cm 2cm 2cm 2.5cm;box-shadow:0 1px 4px rgba(0,0,0,.25);font:12pt/1.5 "Times New Roman",Times,serif;outline:none}
+.min-sep{width:1px;height:18px;background:var(--linha);margin:0 5px}
+.min-faltam{margin:0 4px 0 8px;font-size:12px;color:var(--aviso);font-weight:600;white-space:nowrap}
+.min-corpo{background:var(--linha2);padding:10px}
+.min-folha{background:#fff;color:#111;max-width:21cm;min-height:100%;margin:0 auto;padding:1.3cm 1.6cm 1.3cm 1.8cm;box-shadow:0 1px 4px rgba(0,0,0,.25);font:12pt/1.5 "Times New Roman",Times,serif;outline:none}
 .min-folha p{margin:0 0 6pt}
 .min-folha p.t{text-align:justify;text-indent:1.25cm}
 .min-folha ul,.min-folha ol{margin:0 0 6pt;padding-left:1cm;text-align:justify}
 .min-folha table{border-collapse:collapse;width:100%;font-size:10pt;margin:0 0 6pt}
 .min-folha td,.min-folha th{border:1px solid #808080;padding:2pt 4pt;vertical-align:top}
-.min-folha .quebra{border-top:1px dashed #9aa;margin:18pt -2cm 18pt -2.5cm;height:0}
+.min-folha .quebra{border-top:1px dashed #9aa;margin:18pt -1.6cm 18pt -1.8cm;height:0}
 .campo-vazio{background:#fff0a0;border-radius:2px}
 .campo-auto{background:#dcebf1;color:#154559;border:1px solid #a9cddc;border-radius:4px;padding:0 4px;font:600 .82em/1.4 var(--f-ui);white-space:nowrap;cursor:default}
-.mm-grade{height:calc(100cqh - 42px)}
-.min-editor .mm-grupo{flex:0 1 190px;min-width:0;height:32px}
+.detalhe.cheio{padding:0}
+.mm-grade{height:100cqh}
+.min-editor .mm-grupo{flex:0 1 160px;min-width:0;height:30px}
 .mm-inserir{position:relative}
 .mm-campos{position:absolute;left:0;top:calc(100% + 4px);z-index:5;width:300px;max-height:360px;overflow:auto;background:var(--sup);border:1px solid var(--linha);border-radius:8px;box-shadow:var(--sombra);padding:6px;display:grid}
 .mm-campos-grupo{margin:8px 8px 2px;font:600 11px var(--f-ui);letter-spacing:.05em;text-transform:uppercase;color:var(--tinta3)}
@@ -540,7 +556,8 @@ select.inp{padding-right:28px}
 .min-modelo:hover{border-color:var(--acento);background:var(--acento-suave)}
 .min-modelo svg{width:20px;height:20px;flex:none;color:var(--acento)}
 @container (max-width:720px){
-  .min-folha{padding:1cm}
+  .min-folha{padding:.8cm}
+  .arq-grade>.dl{border-right:0;border-bottom:1px solid var(--linha)}
   .arq-grade{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,auto) minmax(300px,1fr)}
   .arq-grade>.dl{max-height:38vh}
   .arq-doc{padding:20px}
@@ -2835,10 +2852,9 @@ function blocoMinutas(p) {
     titulo.addEventListener('input', () => { m.titulo = titulo.value; salvar(); desenhar(); });
     const ed = editorTexto({ html: m.html, aoMudar: html => { m.html = html; salvar(); } });
     editor.replaceChildren(
-      h('div', { class: 'arq-visor-cab' }, titulo,
+      h('div', { class: 'arq-visor-cab min-cab' }, titulo, ed.barra,
         !Store.emArtifact ? btn('Imprimir', { icone: 'imprimir', sm: true, onclick: () => imprimirMinuta(m) }) : null,
         btn('Baixar Word', { icone: 'baixar', sm: true, prim: true, onclick: () => baixar(nomeArquivoMinuta(m, p) + '.docx', minutaDocx(m.html)) })),
-      ed.barra,
       h('div', { class: 'arq-visor-corpo min-corpo' }, ed.folha));
   };
   const desenhar = () => {
@@ -2869,6 +2885,7 @@ function blocoMinutas(p) {
 /* janela Cadastros → Modelos de Minuta: à esquerda os modelos (Adicionar e Excluir), à direita o editor */
 function renderModelosMinuta() {
   const d = $('#detalhe');
+  d.classList.add('cheio');
   const u = ui;
   const lado = h('section', { class: 'dl', 'aria-label': 'Modelos de minuta' });
   const editor = h('section', { class: 'arq-visor min-editor', 'aria-label': 'Modelo' });
@@ -2912,8 +2929,7 @@ function renderModelosMinuta() {
     const ed = editorTexto({ html: comoEtiquetas(m.html), campos: true, aoMudar: html => { m.html = html; salvar(); } });
     mostrarRestaurar();
     editor.replaceChildren(
-      h('div', { class: 'arq-visor-cab' }, nome, grupo, grupos, restaurar),
-      ed.barra,
+      h('div', { class: 'arq-visor-cab min-cab' }, nome, grupo, grupos, ed.barra, restaurar),
       h('div', { class: 'arq-visor-corpo min-corpo' }, ed.folha));
   };
   const desenhar = () => {
