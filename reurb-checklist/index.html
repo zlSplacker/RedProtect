@@ -1491,16 +1491,16 @@ function renderItens() {
     else if (!vis.length) itens.push(h('li', { class: 'lat-vazio' }, 'Nenhum protocolo corresponde ao filtro.'));
   } else if (aba === 'analises') {
     const todas = analisesOrdenadas();
-    const vis = todas.filter(a => !termo || norm([a.ident.nucleo, a.ident.municipio, a.ident.processo, a.modelo.nome].join(' ')).includes(termo));
+    const vis = todas.filter(a => { const I = identAnalise(a); return !termo || norm([I.nucleo, I.municipio, I.processo, a.modelo.nome].join(' ')).includes(termo); });
     for (const a of vis) {
       const est = estatisticas(a.modelo, a.respostas);
       const pct = est.total ? Math.round(est.feitas * 100 / est.total) : 0;
-      const sub = [a.ident.municipio, a.ident.processo && ('Proc. ' + a.ident.processo)].filter(Boolean).join(' · ');
+      const I = identAnalise(a), sub = [I.municipio, I.processo && ('Proc. ' + I.processo)].filter(Boolean).join(' · ');
       itens.push(h('li', null, h('button', {
         type: 'button', class: 'item', 'aria-current': String(!ui.criando && a.id === ui.sel.analises),
         onclick: () => { ui.sel.analises = a.id; ui.criando = false; mostrarDetalhe(true); renderItens(); renderDetalhe(); rolarTopo(); }
       },
-        h('span', { class: 'item-tit' }, a.ident.nucleo || 'Núcleo sem nome'),
+        h('span', { class: 'item-tit' }, tituloAnalise(a)),
         sub ? h('span', { class: 'item-sub' }, sub) : null,
         h('span', { class: 'item-meta' },
           h('span', { class: 'barra', 'aria-hidden': 'true' }, h('i', { style: `width:${pct}%` })),
@@ -1708,16 +1708,23 @@ function montarQuestionario(modelo, resp, aoMudar) {
 }
 
 /* ---------- análise ---------- */
+// análise aplicada a um protocolo: município e número vêm do próprio protocolo
+function identAnalise(a) {
+  const p = D().protocolos[a.protocoloId];
+  return p ? Object.assign({}, a.ident, { municipio: p.municipio || a.ident.municipio, processo: p.numero }) : a.ident;
+}
+const tituloAnalise = a => a.ident.nucleo || a.modelo.nome;
 function subtituloAnalise(a) {
-  return [a.ident.municipio, a.ident.processo && ('Processo ' + a.ident.processo), a.ident.inicio && ('Início em ' + fmtData(a.ident.inicio))].filter(Boolean).join(' · ') || 'Preencha a identificação do processo';
+  const I = identAnalise(a);
+  return [I.municipio, I.processo && ('Processo ' + I.processo), I.inicio && ('Início em ' + fmtData(I.inicio))].filter(Boolean).join(' · ') || 'Preencha a identificação do processo';
 }
 function renderAnalise(a) {
   const d = $('#detalhe');
-  const titulo = h('h1', { class: 'titulo' }, a.ident.nucleo || 'Núcleo sem nome');
+  const titulo = h('h1', { class: 'titulo' }, tituloAnalise(a));
   const sub = h('p', { class: 'subt' }, subtituloAnalise(a));
   const concluida = a.status === 'concluida';
   const acoes = h('div', { class: 'acoes' },
-    btn('Baixar relatório', { icone: 'baixar', prim: true, onclick: () => baixar(`relatorio-reurb-${slug(a.ident.nucleo)}-${hoje()}.html`, relatorioHTML(a)) }),
+    btn('Baixar relatório', { icone: 'baixar', prim: true, onclick: () => baixar(`relatorio-reurb-${slug(a.ident.nucleo || identAnalise(a).processo || a.modelo.nome)}-${hoje()}.html`, relatorioHTML(a)) }),
     btn('Copiar pendências', { icone: 'copiar', onclick: () => copiar(textoPendencias(a)) }),
     !Store.emArtifact ? btn('Imprimir', { icone: 'imprimir', onclick: () => imprimir(a) }) : null,
     btn(concluida ? 'Reabrir análise' : 'Marcar como concluída', { icone: concluida ? 'voltar' : 'check', onclick: () => { a.status = concluida ? 'andamento' : 'concluida'; Store.put('analises', a, 0); renderItens(); renderDetalhe(); } }),
@@ -1751,14 +1758,14 @@ function renderAnalise(a) {
       const inp = h('input', { class: 'inp', type: tipo, id: 'an-' + k, value: a.ident[k] || '', autocomplete: 'off' });
       inp.addEventListener('input', () => {
         a.ident[k] = inp.value;
-        titulo.textContent = a.ident.nucleo || 'Núcleo sem nome';
+        titulo.textContent = tituloAnalise(a);
         sub.textContent = subtituloAnalise(a);
         Store.put('analises', a);
         renderItens();
       });
       return h('label', { class: 'campo', for: 'an-' + k }, h('span', { class: 'rot' }, rot), inp);
     }));
-  blocos.push(ident);
+  if (!prot) blocos.push(ident);
 
   const resumo = h('aside', { class: 'resumo', 'aria-label': 'Resumo da análise' });
   let quest;
@@ -1856,6 +1863,24 @@ function renderNovaAnalise() {
   $('#na-nucleo').focus();
 }
 
+// Aplicar checklist no protocolo: aparecem só os nomes dos checklists; escolher um já abre a análise para responder
+function escolherChecklist(p) {
+  const modelos = modelosOrdenados();
+  abrirDialogo({ titulo: 'Aplicar checklist', largura: '520px', aoFechar: renderDetalhe,
+    conteudo: modelos.length
+      ? h('ul', { class: 'vinc esc-check' }, modelos.map(m => h('li', null, h('button', { type: 'button', class: 'item', onclick: () => aplicarChecklist(p, m) }, h('span', { class: 'item-tit' }, m.nome)))))
+      : h('p', { class: 'dica' }, 'Nenhum checklist cadastrado.') });
+}
+function aplicarChecklist(p, m) {
+  const nucleo = (imoveisDoProtocolo(p.id).find(i => i.nucleo) || {}).nucleo || '';
+  const a = novaAnalise(m, { nucleo, municipio: p.municipio, processo: p.numero, inicio: hoje() }, p.id);
+  Store.put('analises', a, 0);
+  registrarAndamento(p, `Checklist “${m.nome}” aplicado.`);
+  Store.put('protocolos', p, 0);
+  fecharDialogo();
+  irPara('analises', a.id);
+}
+
 /* ---------- protocolo como centro: imóveis e pessoas ligados a ele ---------- */
 const QUALIDADES_PROT = ['Requerente', 'Beneficiário', 'Ocupante', 'Proprietário', 'Confrontante', 'Outro'];
 const imoveisDoProtocolo = id => imoveisOrdenados().filter(i => i.protocoloId === id);
@@ -1911,7 +1936,7 @@ function renderProtocolo(p) {
     renderItens(); renderDetalhe();
   });
   const acoes = h('div', { class: 'acoes' },
-    btn('Aplicar checklist', { icone: 'check', prim: true, onclick: () => abrirNovaAnalise(null, p.id) }));
+    btn('Aplicar checklist', { icone: 'check', prim: true, onclick: () => escolherChecklist(p) }));
   // excluir fica no canto inferior direito da janela, discreto
   const pe = h('div', { class: 'pe-prot' },
     btn('Excluir protocolo', { icone: 'lixo', fant: true, sm: true, cls: 'btn-discreto', onclick: ev => armar(ev.currentTarget, () => {
@@ -2045,7 +2070,7 @@ function renderProtocolo(p) {
           est.pendencias.length ? h('span', { class: 'chip chip-pend' }, plural(est.pendencias.length, 'pendência', 'pendências')) : null,
           a.status === 'concluida' ? h('span', { class: 'chip chip-ok' }, 'Concluída') : null)));
     })) : h('p', { class: 'dica' }, 'Nenhum checklist aplicado.'),
-    h('div', null, btn('Aplicar checklist', { icone: 'mais', sm: true, onclick: () => abrirNovaAnalise(null, p.id) })));
+    h('div', null, btn('Aplicar checklist', { icone: 'mais', sm: true, onclick: () => escolherChecklist(p) })));
 
   // janela Dados: abaixo das abas fica só o que foi adicionado; depois, uma linha com Adicionar e Excluir
   const selDados = ui.selDados || (ui.selDados = { imoveis: null, pessoas: null });
@@ -3724,7 +3749,7 @@ function visualizar(m) {
 /* ---------- relatório, cópia, impressão, arquivos ---------- */
 function relatorioHTML(a) {
   const est = estatisticas(a.modelo, a.respostas);
-  const I = a.ident;
+  const I = identAnalise(a);
   const ident = [['Município', I.municipio], ['Núcleo urbano informal', I.nucleo], ['Processo ou protocolo', I.processo],
     ['Responsável técnico', I.responsavel], ['Início da análise', fmtData(I.inicio)], ['Checklist aplicado', a.modelo.nome],
     ['Situação', a.status === 'concluida' ? 'Concluída' : 'Em andamento'], ['Emitido em', fmtData(hoje())]].filter(([, v]) => v);
@@ -3758,9 +3783,9 @@ th{background:#eef1ef;font:bold 8.5pt Arial,sans-serif;text-transform:uppercase;
 .obs{margin-top:4px;color:#333;font-size:9.5pt}.nr{color:#888;font-style:italic}.cont{font:10pt Arial,sans-serif}
 .ass{margin-top:64px;border-top:1px solid #1b1b1b;width:340px;padding-top:4px;font:9.5pt Arial,sans-serif}
 .aviso{font:8.5pt Arial,sans-serif;color:#666;margin-top:28px}@media print{body{margin:0;max-width:none}h2,h3{break-after:avoid}tr{break-inside:avoid}}`;
-  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Relatório — ${esc(I.nucleo || 'Análise REURB')}</title><style>${css}</style></head><body>
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Relatório — ${esc(tituloAnalise(a))}</title><style>${css}</style></head><body>
 <p class="sub">Relatório de análise · ${esc(a.modelo.nome)}</p>
-<h1>${esc(I.nucleo || 'Núcleo sem nome')}</h1>
+<h1>${esc(tituloAnalise(a))}</h1>
 <h2>Identificação</h2><table class="ident"><tbody>${ident.map(([k, v]) => `<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>`).join('')}</tbody></table>
 <h2>Resumo</h2><p class="cont">${est.feitas} de ${est.total} itens respondidos · ${plural(est.pendencias.length, 'pendência', 'pendências')} · ${est.abertas.length} em aberto</p>
 <h2>Pendências e providências</h2>${est.pendencias.length ? `<table><thead><tr><th>Item</th><th>Pergunta e fundamento</th><th>Resposta</th><th>Providência</th></tr></thead><tbody>${est.pendencias.map(linhaPend).join('')}</tbody></table>` : '<p>Nenhuma pendência identificada nos itens respondidos.</p>'}
@@ -3772,9 +3797,9 @@ ${est.abertas.length ? `<h2>Itens em aberto</h2><table><thead><tr><th>Item</th><
 }
 function textoPendencias(a) {
   const est = estatisticas(a.modelo, a.respostas);
-  const I = a.ident;
+  const I = identAnalise(a);
   const linhas = [
-    `Análise REURB — ${I.nucleo || 'Núcleo sem nome'}${I.municipio ? ' (' + I.municipio + ')' : ''}`,
+    `Análise REURB — ${tituloAnalise(a)}${I.municipio ? ' (' + I.municipio + ')' : ''}`,
     [I.processo && 'Processo ' + I.processo, `${est.feitas}/${est.total} respondidas`, plural(est.pendencias.length, 'pendência', 'pendências')].filter(Boolean).join(' · '),
     ''
   ];
@@ -4075,7 +4100,7 @@ function tituloJanela() {
   if (aba === 'analises') {
     if (ui.criando) return 'Nova análise';
     const a = det && D().analises[ui.sel.analises];
-    return a ? 'Análise' : 'Análises';
+    return a ? a.modelo.nome : 'Análises';
   }
   if (aba === 'modelos') {
     const m = det && D().modelos[ui.sel.modelos];
