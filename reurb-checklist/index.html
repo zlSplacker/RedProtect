@@ -437,7 +437,8 @@ select.inp{padding-right:28px}
 /* indicadores pessoal e real */
 .reg-pilha{display:grid;gap:20px}
 .reg-pilha>.ident{margin:0}
-.reg-rodape{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--linha)}
+.reg-rodape{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--linha)}
+.reg-rodape .reg-excluir{margin-right:auto}
 /* cadastro compacto (Indicador Pessoal): um só quadro, seções separadas por uma linha */
 .reg-pilha.compacta{gap:0;background:var(--sup);border:1px solid var(--linha);border-radius:10px}
 .compacta>.ident,.compacta>.bloco{border:0;border-radius:0;background:transparent;padding:10px 14px;margin:0}
@@ -3610,14 +3611,14 @@ function renderPessoa(pe) {
     ? h('p', { class: 'nota' }, ico('aviso'), h('span', null, h('strong', null, 'Observação: '), pe.observacoes)) : null;
   d.replaceChildren(
     h('div', { class: 'cab' },
-      h('div', { class: 'cab-txt' }, voltarBtn(), h('span', { class: 'sobre' }, 'Indicador Pessoal')),
-      // pessoa nova ainda não existe (só é gravada no Salvar): não há o que excluir
-      D().pessoas[pe.id] && h('div', { class: 'acoes' },
-        btn('Excluir pessoa', { icone: 'lixo', fant: true, perigo: true, onclick: ev => armar(ev.currentTarget, () => excluirPessoa(pe)) }))),
+      h('div', { class: 'cab-txt' }, voltarBtn(), h('span', { class: 'sobre' }, 'Indicador Pessoal'))),
     ...(aviso ? [aviso] : []),
     barraPe,
     painelPe,
-    h('div', { class: 'reg-rodape' }, btn('Arquivos', { icone: 'anexo', onclick: abrirArquivosPe }), btn('Salvar', { icone: 'check', prim: true, onclick: () => {
+    // embaixo: Excluir à esquerda, discreto como o do protocolo (pessoa nova ainda não existe: não há o que excluir)
+    h('div', { class: 'reg-rodape' },
+      D().pessoas[pe.id] && btn('Excluir pessoa', { icone: 'lixo', fant: true, sm: true, cls: 'btn-discreto reg-excluir', onclick: ev => armar(ev.currentTarget, () => excluirPessoa(pe)) }),
+      btn('Arquivos', { icone: 'anexo', onclick: abrirArquivosPe }), btn('Salvar', { icone: 'check', prim: true, onclick: () => {
       const outro = D().pessoas[pe.conjugeId];
       if (outro && !outro.conjugeId) { outro.conjugeId = pe.id; Store.put('pessoas', outro, 0); }
       gravarVinculosPendentes(pe);
@@ -3695,12 +3696,13 @@ function renderImovel(im) {
   ];
   d.replaceChildren(
     h('div', { class: 'cab' },
-      h('div', { class: 'cab-txt' }, voltarBtn(), h('span', { class: 'sobre' }, 'Indicador Real · ' + TIPOS_IMOVEL[im.tipo]), titulo, sub, linksProt),
-      // imóvel novo ainda não existe (só é gravado no Salvar): não há o que excluir
-      D().imoveis[im.id] ? h('div', { class: 'acoes' }, btn('Excluir imóvel', { icone: 'lixo', fant: true, perigo: true, onclick: ev => armar(ev.currentTarget, () => excluirRegistro('imoveis', im, 'Imóvel excluído.')) })) : null),
+      h('div', { class: 'cab-txt' }, voltarBtn(), h('span', { class: 'sobre' }, 'Indicador Real · ' + TIPOS_IMOVEL[im.tipo]), titulo, sub, linksProt)),
     h('div', { class: 'reg-pilha' },
       h('fieldset', { class: 'ident' }, h('legend', null, 'Identificação do imóvel'), campos)),
-    h('div', { class: 'reg-rodape' }, btn('Salvar', { icone: 'check', prim: true, onclick: () => salvarRegistro('imoveis', im, 'Imóvel salvo.') })));
+    // embaixo: Excluir à esquerda, discreto como o do protocolo (imóvel novo ainda não existe: não há o que excluir)
+    h('div', { class: 'reg-rodape' },
+      D().imoveis[im.id] && btn('Excluir imóvel', { icone: 'lixo', fant: true, sm: true, cls: 'btn-discreto reg-excluir', onclick: ev => armar(ev.currentTarget, () => excluirRegistro('imoveis', im, 'Imóvel excluído.')) }),
+      btn('Salvar', { icone: 'check', prim: true, onclick: () => salvarRegistro('imoveis', im, 'Imóvel salvo.') })));
 }
 
 /* ---------- editor de modelo ---------- */
