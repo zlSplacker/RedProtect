@@ -1,4 +1,4 @@
-# RURB — Sistema Integrado Regularização Fundiária
+# Sistema Fundiário
 
 Ferramenta de checklist para consultoria jurídica em processos de Regularização Fundiária Urbana (REURB), inspirada no módulo de checklist do S.R.I.:
 
