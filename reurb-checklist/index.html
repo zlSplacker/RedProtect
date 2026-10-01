@@ -530,14 +530,21 @@ select.inp:disabled{background:var(--sup2);color:var(--tinta2);cursor:default;op
 .min-cab{flex-wrap:wrap;row-gap:4px}
 .min-titulo{flex:1 1 180px;min-width:0;font-weight:600;height:30px;border-color:transparent;background:transparent}
 .min-titulo:hover,.min-titulo:focus{border-color:var(--linha);background:var(--sup)}
-.min-barra{flex:none;display:flex;align-items:center;gap:1px}
+.min-barra{flex:1;display:flex;align-items:center;flex-wrap:wrap;gap:1px;min-width:0}
+.min-aa{font:600 14px/1 var(--f-ui);letter-spacing:-.02em}
+.min-fmt[aria-pressed="true"]{background:var(--acento-suave);color:var(--acento-texto)}
+.min-pop{width:auto;min-width:230px;padding:6px}
+.min-pop-form{display:grid;gap:8px;padding:6px}
+.min-pop-form .inp{padding:5px 8px;font-size:13px}
+.min-pop-loc{width:280px}
+.min-pop-bts{display:flex;gap:6px;flex-wrap:wrap}
 /* linha da barra de formatação, abaixo do título */
 .min-ferramentas{flex:none;display:flex;align-items:center;padding:2px 8px 2px 6px;border-bottom:1px solid var(--linha);background:var(--sup2)}
-.min-fmt{width:28px;height:28px;display:grid;place-items:center;border:0;border-radius:5px;background:transparent;color:var(--tinta);font:15px/1 var(--f-serif)}
+.min-fmt{width:28px;height:28px;display:grid;place-items:center;border:0;border-radius:5px;background:transparent;color:var(--acento);font:15px/1 var(--f-serif)}
 .min-fmt:hover{background:var(--sup2)}
 .min-fmt svg{width:16px;height:16px}
 .min-sep{width:1px;height:18px;background:var(--linha);margin:0 5px}
-.min-faltam{margin:0 4px 0 8px;font-size:12px;color:var(--aviso);font-weight:600;white-space:nowrap}
+.min-faltam{margin:0 4px 0 auto;padding-left:8px;font-size:12px;color:var(--aviso);font-weight:600;white-space:nowrap}
 .min-corpo{background:var(--linha2);padding:10px}
 .min-folha{background:#fff;color:#111;max-width:21cm;min-height:100%;margin:0 auto;padding:1.3cm 1.6cm 1.3cm 1.8cm;box-shadow:0 1px 4px rgba(0,0,0,.25);font:12pt/1.5 "Times New Roman",Times,serif;outline:none}
 .min-folha p{margin:0 0 6pt}
@@ -751,6 +758,16 @@ const ICONES = {
   alinharEsq: '<path d="M4 6h16M4 10h10M4 14h16M4 18h10"/>',
   alinharCentro: '<path d="M4 6h16M7 10h10M4 14h16M7 18h10"/>',
   justificar: '<path d="M4 6h16M4 10h16M4 14h16M4 18h16"/>',
+  alinharDir: '<path d="M4 6h16M10 10h10M4 14h16M10 18h10"/>',
+  recuoMais: '<path d="M4 5h16M11 10h9M11 14h9M4 19h16M4 9.5l3 2.5-3 2.5"/>',
+  recuoMenos: '<path d="M4 5h16M11 10h9M11 14h9M4 19h16M7 9.5L4 12l3 2.5"/>',
+  desfazer: '<path d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
+  refazer: '<path d="M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/>',
+  tabela: '<path d="M4 5h16v14H4zM4 10h16M4 14.5h16M9.5 5v14M14.5 5v14"/>',
+  quebraPagina: '<path d="M6 3v5h12V3M6 21v-5h12v5M3 12h2M8 12h2M14 12h2M19 12h2"/>',
+  borracha: '<path d="M16 4l5 5-9 9H7l-3-3 12-11zM9.5 8.5l6 6M4 21h16"/>',
+  ortografia: '<path d="M3 15L7 4l4 11M4.5 11h5M13 15.5l3 3 5-7"/>',
+  word: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M8 12l1.5 5 1.5-4 1.5 4 1.5-5"/>',
   anexo: '<path d="M20.5 11.5l-8.2 8.2a5 5 0 0 1-7.1-7.1l8.6-8.6a3.4 3.4 0 0 1 4.8 4.8l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4l7.9-7.9"/>',
   ladoALado: '<rect x="3" y="5" width="8" height="14" rx="1"/><rect x="13" y="5" width="8" height="14" rx="1"/>'
 };
@@ -2809,7 +2826,8 @@ function minutaDocx(html) {
   };
   const pPr = (el, extra = {}) => {
     const st = el.style || {}, al = extra.jc || ({ center: 'center', right: 'right', justify: 'both', left: 'left' })[st.textAlign] || (el.classList && el.classList.contains('t') ? 'both' : '');
-    const ml = /%$/.test(st.marginLeft || '') ? Math.round(LARG * parseFloat(st.marginLeft) / 100) : 0;
+    const mlv = st.marginLeft || '', mln = parseFloat(mlv) || 0;
+    const ml = /%$/.test(mlv) ? Math.round(LARG * mln / 100) : /cm$/.test(mlv) ? Math.round(mln * 567) : /px$/.test(mlv) ? Math.round(mln * 15) : /pt$/.test(mlv) ? Math.round(mln * 20) : 0;
     const primeira = el.classList && el.classList.contains('t') ? 709 : 0;
     return `<w:pPr><w:spacing w:after="120" w:line="360" w:lineRule="auto"/>${ml || primeira || extra.ind ? `<w:ind w:left="${ml + (extra.ind || 0)}"${primeira ? ' w:firstLine="709"' : ''}${extra.ind ? ' w:hanging="283"' : ''}/>` : ''}${al ? `<w:jc w:val="${al}"/>` : ''}</w:pPr>`;
   };
@@ -2882,18 +2900,189 @@ function editorTexto({ html, aoMudar, campos }) {
   });
   // colar sempre como texto simples, para não trazer a formatação de outro programa
   folha.addEventListener('paste', ev => { ev.preventDefault(); document.execCommand('insertText', false, ev.clipboardData.getData('text/plain')); });
+  folha.setAttribute('lang', 'pt-BR');
   const semFoco = ev => ev.preventDefault();
-  const cmd = (rot, icone, c) => h('button', { type: 'button', class: 'min-fmt', title: rot, 'aria-label': rot, onmousedown: semFoco, onclick: () => { document.execCommand(c, false); folha.focus(); mudou(); } }, icone);
+  // a seleção da folha é guardada ao abrir um quadro com campos (o foco sai da folha) e devolvida ao aplicar
+  let guardada = null;
+  const selecaoNaFolha = () => { const sl = getSelection(); return sl.rangeCount && folha.contains(sl.getRangeAt(0).commonAncestorContainer) ? sl.getRangeAt(0) : null; };
+  const guardar = () => { const r = selecaoNaFolha(); guardada = r ? r.cloneRange() : null; };
+  const restaurar = () => { if (selecaoNaFolha() || !guardada) return; const sl = getSelection(); sl.removeAllRanges(); sl.addRange(guardada); };
+  const bt = (rot, icone, acao, extra = {}) => h('button', Object.assign({ type: 'button', class: 'min-fmt', title: rot, 'aria-label': rot, onmousedown: semFoco, onclick: acao }, extra), icone);
+  const cmd = (rot, icone, c) => bt(rot, icone, () => { document.execCommand(c, false); folha.focus(); mudou(); });
+  // parágrafo (do primeiro nível da folha) onde está o cursor; sem cursor, o último
+  const blocoAtual = () => { const r = selecaoNaFolha() || guardada; let n = r ? r.startContainer : folha.lastChild; while (n && n.parentNode !== folha) n = n.parentNode; return n; };
+  const inserirDepois = (...nos) => { const b = blocoAtual(); if (b) b.after(...nos); else folha.append(...nos); };
+  const cursorEm = el => { const r = document.createRange(); r.selectNodeContents(el); r.collapse(true); const sl = getSelection(); sl.removeAllRanges(); sl.addRange(r); folha.focus(); };
+  // recuo dos parágrafos selecionados, de 1,25 cm em 1,25 cm (a largura útil da folha é de 16 cm)
+  const recuoCm = b => { const v = b.style.marginLeft, n = parseFloat(v) || 0; return /%$/.test(v) ? n * 0.16 : /px$/.test(v) ? n / 37.8 : /pt$/.test(v) ? n / 28.35 : n; };
+  const recuo = d => () => {
+    restaurar();
+    const r = selecaoNaFolha(), blocos = r ? [...folha.children].filter(b => r.intersectsNode(b)) : [];
+    for (const b of blocos) {
+      const v = Math.max(0, Math.round((recuoCm(b) + d) * 100) / 100);
+      b.style.marginLeft = v ? v + 'cm' : '';
+      if (!b.getAttribute('style')) b.removeAttribute('style');
+    }
+    folha.focus(); mudou();
+  };
+  // quadros que abrem embaixo de um botão (maiúsculas, tabela, localizar)
+  const pops = [];
+  const fecharPops = () => { for (const q of pops) q.fechar(); };
+  const popover = (botao, conteudo, aoAbrir) => {
+    const painel = h('div', { class: 'mm-campos min-pop', hidden: true }, conteudo);
+    const api = {
+      caixa: h('div', { class: 'mm-inserir' }, botao, painel),
+      aberto: () => !painel.hidden,
+      abrir: () => { const ab = painel.hidden; fecharPops(); if (!ab) return; guardar(); painel.hidden = false; botao.setAttribute('aria-expanded', 'true'); if (aoAbrir) aoAbrir(); },
+      fechar: () => { painel.hidden = true; botao.setAttribute('aria-expanded', 'false'); }
+    };
+    botao.setAttribute('aria-expanded', 'false');
+    botao.addEventListener('click', api.abrir);
+    painel.addEventListener('keydown', ev => { if (ev.key === 'Escape') { ev.stopPropagation(); api.fechar(); restaurar(); folha.focus(); } });
+    pops.push(api);
+    return api;
+  };
+  folha.addEventListener('pointerdown', fecharPops);
+
+  // Aa: Primeira letra maiúscula, TODAS MAIÚSCULAS, todas minúsculas, Cada Palavra em Maiúscula (Alt+F3)
+  const mudarCaixa = modo => {
+    restaurar();
+    const sl = getSelection(), r = selecaoNaFolha();
+    if (!r || r.collapsed) { toast('Selecione o texto.'); return; }
+    const [sc, so, ec, eo] = [r.startContainer, r.startOffset, r.endContainer, r.endOffset];
+    const raiz = r.commonAncestorContainer.nodeType === 3 ? r.commonAncestorContainer.parentNode : r.commonAncestorContainer;
+    const w = document.createTreeWalker(raiz, NodeFilter.SHOW_TEXT), nos = [];
+    while (w.nextNode()) if (r.intersectsNode(w.currentNode) && !(w.currentNode.parentElement && w.currentNode.parentElement.closest('.campo-auto'))) nos.push(w.currentNode);
+    const mai = c => c.toLocaleUpperCase('pt-BR'), min = c => c.toLocaleLowerCase('pt-BR');
+    let frase = true, palavra = true;
+    for (const n of nos) {
+      const t = n.nodeValue, ini = n === sc ? so : 0, fim = n === ec ? eo : t.length;
+      let out = '';
+      for (const c of t.slice(ini, fim)) {
+        const letra = /\p{L}/u.test(c);
+        if (modo === 'mai') out += mai(c);
+        else if (modo === 'min') out += min(c);
+        else if (modo === 'frase') { out += letra ? (frase ? mai(c) : min(c)) : c; if (letra) frase = false; if (/[.!?]/.test(c)) frase = true; }
+        else { out += letra ? (palavra ? mai(c) : min(c)) : c; palavra = !/[\p{L}\p{N}]/u.test(c); }
+      }
+      n.nodeValue = t.slice(0, ini) + out + t.slice(fim);
+    }
+    const nr = document.createRange(); nr.setStart(sc, so); nr.setEnd(ec, eo);
+    sl.removeAllRanges(); sl.addRange(nr); folha.focus(); mudou();
+  };
+  const bCaixa = bt('Maiúsculas e minúsculas (Alt+F3)', h('span', { class: 'min-aa' }, 'Aa'), null, { 'aria-haspopup': 'menu' });
+  const opCaixa = (rot, modo) => h('button', { type: 'button', role: 'menuitem', class: 'mm-campo-op', onmousedown: semFoco, onclick: () => { popCaixa.fechar(); mudarCaixa(modo); } }, rot);
+  const popCaixa = popover(bCaixa, [opCaixa('Primeira letra maiúscula', 'frase'), opCaixa('TODAS MAIÚSCULAS', 'mai'), opCaixa('todas minúsculas', 'min'), opCaixa('Cada Palavra em Maiúscula', 'palavra')]);
+
+  // tabela: escolhe linhas e colunas; entra depois do parágrafo do cursor
+  const nLin = h('input', { class: 'inp', type: 'number', min: '1', max: '30', value: '2' });
+  const nCol = h('input', { class: 'inp', type: 'number', min: '1', max: '10', value: '3' });
+  const inserirTabela = (l, c) => {
+    l = Math.min(30, Math.max(1, l || 1)); c = Math.min(10, Math.max(1, c || 1));
+    const tb = h('table', null, Array.from({ length: l }, () => h('tr', null, Array.from({ length: c }, () => h('td', null, h('br'))))));
+    inserirDepois(tb, h('p', { class: 't' }, h('br')));
+    cursorEm(tb.querySelector('td')); mudou();
+  };
+  const formTab = h('form', { class: 'min-pop-form' },
+    h('label', { class: 'campo' }, h('span', { class: 'rot' }, 'Linhas'), nLin), h('label', { class: 'campo' }, h('span', { class: 'rot' }, 'Colunas'), nCol),
+    h('button', { type: 'submit', class: 'btn btn-sm btn-prim' }, 'Inserir'));
+  const popTab = popover(bt('Inserir tabela', ico('tabela'), null, { 'aria-haspopup': 'dialog' }), formTab, () => nLin.focus());
+  formTab.addEventListener('submit', ev => { ev.preventDefault(); popTab.fechar(); restaurar(); inserirTabela(+nLin.value, +nCol.value); });
+
+  // localizar e substituir
+  const qLoc = h('input', { class: 'inp', type: 'search', placeholder: 'Localizar', 'aria-label': 'Localizar' });
+  const qSub = h('input', { class: 'inp', type: 'text', placeholder: 'Substituir por', 'aria-label': 'Substituir por' });
+  const textos = () => { const w = document.createTreeWalker(folha, NodeFilter.SHOW_TEXT), l = []; while (w.nextNode()) l.push(w.currentNode); return l; };
+  const achar = () => {
+    const q = qLoc.value.toLocaleLowerCase('pt-BR');
+    if (!q) return;
+    const mapa = []; let tudo = '';
+    for (const n of textos()) { mapa.push([n, tudo.length]); tudo += n.nodeValue; }
+    const baixo = tudo.toLocaleLowerCase('pt-BR');
+    const ref = guardada, m = ref && mapa.find(([n]) => n === ref.endContainer);
+    let i = baixo.indexOf(q, m ? m[1] + ref.endOffset : 0);
+    if (i < 0) i = baixo.indexOf(q);
+    if (i < 0) { toast('Texto não encontrado.'); return; }
+    const pos = k => { for (let j = mapa.length - 1; j >= 0; j--) if (mapa[j][1] <= k) return [mapa[j][0], k - mapa[j][1]]; return [folha, 0]; };
+    const [sn, so] = pos(i), [en, eo] = pos(i + q.length);
+    const nr = document.createRange(); nr.setStart(sn, so); nr.setEnd(en, eo);
+    const sl = getSelection(); sl.removeAllRanges(); sl.addRange(nr);
+    guardada = nr.cloneRange();
+    (sn.parentElement || folha).scrollIntoView({ block: 'center' });
+  };
+  const substituir = () => {
+    const r = guardada;
+    if (r && !r.collapsed && r.toString().toLocaleLowerCase('pt-BR') === qLoc.value.toLocaleLowerCase('pt-BR')) {
+      r.deleteContents();
+      const t = document.createTextNode(qSub.value);
+      r.insertNode(t);
+      const nr = document.createRange(); nr.setStartAfter(t); nr.collapse(true);
+      guardada = nr; mudou();
+    }
+    achar();
+  };
+  const substituirTudo = () => {
+    if (!qLoc.value) return;
+    const re = new RegExp(qLoc.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    let n = 0;
+    for (const t of textos()) {
+      if (t.parentElement && t.parentElement.closest('.campo-auto')) continue;
+      const v = t.nodeValue.replace(re, () => { n++; return qSub.value; });
+      if (v !== t.nodeValue) t.nodeValue = v;
+    }
+    toast(n ? plural(n, 'ocorrência substituída', 'ocorrências substituídas') + '.' : 'Texto não encontrado.');
+    if (n) mudou();
+  };
+  qLoc.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); achar(); } });
+  const popLoc = popover(bt('Localizar e substituir', ico('lupa'), null, { 'aria-haspopup': 'dialog' }),
+    h('div', { class: 'min-pop-form min-pop-loc' }, qLoc, qSub,
+      h('div', { class: 'min-pop-bts' },
+        btn('Localizar', { sm: true, onclick: achar }), btn('Substituir', { sm: true, onclick: substituir }), btn('Substituir tudo', { sm: true, prim: true, onclick: substituirTudo }))),
+    () => { qLoc.focus(); qLoc.select(); });
+
+  // ortografia: liga e desliga o sublinhado de palavras erradas do navegador
+  const bOrt = bt('Verificação ortográfica', ico('ortografia'), () => { folha.spellcheck = !folha.spellcheck; bOrt.setAttribute('aria-pressed', String(folha.spellcheck)); folha.focus(); }, { 'aria-pressed': 'true' });
+  // trazer o texto de um arquivo do Word (.docx) para depois do parágrafo do cursor
+  const entradaDocx = h('input', { type: 'file', accept: '.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document', hidden: true });
+  entradaDocx.addEventListener('change', async () => {
+    const f = entradaDocx.files[0];
+    entradaDocx.value = '';
+    if (!f) return;
+    try {
+      await carregarScript(CDN + 'mammoth/1.6.0/mammoth.browser.min.js');
+      const r = await window.mammoth.convertToHtml({ arrayBuffer: await f.arrayBuffer() });
+      const frag = htmlSeguro(r.value);
+      for (const im of frag.querySelectorAll('img')) im.remove();
+      const nos = [...frag.childNodes];
+      if (!nos.some(n => n.textContent.trim())) { toast('O arquivo não tem texto.'); return; }
+      restaurar(); inserirDepois(...nos); folha.focus(); mudou();
+      toast('Texto do Word inserido.');
+    } catch (e) { toast('Não foi possível ler este arquivo do Word.'); }
+  });
+
+  folha.addEventListener('keydown', ev => {
+    if (ev.altKey && ev.key === 'F3') { ev.preventDefault(); popCaixa.abrir(); }
+    else if (ev.key === 'Escape' && pops.some(q => q.aberto())) { ev.stopPropagation(); fecharPops(); }
+  });
+  const sep = () => h('span', { class: 'min-sep' });
   const barra = h('div', { class: 'min-barra', role: 'toolbar', 'aria-label': 'Formatação' },
-    cmd('Negrito', h('b', null, 'N'), 'bold'), cmd('Itálico', h('i', null, 'I'), 'italic'), cmd('Sublinhado', h('u', null, 'S'), 'underline'),
-    h('span', { class: 'min-sep' }),
-    cmd('Alinhar à esquerda', ico('alinharEsq'), 'justifyLeft'), cmd('Centralizar', ico('alinharCentro'), 'justifyCenter'), cmd('Justificar', ico('justificar'), 'justifyFull'));
+    cmd('Desfazer', ico('desfazer'), 'undo'), cmd('Refazer', ico('refazer'), 'redo'), sep(),
+    cmd('Negrito', h('b', null, 'N'), 'bold'), cmd('Itálico', h('i', null, 'I'), 'italic'), cmd('Sublinhado', h('u', null, 'S'), 'underline'), sep(),
+    cmd('Alinhar à esquerda', ico('alinharEsq'), 'justifyLeft'), cmd('Centralizar', ico('alinharCentro'), 'justifyCenter'),
+    cmd('Alinhar à direita', ico('alinharDir'), 'justifyRight'), cmd('Justificar', ico('justificar'), 'justifyFull'), sep(),
+    bt('Diminuir recuo', ico('recuoMenos'), recuo(-1.25)), bt('Aumentar recuo', ico('recuoMais'), recuo(1.25)), sep(),
+    popCaixa.caixa, cmd('Limpar formatação', ico('borracha'), 'removeFormat'), sep(),
+    popTab.caixa, bt('Quebra de página', ico('quebraPagina'), () => { const novo = h('p', { class: 't' }, h('br')); inserirDepois(h('p', { class: 'quebra' }), novo); cursorEm(novo); mudou(); }), sep(),
+    popLoc.caixa, bOrt, sep(),
+    bt('Copiar o texto', ico('copiar'), () => copiar(folha.innerText, 'Texto copiado.', 'Copiar o texto')),
+    bt('Trazer texto de um arquivo do Word (.docx)', ico('word'), () => { guardar(); entradaDocx.click(); }), entradaDocx);
   if (campos) {
     let maiusc = false;
     const caixa = h('div', { class: 'mm-inserir' });
     const lista = h('div', { class: 'mm-campos', role: 'menu', hidden: true });
-    const bCampo = h('button', { type: 'button', class: 'btn btn-sm', 'aria-haspopup': 'menu', 'aria-expanded': 'false', onmousedown: semFoco, onclick: () => mostrar(lista.hidden) }, ico('mais'), 'Inserir campo');
+    const bCampo = h('button', { type: 'button', class: 'btn btn-sm', 'aria-haspopup': 'menu', 'aria-expanded': 'false', onmousedown: semFoco, onclick: () => { const ab = lista.hidden; fecharPops(); mostrar(ab); } }, ico('mais'), 'Inserir campo');
     const mostrar = sim => { lista.hidden = !sim; bCampo.setAttribute('aria-expanded', String(sim)); };
+    pops.push({ aberto: () => !lista.hidden, fechar: () => mostrar(false) });
     const bMai = h('button', { type: 'button', class: 'mm-mai', 'aria-pressed': 'false', onmousedown: semFoco, onclick: () => { maiusc = !maiusc; bMai.setAttribute('aria-pressed', String(maiusc)); } }, 'Em MAIÚSCULAS');
     // a etiqueta entra exatamente onde está o cursor (o insertHTML do navegador a jogaria para fora do parágrafo)
     const inserir = c => {
@@ -2925,7 +3114,6 @@ function editorTexto({ html, aoMudar, campos }) {
     lista.addEventListener('keydown', ev => { if (ev.key === 'Escape') { ev.stopPropagation(); mostrar(false); bCampo.focus(); } });
     caixa.append(bCampo, lista);
     barra.append(h('span', { class: 'min-sep' }), caixa);
-    folha.addEventListener('pointerdown', () => mostrar(false));
   }
   barra.append(faltam);
   contar();
