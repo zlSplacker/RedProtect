@@ -531,6 +531,8 @@ select.inp:disabled{background:var(--sup2);color:var(--tinta2);cursor:default;op
 .min-titulo{flex:1 1 180px;min-width:0;font-weight:600;height:30px;border-color:transparent;background:transparent}
 .min-titulo:hover,.min-titulo:focus{border-color:var(--linha);background:var(--sup)}
 .min-barra{flex:none;display:flex;align-items:center;gap:1px}
+/* linha da barra de formatação, abaixo do título */
+.min-ferramentas{flex:none;display:flex;align-items:center;padding:2px 8px 2px 6px;border-bottom:1px solid var(--linha);background:var(--sup2)}
 .min-fmt{width:28px;height:28px;display:grid;place-items:center;border:0;border-radius:5px;background:transparent;color:var(--tinta);font:15px/1 var(--f-serif)}
 .min-fmt:hover{background:var(--sup2)}
 .min-fmt svg{width:16px;height:16px}
@@ -2974,10 +2976,12 @@ function blocoMinutas(p, op = {}) {
     const titulo = h('input', { class: 'inp min-titulo', 'aria-label': T.titulo, value: m.titulo });
     titulo.addEventListener('input', () => { m.titulo = titulo.value; salvar(); desenhar(); });
     const ed = editorTexto({ html: m.html, aoMudar: html => { m.html = html; salvar(); } });
+    // no alto o título e os botões; logo abaixo, numa linha só dela, a barra de formatação
     editor.replaceChildren(
-      h('div', { class: 'arq-visor-cab min-cab' }, titulo, ed.barra,
+      h('div', { class: 'arq-visor-cab min-cab' }, titulo,
         !Store.emArtifact ? btn('Imprimir', { icone: 'imprimir', sm: true, onclick: () => imprimirMinuta(m) }) : null,
         btn('Baixar Word', { icone: 'baixar', sm: true, prim: true, onclick: () => baixar(nomeArq(m) + '.docx', minutaDocx(m.html)) })),
+      h('div', { class: 'min-ferramentas' }, ed.barra),
       h('div', { class: 'arq-visor-corpo min-corpo' }, ed.folha));
   };
   const desenhar = () => {
@@ -3061,7 +3065,8 @@ function renderModelosMinuta() {
     const ed = editorTexto({ html: comoEtiquetas(m.html), campos: true, aoMudar: html => { m.html = html; salvar(); } });
     mostrarRestaurar();
     editor.replaceChildren(
-      h('div', { class: 'arq-visor-cab min-cab' }, nome, grupo, grupos, ed.barra, restaurar, bSalvar),
+      h('div', { class: 'arq-visor-cab min-cab' }, nome, grupo, grupos, restaurar, bSalvar),
+      h('div', { class: 'min-ferramentas' }, ed.barra),
       h('div', { class: 'arq-visor-corpo min-corpo' }, ed.folha));
   };
   const desenhar = () => {

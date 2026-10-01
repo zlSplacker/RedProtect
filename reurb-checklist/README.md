@@ -65,7 +65,7 @@ Tudo começa na **Recepção de Título**, que cria o protocolo. No topo da fich
   - *Titulação e registro*: Certidão de Regularização Fundiária (CRF, com o conteúdo do art. 41 e a listagem dos ocupantes) e ofício ao Registro de Imóveis;
   - documento em branco.
 
-  O texto já sai preenchido com os dados do protocolo, das pessoas (qualificação completa, com concordância de gênero) e dos imóveis; o que falta aparece **[entre colchetes]**, destacado em amarelo, e a barra mostra quantos campos faltam. Um clique no campo o seleciona para digitar por cima. A barra tem negrito, itálico, sublinhado e alinhamento; colar traz só o texto. Tudo é salvo automaticamente, e **Baixar Word** gera o `.docx` (abre no Word e no LibreOffice Writer). No `index.html` há também **Imprimir**. Criação e exclusão entram nos andamentos.
+  O texto já sai preenchido com os dados do protocolo, das pessoas (qualificação completa, com concordância de gênero) e dos imóveis; o que falta aparece **[entre colchetes]**, destacado em amarelo, e a barra mostra quantos campos faltam. Um clique no campo o seleciona para digitar por cima. No alto ficam o título e os botões; logo abaixo, numa linha só dela, a barra de formatação (negrito, itálico, sublinhado e alinhamento, com a contagem de campos a preencher); colar traz só o texto. Tudo é salvo automaticamente, e **Baixar Word** gera o `.docx` (abre no Word e no LibreOffice Writer). No `index.html` há também **Imprimir**. Criação e exclusão entram nos andamentos.
 
   > Os modelos são pontos de partida: confira a redação e os dispositivos legais com a legislação vigente e a lei municipal antes de usar.
 
