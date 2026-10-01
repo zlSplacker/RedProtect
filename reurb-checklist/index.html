@@ -548,6 +548,8 @@ select.inp:disabled{background:var(--sup2);color:var(--tinta2);cursor:default;op
 .campo-auto{background:var(--acento-suave);color:var(--acento-texto);border:1px solid var(--borda-jan);border-radius:4px;padding:0 4px;font:600 .82em/1.4 var(--f-ui);white-space:nowrap;cursor:default}
 .detalhe.cheio{padding:0}
 .mm-grade{height:100cqh}
+/* aba Termos do Indicador Pessoal: a tela de minutas dentro da aba, ocupando a altura da janela */
+.termos-pe{height:max(460px,calc(100cqh - 200px));border:1px solid var(--linha);border-radius:10px;overflow:hidden;background:var(--chao)}
 .min-editor .mm-grupo{flex:0 1 160px;min-width:0;height:30px}
 .mm-inserir{position:relative}
 .mm-campos{position:absolute;left:0;top:calc(100% + 4px);z-index:5;width:300px;max-height:360px;overflow:auto;background:var(--sup);border:1px solid var(--linha);border-radius:8px;box-shadow:var(--sombra);padding:6px;display:grid}
@@ -1015,9 +1017,7 @@ function normalizarProtocolo(p) {
     exigencias: Array.isArray(p.exigencias) ? p.exigencias.filter(x => x && String(x.texto || '').trim()).map(x => ({ id: String(x.id || uid('ex')), texto: String(x.texto), emitidaEm: String(x.emitidaEm || ''), cumpridaEm: String(x.cumpridaEm || '') })) : [],
     partes: Array.isArray(p.partes) ? p.partes.filter(x => x && x.pessoaId).map(x => ({ pessoaId: String(x.pessoaId), qualidade: String(x.qualidade || 'Beneficiário') })) : [],
     arquivos: normalizarArquivos(p.arquivos),
-    minutas: Array.isArray(p.minutas) ? p.minutas.filter(x => x && x.id).map(x => ({
-      id: String(x.id), modelo: String(x.modelo || ''), titulo: String(x.titulo || ''), html: String(x.html || ''),
-      criadaEm: String(x.criadaEm || ''), atualizadaEm: String(x.atualizadaEm || '') })) : [],
+    minutas: normalizarMinutas(p.minutas),
     exemplo: !!p.exemplo,
     criadoEm: p.criadoEm || agora(),
     atualizadoEm: p.atualizadoEm || agora()
@@ -1095,6 +1095,12 @@ function normalizarArquivos(l) {
     id: String(x.id || uid('a')), nome: String(x.nome || 'arquivo'), tamanho: Number(x.tamanho) || 0, tipo: String(x.tipo || ''),
     em: String(x.em || ''), ref: String(x.ref), via: x.via === 'asset' ? 'asset' : 'local', embrulhado: !!x.embrulhado })) : [];
 }
+// minutas do protocolo e termos do Indicador Pessoal: o mesmo formato
+function normalizarMinutas(l) {
+  return Array.isArray(l) ? l.filter(x => x && x.id).map(x => ({
+    id: String(x.id), modelo: String(x.modelo || ''), titulo: String(x.titulo || ''), html: String(x.html || ''),
+    criadaEm: String(x.criadaEm || ''), atualizadaEm: String(x.atualizadaEm || '') })) : [];
+}
 function normalizarPessoa(p) {
   p = p || {};
   // cadastros antigos: filiação num campo só ("pai e mãe"), endereço e contato numa linha
@@ -1113,7 +1119,7 @@ function normalizarPessoa(p) {
     enderecoResidencial: normEndereco(p.enderecoResidencial || (p.endereco ? { logradouro: p.endereco } : null)),
     enderecoProfissional: normEndereco(p.enderecoProfissional),
     pai: txt(pai), mae: txt(mae),
-    observacoes: txt(p.observacoes), avisoObservacao: !!p.avisoObservacao, arquivos: normalizarArquivos(p.arquivos),
+    observacoes: txt(p.observacoes), avisoObservacao: !!p.avisoObservacao, arquivos: normalizarArquivos(p.arquivos), termos: normalizarMinutas(p.termos),
     criadoEm: p.criadoEm || agora(), atualizadoEm: p.atualizadoEm || agora()
   };
 }
@@ -2472,6 +2478,20 @@ function dadosMinuta(p) {
   const comQualidade = (...q) => partes.filter(x => q.includes(x.qualidade));
   return { p, partes, imoveis, analise, cidade: cidade || '', uf: uf || '', nucleo, local, comQualidade, ano: hoje().slice(0, 4) };
 }
+/* termo do Indicador Pessoal: a própria pessoa responde por todos os campos de pessoa (requerente, ocupante, notificado…);
+   protocolo e núcleo vêm do primeiro protocolo em que ela está; os imóveis, da Propriedade dela */
+function dadosTermo(pe) {
+  const pr = protocolosDaPessoa(pe.id)[0];
+  const base = pr ? dadosMinuta(pr) : null;
+  const p = pr || { numero: '', interessado: '', municipio: '', descricao: '', partes: [] };
+  const imoveis = imoveisDaPessoa(pe.id).map(x => x.imovel);
+  const parte = pr && pr.partes.find(x => x.pessoaId === pe.id);
+  const partes = [{ pe, qualidade: pe.qualidade || (parte && parte.qualidade) || 'Beneficiário' }];
+  const [cidade, uf] = String(p.municipio || pe.enderecoResidencial.municipio || '').split('/').map(s => s.trim());
+  const nucleo = (base && base.nucleo) || (imoveis.find(i => i.nucleo) || {}).nucleo || '';
+  const local = (imoveis.find(i => i.logradouro) || {}).logradouro || (base && base.local) || '';
+  return { p, partes, imoveis, analise: base ? base.analise : null, cidade: cidade || '', uf: uf || '', nucleo, local, comQualidade: () => partes, ano: hoje().slice(0, 4) };
+}
 function enderecoTexto(e) {
   if (!e || !e.logradouro) return '';
   return [[e.tipo, e.logradouro].filter(Boolean).join(' ') + (e.numero ? ', nº ' + e.numero : ''), e.complemento, e.bairro && 'bairro ' + e.bairro, e.municipio, e.cep && 'CEP ' + e.cep].filter(Boolean).join(', ');
@@ -2915,63 +2935,74 @@ function escolhaModelos(modelos, aoEscolher, extra) {
   return h('div', { class: 'arq-visor-corpo min-modelos' }, extra || '', grupos.map(g => h('section', null, h('h3', null, g),
     h('div', { class: 'min-modelos-grade' }, modelos.filter(x => x.grupo === g).map(x => h('button', { type: 'button', class: 'min-modelo', onclick: () => aoEscolher(x) }, ico('minuta'), h('span', null, x.nome)))))));
 }
-// janela Minuta: à esquerda a lista (Adicionar e Excluir), à direita o editor; dois cliques abrem a minuta
-function blocoMinutas(p) {
-  const lado = h('section', { class: 'dl', 'aria-label': 'Minutas do protocolo' });
-  const editor = h('section', { class: 'arq-visor min-editor', 'aria-label': 'Minuta' });
+// janela Minuta: à esquerda a lista (Adicionar e Excluir), à direita o editor; dois cliques abrem a minuta.
+// A aba Termos do Indicador Pessoal usa o mesmo bloco, com os termos guardados na pessoa.
+function blocoMinutas(p, op = {}) {
+  const chave = op.chave || 'minutas';
+  const dados = op.dados || (() => dadosMinuta(p));
+  const gravar = op.salvar || (atraso => Store.put('protocolos', p, atraso));
+  const registrar = op.registrar || (msg => registrarAndamento(p, msg));
+  const nomeArq = op.nomeArquivo || (m => nomeArquivoMinuta(m, p));
+  const T = op.termo
+    ? { lista: 'Termos da pessoa', item: 'Termo', aberta: 'Nenhum termo aberto.', nova: 'Novo termo', semTitulo: 'Termo sem título', nenhuma: 'Nenhum termo.', abre: 'Dois cliques abrem o termo', titulo: 'Título do termo' }
+    : { lista: 'Minutas do protocolo', item: 'Minuta', aberta: 'Nenhuma minuta aberta.', nova: 'Nova minuta', semTitulo: 'Minuta sem título', nenhuma: 'Nenhuma minuta.', abre: 'Dois cliques abrem a minuta', titulo: 'Título da minuta' };
+  const lado = h('section', { class: 'dl', 'aria-label': T.lista });
+  const editor = h('section', { class: 'arq-visor min-editor', 'aria-label': T.item });
   const raiz = h('div', { class: 'arq-grade' }, lado, editor);
+  // op.estado guarda qual está aberta, para a tela voltar igual quando a janela é redesenhada
+  const est = op.estado || {};
   let sel = null, aberta = null, escolhendo = false;
-  const vazio = () => editor.replaceChildren(h('p', { class: 'arq-vazio' }, 'Nenhuma minuta aberta.'));
+  const vazio = () => { est.aberta = null; editor.replaceChildren(h('p', { class: 'arq-vazio' }, T.aberta)); };
   const escolherModelo = () => {
     escolhendo = true; aberta = null; desenhar();
     editor.replaceChildren(
-      h('div', { class: 'arq-visor-cab' }, h('span', { class: 'arq-visor-nome' }, 'Nova minuta'),
+      h('div', { class: 'arq-visor-cab' }, h('span', { class: 'arq-visor-nome' }, T.nova),
         btn('Cancelar', { fant: true, sm: true, onclick: () => { escolhendo = false; vazio(); desenhar(); } })),
       escolhaModelos(modelosMinuta(), criar));
   };
   const criar = modelo => {
-    const m = { id: uid('mi'), modelo: modelo.id, titulo: modelo.nome, html: preencherModelo(modelo.html, dadosMinuta(p)), criadaEm: agora(), atualizadaEm: agora() };
-    p.minutas.push(m);
-    registrarAndamento(p, `Minuta “${m.titulo}” criada.`);
-    Store.put('protocolos', p, 0);
+    const m = { id: uid('mi'), modelo: modelo.id, titulo: modelo.nome, html: preencherModelo(modelo.html, dados()), criadaEm: agora(), atualizadaEm: agora() };
+    p[chave].push(m);
+    registrar(`Minuta “${m.titulo}” criada.`);
+    gravar(0);
     escolhendo = false;
     abrir(m);
   };
   const abrir = m => {
-    sel = aberta = m.id; escolhendo = false; desenhar();
-    const salvar = () => { m.atualizadaEm = agora(); Store.put('protocolos', p); };
-    const titulo = h('input', { class: 'inp min-titulo', 'aria-label': 'Título da minuta', value: m.titulo });
+    sel = aberta = est.aberta = m.id; escolhendo = false; desenhar();
+    const salvar = () => { m.atualizadaEm = agora(); gravar(); };
+    const titulo = h('input', { class: 'inp min-titulo', 'aria-label': T.titulo, value: m.titulo });
     titulo.addEventListener('input', () => { m.titulo = titulo.value; salvar(); desenhar(); });
     const ed = editorTexto({ html: m.html, aoMudar: html => { m.html = html; salvar(); } });
     editor.replaceChildren(
       h('div', { class: 'arq-visor-cab min-cab' }, titulo, ed.barra,
         !Store.emArtifact ? btn('Imprimir', { icone: 'imprimir', sm: true, onclick: () => imprimirMinuta(m) }) : null,
-        btn('Baixar Word', { icone: 'baixar', sm: true, prim: true, onclick: () => baixar(nomeArquivoMinuta(m, p) + '.docx', minutaDocx(m.html)) })),
+        btn('Baixar Word', { icone: 'baixar', sm: true, prim: true, onclick: () => baixar(nomeArq(m) + '.docx', minutaDocx(m.html)) })),
       h('div', { class: 'arq-visor-corpo min-corpo' }, ed.folha));
   };
   const desenhar = () => {
-    if (!p.minutas.some(m => m.id === sel)) sel = null;
-    if (aberta && !p.minutas.some(m => m.id === aberta)) { aberta = null; vazio(); }
-    const linhas = p.minutas.map(m => h('button', {
-      type: 'button', class: 'dl-linha' + (m.id === aberta ? ' aberto' : ''), 'aria-pressed': String(m.id === sel), title: 'Dois cliques abrem a minuta',
+    if (!p[chave].some(m => m.id === sel)) sel = null;
+    if (aberta && !p[chave].some(m => m.id === aberta)) { aberta = null; vazio(); }
+    const linhas = p[chave].map(m => h('button', {
+      type: 'button', class: 'dl-linha' + (m.id === aberta ? ' aberto' : ''), 'aria-pressed': String(m.id === sel), title: T.abre,
       onclick: ev => { sel = m.id; for (const b of linhas) b.setAttribute('aria-pressed', String(b === ev.currentTarget)); bExcluir.disabled = false; },
       ondblclick: () => { if (m.id !== aberta) abrir(m); },
       onkeydown: ev => { if (ev.key === 'Enter') { ev.preventDefault(); if (m.id !== aberta) abrir(m); } }
-    }, h('span', { class: 'dl-nome' }, m.titulo || 'Minuta sem título'), h('small', null, fmtData(m.atualizadaEm))));
+    }, h('span', { class: 'dl-nome' }, m.titulo || T.semTitulo), h('small', null, fmtData(m.atualizadaEm))));
     const bExcluir = btn('Excluir', { icone: 'lixo', perigo: true, disabled: !sel, onclick: ev => armar(ev.currentTarget, () => {
-      const m = p.minutas.find(x => x.id === sel);
+      const m = p[chave].find(x => x.id === sel);
       if (!m) return;
-      p.minutas = p.minutas.filter(x => x !== m);
-      registrarAndamento(p, `Minuta “${m.titulo}” excluída.`);
-      Store.put('protocolos', p, 0);
+      p[chave] = p[chave].filter(x => x !== m);
+      registrar(`Minuta “${m.titulo}” excluída.`);
+      gravar(0);
       sel = null;
       desenhar();
     }) });
-    lado.replaceChildren(h('div', { class: 'dl-lista' }, linhas.length ? linhas : h('p', { class: 'dica' }, 'Nenhuma minuta.')),
+    lado.replaceChildren(h('div', { class: 'dl-lista' }, linhas.length ? linhas : h('p', { class: 'dica' }, T.nenhuma)),
       h('div', { class: 'dl-bts' }, btn('Adicionar', { icone: 'mais', prim: true, disabled: escolhendo, onclick: escolherModelo }), bExcluir));
   };
-  vazio();
-  desenhar();
+  const ini = est.aberta && p[chave].find(m => m.id === est.aberta);
+  if (ini) abrir(ini); else { vazio(); desenhar(); }
   return { el: raiz, desenhar };
 }
 /* janela Cadastros → Modelos de Minuta: à esquerda os modelos (Adicionar e Excluir), à direita o editor */
@@ -3580,8 +3611,17 @@ function renderPessoa(pe) {
       }))))
       : h('p', { class: 'dica' }, 'Nenhum protocolo vinculado.'));
   };
-  // abas no alto do cadastro, como as do protocolo: Cadastro (os dados), Propriedade (imóveis) e Informações (protocolos)
-  const ABAS_PE = [['cadastro', 'Cadastro'], ['propriedade', 'Propriedade'], ['informacoes', 'Informações']];
+  // Termos: os modelos de minuta (Cadastros → Modelos de Minuta) preenchidos com os dados da pessoa; ficam guardados nela
+  const blocoTermos = () => {
+    const b = blocoMinutas(pe, {
+      chave: 'termos', termo: true, dados: () => dadosTermo(pe), registrar: () => {}, estado: (ui.termosPe || (ui.termosPe = {}))[pe.id] || (ui.termosPe[pe.id] = {}),
+      salvar: atraso => { if (D().pessoas[pe.id]) Store.put('pessoas', pe, atraso); },
+      nomeArquivo: m => `${m.titulo || 'Termo'} - ${pe.nome || 'Pessoa'}`.replace(/[\\/:*?"<>|]+/g, ' ').trim()
+    });
+    return h('section', { class: 'termos-pe' }, b.el);
+  };
+  // abas no alto do cadastro, como as do protocolo: Cadastro (os dados), Propriedade (imóveis), Informações (protocolos) e Termos
+  const ABAS_PE = [['cadastro', 'Cadastro'], ['propriedade', 'Propriedade'], ['informacoes', 'Informações'], ['termos', 'Termos']];
   if (!ABAS_PE.some(([k]) => k === ui.abaPe)) ui.abaPe = 'cadastro';
   const barraPe = h('div', { class: 'pr-abas pe-abas', role: 'tablist', 'aria-label': 'Indicador Pessoal' },
     ABAS_PE.map(([k, rot]) => h('button', {
@@ -3589,7 +3629,7 @@ function renderPessoa(pe) {
       onclick: () => { ui.abaPe = k; renderDetalhe(); }
     }, rot)));
   const painelPe = h('div', { id: 'pe-painel', role: 'tabpanel', 'aria-labelledby': 'pe-aba-' + ui.abaPe },
-    ui.abaPe === 'propriedade' ? blocoPropriedade() : ui.abaPe === 'informacoes' ? blocoInformacoes() : h('div', { class: 'reg-pilha compacta' }, blocos));
+    ui.abaPe === 'propriedade' ? blocoPropriedade() : ui.abaPe === 'informacoes' ? blocoInformacoes() : ui.abaPe === 'termos' ? blocoTermos() : h('div', { class: 'reg-pilha compacta' }, blocos));
 
   // Arquivos da pessoa: a mesma janela do protocolo, com os arquivos guardados no próprio indicador
   // (na pessoa ainda não salva, a lista entra no cadastro no Salvar)
