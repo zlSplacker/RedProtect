@@ -11,7 +11,7 @@ Abra `index.html` no navegador (Chrome, Edge ou Firefox). Não precisa instalar 
 
 ### Área de trabalho e janelas
 
-Ao abrir, o sistema mostra só a barra de menus e, abaixo dela, a área de trabalho azul. Cada opção do menu abre uma **janela** sobre essa área, e dá para trabalhar em várias ao mesmo tempo — por exemplo, o cadastro de um imóvel e o de uma pessoa lado a lado:
+Ao abrir, o sistema mostra só a barra de menus e, abaixo dela, a área de trabalho cinza-clara. As cores seguem as do S.R.I.: janelas com barra de título azul-clara (a janela da frente mais forte), corpo cinza-claro, listas brancas e botões claros com borda cinza; no modo escuro do navegador, a versão escura dessas cores. Cada opção do menu abre uma **janela** sobre essa área, e dá para trabalhar em várias ao mesmo tempo — por exemplo, o cadastro de um imóvel e o de uma pessoa lado a lado:
 
 - arraste pela barra de título para mover; puxe as bordas ou os cantos para mudar o tamanho (o conteúdo se reorganiza conforme a largura da janela);
 - os botões do canto minimizam, maximizam (ou duplo clique no título) e fecham;
