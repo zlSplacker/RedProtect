@@ -220,6 +220,9 @@ select.inp:disabled{background:var(--sup2);color:var(--tinta2);cursor:default;op
 /* linha do lote na pesquisa do Indicador Real: Núcleo | Lote | Quadra | Cidade */
 .item.item-lote{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,.55fr) minmax(0,.55fr) minmax(0,1fr) auto;align-items:center;gap:0;font-size:14px}
 .item-lote > .chip{justify-self:end;margin-left:12px}
+/* linha da pessoa na pesquisa do Indicador Pessoal: Nome | CPF | Protocolo vinculado */
+.item.item-pes{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,.8fr) minmax(0,1fr) auto;align-items:center;gap:0;font-size:14px}
+.item-pes > .chip{justify-self:end;margin-left:12px}
 @container (max-width:560px){
   .item.item-prot{grid-template-columns:minmax(0,1fr) auto;align-items:start;row-gap:2px}
   .prot-campo{grid-column:1;white-space:normal;overflow-wrap:anywhere}
@@ -227,6 +230,8 @@ select.inp:disabled{background:var(--sup2);color:var(--tinta2);cursor:default;op
   .item-prot > .chip{grid-column:2;grid-row:1}
   .item.item-lote{grid-template-columns:minmax(0,1fr) auto;align-items:start;row-gap:2px}
   .item-lote > .chip{grid-column:2;grid-row:1}
+  .item.item-pes{grid-template-columns:minmax(0,1fr) auto;align-items:start;row-gap:2px}
+  .item-pes > .chip{grid-column:2;grid-row:1}
 }
 .lat-vazio{padding:12px;border:1px dashed var(--linha);border-radius:9px;color:var(--tinta3);font-size:13px}
 
@@ -1435,7 +1440,7 @@ function renderLateral() {
   const aba = ui.aba;
   const f = $('#filtro');
   if (document.activeElement !== f) f.value = ui.filtro[aba] || '';
-  f.placeholder = { analises: 'Filtrar por núcleo, município ou processo', modelos: 'Filtrar modelos', protocolos: 'Filtrar por protocolo, município ou interessado', pessoas: 'Filtrar por nome, qualidade, CPF/CNPJ, RG ou e-mail', imoveis: 'Filtrar por núcleo, lote, quadra, cidade, matrícula ou pessoa', tabelas: 'Filtrar tabelas' }[aba];
+  f.placeholder = { analises: 'Filtrar por núcleo, município ou processo', modelos: 'Filtrar modelos', protocolos: 'Filtrar por protocolo, município ou interessado', pessoas: 'Filtrar por nome, CPF/CNPJ, protocolo, qualidade, RG ou e-mail', imoveis: 'Filtrar por núcleo, lote, quadra, cidade, matrícula ou pessoa', tabelas: 'Filtrar tabelas' }[aba];
   const acoes = $('#lat-acoes'), pe = $('#lat-pe');
   pe.replaceChildren();
   // pesquisa dos indicadores: um clique marca o cadastro; Excluir (fora da pesquisa aberta pelo Adicionar) apaga o marcado
@@ -1505,16 +1510,15 @@ function renderItens() {
       h('span', { class: 'item-tit' }, TABELAS[id].nome), h('span', { class: 'item-meta' }, plural(tabela(id).itens.length, 'opção', 'opções')))));
   } else if (aba === 'pessoas') {
     const todas = pessoasOrdenadas();
-    const vis = todas.filter(p => !termo || norm([p.nome, p.qualidade, p.documento, p.rg, p.passaporte, p.cnh, p.email].join(' ')).includes(termo)
+    const protsDe = new Map(todas.map(p => [p.id, protocolosDaPessoa(p.id).map(pr => pr.numero)]));
+    const vis = todas.filter(p => !termo || norm([p.nome, p.qualidade, p.documento, p.rg, p.passaporte, p.cnh, p.email, ...protsDe.get(p.id)].join(' ')).includes(termo)
       || (termo.replace(/\D/g, '') && String(p.documento).replace(/\D/g, '').includes(termo.replace(/\D/g, ''))));
+    // uma linha: Nome | CPF (CNPJ na pessoa jurídica) | Protocolo vinculado, como a consulta de protocolos
     for (const p of vis) {
-      const n = imoveisDaPessoa(p.id).length;
-      itens.push(h('li', null, h('button', { type: 'button', class: 'item', 'aria-current': String(p.id === marca.pessoas), ...acoesItem('pessoas', p.id) },
-        h('span', { class: 'item-tit' }, p.nome || 'Sem nome'),
-        h('span', { class: 'item-sub' }, [p.documento, p.tipo === 'fisica' ? p.estadoCivil : 'Pessoa jurídica'].filter(Boolean).join(' · ') || 'Sem documento'),
-        n || (sel && sel.partes.some(x => x.pessoaId === p.id)) ? h('span', { class: 'item-meta' },
-          sel && sel.partes.some(x => x.pessoaId === p.id) ? h('span', { class: 'chip chip-acento' }, 'No protocolo') : null,
-          n ? plural(n, 'imóvel', 'imóveis') : null) : null)));
+      const campo = (rot, v) => h('span', { class: 'prot-campo', title: rot + ': ' + (v || '—') }, h('span', { class: 'rot-in' }, rot + ':'), h('b', null, v || '—'));
+      itens.push(h('li', null, h('button', { type: 'button', class: 'item item-pes', 'aria-current': String(p.id === marca.pessoas), ...acoesItem('pessoas', p.id) },
+        campo('Nome', p.nome), campo(p.tipo === 'juridica' ? 'CNPJ' : 'CPF', p.documento), campo('Protocolo vinculado', protsDe.get(p.id).join(', ')),
+        sel && sel.partes.some(x => x.pessoaId === p.id) ? h('span', { class: 'chip chip-acento' }, 'No protocolo') : null)));
     }
     desmarcarFora(vis);
     if (!todas.length) itens.push(h('li', { class: 'lat-vazio' }, 'Nenhuma pessoa cadastrada.'));
