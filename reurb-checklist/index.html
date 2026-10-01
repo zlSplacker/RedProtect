@@ -11,7 +11,9 @@
 <style>
 :root{
   /* cores do S.R.I. (vídeo de referência): área de trabalho cinza-clara, janelas com barra de título azul-clara,
-     corpo cinza-claro, listas brancas, botões claros com borda cinza e seleção azul-acinzentada */
+     corpo cinza-claro, listas brancas, botões claros com borda cinza e seleção azul-acinzentada.
+     O S.R.I. não tem modo escuro: o sistema usa sempre estas cores, mesmo com o aparelho ou o navegador no escuro */
+  color-scheme:light;
   --chao:#F0F0F0;--sup:#FFFFFF;--sup2:#F6F6F6;
   --tinta:#1B1B1B;--tinta2:#474C52;--tinta3:#6E747A;
   --linha:#C9CED4;--linha2:#E1E3E6;
@@ -27,38 +29,6 @@
   --mesa:#E5E7EA;
   --tit-a:#C4D7EB;--tit-b:#A9C2DC;--tit-tinta:#1B1B1B;--tit-in-a:#E6ECF2;--tit-in-b:#D6DFE8;--tit-in-tinta:#5A6168;--borda-jan:#8FA7C1;
   --bt-a:#FFFFFF;--bt-b:#EEEEEE;--bt-borda:#ADB3BA;
-}
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    color-scheme:dark;
-    --chao:#1B1F23;--sup:#22272C;--sup2:#282E34;
-    --tinta:#E6E9EC;--tinta2:#B0B7BE;--tinta3:#88919A;
-    --linha:#3A424A;--linha2:#2E353C;
-    --acento:#8DB4DE;--acento-forte:#B3CDEA;--acento-suave:#2A3A4C;--acento-texto:#B8D0EA;--sobre-acento:#0F151B;
-    --ok:#6CC08A;--ok-suave:#16301F;
-    --pend:#F28B7F;--pend-suave:#3A1B18;--sobre-pend:#1C0C0A;
-    --aviso:#E5B35B;--aviso-suave:#33270F;
-    --veu:rgba(0,0,0,.6);
-    --sombra:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25);
-    --mesa:#24292E;
-    --tit-a:#3A4D62;--tit-b:#2F3F51;--tit-tinta:#EEF2F6;--tit-in-a:#2C3339;--tit-in-b:#272D33;--tit-in-tinta:#9AA3AC;--borda-jan:#4A5A6B;
-    --bt-a:#2A3036;--bt-b:#23292E;--bt-borda:#46505A;
-  }
-}
-:root[data-theme="dark"]{
-  color-scheme:dark;
-  --chao:#1B1F23;--sup:#22272C;--sup2:#282E34;
-  --tinta:#E6E9EC;--tinta2:#B0B7BE;--tinta3:#88919A;
-  --linha:#3A424A;--linha2:#2E353C;
-  --acento:#8DB4DE;--acento-forte:#B3CDEA;--acento-suave:#2A3A4C;--acento-texto:#B8D0EA;--sobre-acento:#0F151B;
-  --ok:#6CC08A;--ok-suave:#16301F;
-  --pend:#F28B7F;--pend-suave:#3A1B18;--sobre-pend:#1C0C0A;
-  --aviso:#E5B35B;--aviso-suave:#33270F;
-  --veu:rgba(0,0,0,.6);
-  --sombra:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25);
-  --mesa:#24292E;
-  --tit-a:#3A4D62;--tit-b:#2F3F51;--tit-tinta:#EEF2F6;--tit-in-a:#2C3339;--tit-in-b:#272D33;--tit-in-tinta:#9AA3AC;--borda-jan:#4A5A6B;
-  --bt-a:#2A3036;--bt-b:#23292E;--bt-borda:#46505A;
 }
 *,*::before,*::after{box-sizing:border-box}
 html{height:100%}
