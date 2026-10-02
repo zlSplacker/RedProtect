@@ -865,6 +865,39 @@ textarea.inp{min-height:40px}
 .fin-dlg{display:grid;gap:8px}
 .fin-dlg-bts{display:flex;justify-content:flex-end;gap:4px;padding-top:8px;border-top:1px solid #D5D5D5}
 @container (max-width:560px){.fin-edicao{margin-left:0}.fin-sep{display:none}.linha .cel.num{text-align:left}}
+/* Minuta (criação) no formato da tela de atos do S.R.I. */
+.min-sri .modal-cab .btn{display:none}
+.msri{height:100%;min-height:0;display:flex;flex-direction:column;gap:6px;padding:6px 8px;background:var(--chao)}
+.msri-ident{width:100%;flex:none}
+.msri-linha{flex:none;display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px}
+.msri-c{display:flex;align-items:center;gap:6px;min-width:0}
+.msri-c>span{white-space:nowrap}
+.msri-curto{width:110px}.msri-num{width:56px;text-align:right}
+.msri-largo{flex:1 1 360px}.msri-largo .inp{flex:1}
+.msri-modelo{flex:0 1 380px}.msri-modelo .inp{flex:1;min-width:180px}
+.msri-confirma{flex:none;margin:0;align-items:center}
+.msri-confirma-bts{margin-left:auto;display:flex;gap:4px}
+.msri-abas{flex:none;margin:2px 0 0}
+.msri-texto{flex:1;min-height:220px;display:flex;flex-direction:column;border:1px solid #A0A0A0;background:#fff}
+.msri-texto .min-ferramentas{flex:none}
+.msri-folha{flex:1;min-height:0;overflow:auto}
+.msri-partes{flex:none;height:150px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px}
+.msri-partes .itens.grade{height:100%;min-height:0}
+.msri-partes-bts{display:flex;flex-direction:column;gap:4px}
+.g-partesMinuta{grid-template-columns:minmax(0,1.4fr) minmax(110px,.7fr) minmax(0,.8fr) 90px minmax(0,1.4fr)}
+.msri-pe{flex:none;display:flex;align-items:center;justify-content:flex-end;gap:4px;padding-top:6px;border-top:1px solid #D5D5D5}
+.msri-pe-txt{margin-right:8px;font-weight:600}
+@container (max-width:640px){.msri-partes{grid-template-columns:1fr;height:auto}.msri-partes .itens.grade{max-height:160px}.msri-partes-bts{flex-direction:row}}
+/* Minutas Realizadas: a lista à esquerda e o PDF ao lado, até o rodapé */
+.jan.ver-detalhe .detalhe:has(.mr){height:100cqh}
+.prot-conteudo:has(.mr){flex:1;min-height:0;display:flex;flex-direction:column}
+.prot-conteudo:has(.mr)>.pr-painel{flex:1;min-height:0;display:flex;flex-direction:column}
+.mr{flex:1;min-height:260px;display:grid;grid-template-columns:minmax(220px,340px) minmax(0,1fr);grid-template-rows:minmax(0,1fr);gap:8px}
+.mr-lado{display:flex;flex-direction:column;min-height:0;gap:6px}
+.mr-lado .itens.grade{flex:1;min-height:0}
+.mr .arq-visor{border:1px solid #828790;min-height:0}
+.g-minutas{grid-template-columns:40px minmax(0,1fr) 84px}
+@container (max-width:720px){.jan.ver-detalhe .detalhe:has(.mr){height:auto}.mr{grid-template-columns:1fr;grid-template-rows:auto 480px}.mr-lado .itens.grade{min-height:120px}}
 /* rodapé das fichas (pessoa, imóvel, checklist, protocolo) fixo embaixo da janela, qualquer que seja a aba ou o tamanho do conteúdo */
 .jan.ver-detalhe .detalhe:has(>.reg-rodape){display:flex;flex-direction:column;min-height:100cqh;padding-bottom:0}
 .detalhe>.reg-rodape,.detalhe>.pe-prot{margin-top:auto;position:sticky;bottom:0;z-index:3;background:var(--chao);padding-bottom:10px}
@@ -1527,8 +1560,9 @@ function normalizarArquivos(l) {
 }
 // minutas do protocolo e termos do Indicador Pessoal: o mesmo formato
 function normalizarMinutas(l) {
-  return Array.isArray(l) ? l.filter(x => x && x.id).map(x => ({
-    id: String(x.id), modelo: String(x.modelo || ''), titulo: String(x.titulo || ''), html: String(x.html || ''),
+  return Array.isArray(l) ? l.filter(x => x && x.id).map((x, k) => ({
+    id: String(x.id), numero: Number(x.numero) || k + 1, data: String(x.data || String(x.criadaEm || '').slice(0, 10)),
+    modelo: String(x.modelo || ''), titulo: String(x.titulo || ''), html: String(x.html || ''),
     criadaEm: String(x.criadaEm || ''), atualizadaEm: String(x.atualizadaEm || '') })) : [];
 }
 function normalizarPessoa(p) {
@@ -1810,9 +1844,11 @@ function cancelar() {
   renderTudo();
 }
 /* diálogo à frente da janela (Exigência, Dados); fecha no X, no Esc ou clicando fora */
-function fecharDialogo(semRender) {
+function fecharDialogo(semRender, forcar) {
   const dl = ui && ui.dialogo;
   if (!dl) return;
+  // quem abriu o diálogo pode segurar o fechamento (minuta não salva)
+  if (!forcar && !semRender && dl.antesDeFechar && dl.antesDeFechar() === false) return;
   ui.dialogo = null;
   dl.el.remove();
   if (dl.aoFechar && !semRender) dl.aoFechar();
@@ -1820,7 +1856,7 @@ function fecharDialogo(semRender) {
   const alvo = dl.volta && dl.volta.isConnected ? dl.volta : (dl.voltaId && document.getElementById(dl.voltaId));
   if (alvo && !semRender) alvo.focus();
 }
-function abrirDialogo({ titulo, conteudo, aoFechar, atualizar, largura, cls }) {
+function abrirDialogo({ titulo, conteudo, aoFechar, atualizar, largura, cls, antesDeFechar }) {
   fecharDialogo(true);
   const id = uid('jt');
   const bFechar = btn('Fechar', { icone: 'x', onclick: () => fecharDialogo() });
@@ -1830,7 +1866,7 @@ function abrirDialogo({ titulo, conteudo, aoFechar, atualizar, largura, cls }) {
       h('div', { class: 'modal-corpo' }, conteudo)));
   el.addEventListener('click', ev => { if (ev.target === el) fecharDialogo(); });
   el._fechar = () => fecharDialogo();
-  ui.dialogo = { el, aoFechar, atualizar, volta: document.activeElement, voltaId: document.activeElement && document.activeElement.id };
+  ui.dialogo = { el, aoFechar, atualizar, antesDeFechar, volta: document.activeElement, voltaId: document.activeElement && document.activeElement.id };
   J.el.append(el);
   bFechar.focus();
 }
@@ -1868,7 +1904,9 @@ const COLUNAS = {
   analises: ['Núcleo', 'Checklist', 'Protocolo', 'Respondidas', 'Situação'],
   tabelas: ['Descrição', 'Opções'],
   parcelas: ['Parcela', 'Vencimento', 'Valor', 'Recebido em', 'Valor recebido', 'Documento', 'Situação'],
-  despesas: ['Data', 'Descrição', 'Valor']
+  despesas: ['Data', 'Descrição', 'Valor'],
+  minutas: ['Nº', 'Título', 'Data'],
+  partesMinuta: ['Nome', 'CPF/CNPJ', 'Qualidade', 'Modalidade', 'Imóvel']
 };
 const cel = (rot, v, cls) => h('span', { class: 'cel' + (cls ? ' ' + cls : ''), 'data-rot': rot || null, title: v ? String(v) : null }, v ? String(v) : null);
 const cabGrade = aba => h('li', { class: 'grade-cab g-' + aba, 'aria-hidden': 'true' }, COLUNAS[aba].map(c => h('span', { class: 'cel' }, c)));
@@ -2433,8 +2471,14 @@ function renderProtocolo(p) {
   // Minuta do protocolo: ofícios do município, decretos… (as minutas das partes ficam nos Termos do Indicador Pessoal)
   const barraProt = h('div', { class: 'barra-prot', role: 'toolbar', 'aria-label': 'Protocolo ' + p.numero },
     botaoJanela('minuta', 'Minuta', 'minuta', () => {
-      const b = blocoMinutas(p);
-      abrirDialogo({ titulo: 'Minutas do protocolo', conteudo: b.el, aoFechar: renderDetalhe, atualizar: b.desenhar, cls: 'arq' });
+      const b = criarMinuta(p, m => {
+        fecharDialogo(true, true);
+        ui.abaProt = 'minutas'; ui.minSel = m.id;
+        renderItens(); renderDetalhe();
+        toast('Minuta salva em Minutas Realizadas.');
+      });
+      abrirDialogo({ titulo: 'Minuta · Protocolo ' + p.numero, conteudo: b.el, aoFechar: renderDetalhe, cls: 'arq min-sri', antesDeFechar: b.antesDeFechar });
+      b.focar();
     }));
   const cab = h('div', { class: 'cab' },
     h('div', { class: 'cab-txt' }, voltarBtn(), chips));
@@ -2488,7 +2532,7 @@ function renderProtocolo(p) {
   const painel = h('div', { class: 'pr-painel', id: 'pr-painel', role: 'tabpanel' });
   const barraAbas = h('div', { class: 'pr-abas', role: 'tablist', 'aria-label': 'Conteúdo do protocolo' });
   // linha de abas do protocolo: cada aba mostra só o seu conteúdo
-  const ABAS_PROT = [['dados', 'Recepção'], ['andamentos', 'Andamentos'], ['financeiro', 'Financeiro'], ['checklists', 'Checklists'], ['indicadores', 'Partes e Imóveis']];
+  const ABAS_PROT = [['dados', 'Recepção'], ['andamentos', 'Andamentos'], ['financeiro', 'Financeiro'], ['checklists', 'Checklists'], ['indicadores', 'Partes e Imóveis'], ['minutas', 'Minutas Realizadas']];
   // pessoas e imóveis ficam na aba Partes e Imóveis, ao lado de Checklists
   if (ui.abaProt === 'imoveis' || ui.abaProt === 'pessoas') ui.abaProt = 'indicadores';
   if (!ABAS_PROT.some(([k]) => k === ui.abaProt)) ui.abaProt = 'dados';
@@ -2609,9 +2653,42 @@ function renderProtocolo(p) {
       h('div', { class: 'pi-lista' }, botoes.length ? botoes : h('p', { class: 'pi-nada' }, 'Nenhuma parte adicionada.')));
   };
 
+  // Minutas Realizadas: a lista das minutas salvas e, ao lado, o PDF da marcada; Excluir Minuta embaixo
+  const blocoMinutasRealizadas = () => {
+    if (ui.minViz) ui.minViz.limpar();
+    const visor = h('section', { class: 'arq-visor', 'aria-label': 'PDF da minuta' });
+    const viz = ui.minViz = visualizador(visor);
+    const lista = p.minutas.slice().sort((a, b) => a.numero - b.numero);
+    if (!lista.some(m => m.id === ui.minSel)) ui.minSel = null;
+    const nome = m => `Minuta ${m.numero} - ${m.titulo}`;
+    const baixarPdf = async m => {
+      try { baixar(nomeArquivoMinuta(m, p) + '.pdf', await pdfMinuta(m)); }
+      catch (e) { toast('Não foi possível gerar o PDF. Na primeira vez é preciso estar conectado à internet.'); }
+    };
+    const mostrar = m => viz.pdf(nome(m), () => pdfMinuta(m), () => baixarPdf(m));
+    const grade = h('ul', { class: 'itens grade' }, cabGrade('minutas'),
+      lista.length ? lista.map(m => h('li', null, h('button', {
+        type: 'button', class: 'item linha g-minutas', 'aria-current': String(m.id === ui.minSel), title: m.titulo,
+        onclick: ev => { ui.minSel = m.id; for (const b of grade.querySelectorAll('.item')) b.setAttribute('aria-current', String(b === ev.currentTarget)); bExcluir.disabled = false; mostrar(m); },
+        ondblclick: () => baixarPdf(m), onkeydown: ev => { if (ev.key === 'Enter') { ev.preventDefault(); baixarPdf(m); } }
+      }, cel('Nº', String(m.numero)), cel('Título', m.titulo), cel('Data', fmtData(m.data))))) : [h('li', { class: 'lat-vazio' }, 'Nenhuma minuta realizada.')]);
+    const bExcluir = btn('Excluir Minuta', { icone: 'lixo', disabled: !ui.minSel, onclick: ev => armar(ev.currentTarget, () => {
+      const m = p.minutas.find(x => x.id === ui.minSel);
+      if (!m) return;
+      p.minutas = p.minutas.filter(x => x !== m);
+      registrarAndamento(p, `Minuta nº ${m.numero} “${m.titulo}” excluída.`);
+      Store.put('protocolos', p, 0);
+      ui.minSel = null;
+      renderItens(); renderDetalhe();
+      toast('Minuta excluída.');
+    }) });
+    const marcada = lista.find(m => m.id === ui.minSel);
+    if (marcada) mostrar(marcada); else visor.replaceChildren(h('p', { class: 'arq-vazio' }, lista.length ? 'Clique numa minuta para ver o PDF.' : 'As minutas salvas aparecem aqui.'));
+    return h('section', { class: 'mr' }, h('div', { class: 'mr-lado' }, grade, h('div', { class: 'mr-bts' }, bExcluir)), visor);
+  };
   const desenharPainel = () => {
     painel.setAttribute('aria-labelledby', idJ('pr-aba-' + ui.abaProt));
-    painel.replaceChildren({ dados: () => quadroDados, andamentos: () => blocoAnd, financeiro: () => blocoFinanceiro(p, atualizarContagens), checklists: () => blocoVinc, indicadores: blocoPartes }[ui.abaProt]());
+    painel.replaceChildren({ dados: () => quadroDados, andamentos: () => blocoAnd, financeiro: () => blocoFinanceiro(p, atualizarContagens), checklists: () => blocoVinc, indicadores: blocoPartes, minutas: blocoMinutasRealizadas }[ui.abaProt]());
   };
   desenharAbas();
   desenharPainel();
@@ -2815,8 +2892,23 @@ function visualizador(caixa) {
       if (minha === geracao) corpo.replaceChildren(aviso('Não foi possível mostrar este arquivo aqui. Use Baixar para abri-lo.'));
     }
   }
+  // PDF gerado aqui mesmo (minutas): o cabeçalho traz o nome e o Baixar PDF
+  async function pdf(nome, gerar, aoBaixar) {
+    const minha = ++geracao;
+    soltarUrl();
+    const corpo = h('div', { class: 'arq-visor-corpo' }, aviso('Gerando o PDF…'));
+    caixa.replaceChildren(h('div', { class: 'arq-visor-cab' },
+      h('span', { class: 'arq-visor-nome', title: nome }, nome),
+      btn('Baixar PDF', { icone: 'baixar', sm: true, onclick: aoBaixar })), corpo);
+    let blob = null;
+    try { blob = await gerar(); } catch (e) { blob = null; }
+    if (minha !== geracao) return;
+    if (!blob) { corpo.replaceChildren(aviso('Não foi possível gerar o PDF. Na primeira vez é preciso estar conectado à internet.')); return; }
+    try { await verPdf(blob, corpo, () => minha !== geracao); }
+    catch (e) { if (minha === geracao) corpo.replaceChildren(aviso('Não foi possível mostrar o PDF aqui. Use Baixar PDF.')); }
+  }
   vazio();
-  return { abrir, vazio, limpar: () => { geracao++; soltarUrl(); } };
+  return { abrir, pdf, vazio, limpar: () => { geracao++; soltarUrl(); } };
 }
 // janela Arquivos: à esquerda a lista (com Adicionar e Excluir), à direita a visualização; dois cliques abrem o arquivo
 function blocoArquivos(p, op = {}) {
@@ -3282,6 +3374,86 @@ function minutaDocx(html) {
     { nome: 'word/document.xml', dados: doc }
   ], 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
 }
+/* PDF da minuta: a folha vira um documento do pdfmake (Times 12, A4, margens de 3 e 2 cm, como no Word).
+   A biblioteca vem da CDN na primeira vez; o PDF é refeito a partir do texto guardado, sem ocupar espaço de arquivo. */
+const PDFMAKE = 'https://cdn.jsdelivr.net/npm/pdfmake@0.3.11/build/';
+async function pdfMake() {
+  await carregarScript(PDFMAKE + 'pdfmake.min.js');
+  await carregarScript(PDFMAKE + 'standard-fonts/Times.js');
+  return window.pdfMake;
+}
+function minutaPdfDef(html, titulo) {
+  const t = document.createElement('template');
+  t.innerHTML = html;
+  const CM = 28.3465, LARG = 16 * CM; // largura útil da folha A4 com margens de 3 cm e 2 cm
+  const runs = (no, f) => {
+    const out = [];
+    for (const n of no.childNodes) {
+      if (n.nodeType === 3) { const txt = n.nodeValue.replace(/\s+/g, ' '); if (txt) out.push(Object.assign({ text: txt }, f)); continue; }
+      if (n.nodeType !== 1) continue;
+      if (n.tagName === 'BR') { out.push({ text: '\n' }); continue; }
+      const g = Object.assign({}, f), st = n.style;
+      if (/^(B|STRONG)$/.test(n.tagName) || st.fontWeight === 'bold' || +st.fontWeight >= 600) g.bold = true;
+      if (/^(I|EM)$/.test(n.tagName) || st.fontStyle === 'italic') g.italics = true;
+      if (n.tagName === 'U' || /underline/.test(st.textDecoration)) g.decoration = 'underline';
+      out.push(...runs(n, g));
+    }
+    return out;
+  };
+  const recuo = el => {
+    const v = (el.style && el.style.marginLeft) || '', n = parseFloat(v) || 0;
+    return /%$/.test(v) ? LARG * n / 100 : /cm$/.test(v) ? n * CM : /px$/.test(v) ? n * 0.75 : /pt$/.test(v) ? n : 0;
+  };
+  const par = (el, f = {}, extra = {}) => {
+    const al = extra.alignment || ({ center: 'center', right: 'right', justify: 'justify', left: 'left' })[el.style && el.style.textAlign] || (el.classList && el.classList.contains('t') ? 'justify' : 'left');
+    const texto = runs(el, f);
+    return { text: texto.length ? texto : ' ', alignment: al, leadingIndent: el.classList && el.classList.contains('t') ? 1.25 * CM : 0, margin: [recuo(el), 0, 0, 6] };
+  };
+  const tabela = tb => {
+    const linhas = [...tb.querySelectorAll('tr')];
+    const cols = Math.max(1, ...linhas.map(r => r.children.length));
+    const body = linhas.map(r => {
+      const cel = [...r.children].map(c => ({ text: runs(c, c.tagName === 'TH' ? { bold: true } : {}), fontSize: 10 }));
+      while (cel.length < cols) cel.push({ text: '' });
+      return cel;
+    });
+    const fina = () => 0.5, cinza = () => '#808080';
+    return { table: { widths: Array(cols).fill('*'), body: body.length ? body : [[{ text: '' }]] }, layout: { hLineWidth: fina, vLineWidth: fina, hLineColor: cinza, vLineColor: cinza }, margin: [0, 0, 0, 6] };
+  };
+  const conteudo = [];
+  const andar = raiz => {
+    let solto = null;
+    const fecharSolto = () => { if (solto) { conteudo.push(par(solto)); solto = null; } };
+    for (const n of [...raiz.childNodes]) {
+      const bloco = n.nodeType === 1 && /^(P|DIV|H1|H2|H3|H4|UL|OL|TABLE|BLOCKQUOTE)$/.test(n.tagName);
+      if (!bloco) {
+        if (n.nodeType === 3 && !n.nodeValue.trim() && !solto) continue;
+        if (!solto) solto = document.createElement('p');
+        solto.append(n.cloneNode(true));
+        continue;
+      }
+      fecharSolto();
+      if (n.classList.contains('quebra')) { conteudo.push({ text: '', pageBreak: 'after' }); continue; }
+      if (n.tagName === 'TABLE') { conteudo.push(tabela(n)); continue; }
+      if (n.tagName === 'UL' || n.tagName === 'OL') { conteudo.push({ [n.tagName === 'OL' ? 'ol' : 'ul']: [...n.children].map(li => ({ text: runs(li, {}), alignment: 'justify' })), margin: [28, 0, 0, 6] }); continue; }
+      if (n.tagName === 'DIV' && n.querySelector('p,div,ul,ol,table,h1,h2,h3')) { andar(n); continue; }
+      const hx = /^H(\d)$/.exec(n.tagName);
+      conteudo.push(hx ? par(n, { bold: true, fontSize: hx[1] === '1' ? 14 : 13 }, { alignment: n.style.textAlign || 'center' }) : par(n));
+    }
+    fecharSolto();
+  };
+  andar(t.content);
+  return {
+    info: { title: titulo || 'Minuta' }, pageSize: 'A4', pageMargins: [3 * CM, 3 * CM, 2 * CM, 2 * CM],
+    defaultStyle: { font: 'Times', fontSize: 12, lineHeight: 1.3 }, content: conteudo.length ? conteudo : [{ text: ' ' }]
+  };
+}
+const pdfsMinuta = new Map();
+async function pdfMinuta(m) {
+  const chave = m.id + '|' + m.atualizadaEm;
+  if (!pdfsMinuta.has(chave)) pdfsMinuta.set(chave, pdfMake().then(lib => lib.createPdf(minutaPdfDef(m.html, m.titulo)).getBlob()).catch(e => { pdfsMinuta.delete(chave); throw e; }));
+  return pdfsMinuta.get(chave);
+}
 const nomeArquivoMinuta = (m, p) => `${m.titulo || 'Minuta'} - Protocolo ${p.numero.replace('/', '-')}`.replace(/[\\/:*?"<>|]+/g, ' ').trim();
 const ESTILO_FOLHA = 'body{margin:0}.folha{font:12pt/1.5 "Times New Roman",Times,serif;color:#000;max-width:16cm;margin:0 auto;padding:1cm 0}.folha p{margin:0 0 6pt}.folha p.t{text-align:justify;text-indent:1.25cm}.folha ul,.folha ol{margin:0 0 6pt;padding-left:1cm;text-align:justify}.folha table{border-collapse:collapse;width:100%;font-size:10pt;margin:0 0 6pt}.folha td,.folha th{border:1px solid #808080;padding:2pt 4pt;vertical-align:top}.folha .quebra{page-break-after:always;height:0;margin:0}@page{size:A4;margin:3cm 2cm 2cm 3cm}';
 function imprimirMinuta(m) {
@@ -3538,8 +3710,112 @@ function escolhaModelos(modelos, aoEscolher, extra) {
   return h('div', { class: 'arq-visor-corpo min-modelos' }, extra || '', grupos.map(g => h('section', null, h('h3', null, g),
     h('div', { class: 'min-modelos-grade' }, modelos.filter(x => x.grupo === g).map(x => h('button', { type: 'button', class: 'min-modelo', onclick: () => aoEscolher(x) }, ico('minuta'), h('span', null, x.nome)))))));
 }
-// janela Minuta: à esquerda a lista (Adicionar e Excluir), à direita o editor; dois cliques abrem a minuta.
-// A aba Termos do Indicador Pessoal usa o mesmo bloco, com os termos guardados na pessoa.
+/* Minuta do protocolo, no formato da tela de atos do S.R.I.: identificação no alto, a aba Texto/Partes Envolvidas
+   (barra de formatação, a folha e as partes do protocolo) e, embaixo, Salvar e Fechar. Serve só para criar:
+   no Salvar a minuta vai para a aba Minutas Realizadas, onde fica o PDF. */
+function criarMinuta(p, aoSalvar) {
+  const dados = () => dadosMinuta(p);
+  const d0 = dados();
+  const modelos = modelosMinuta().filter(m => paraUso(m, 'protocolo'));
+  const numero = p.minutas.reduce((a, x) => Math.max(a, x.numero || 0), 0) + 1;
+  let html = '<p class="t"><br></p>', editado = false, aplicando = false, modeloAtual = '', confirmarFaltas = false, faltas = 0;
+  const ed = editorTexto({ html, aoMudar: novo => { html = novo; if (!aplicando) editado = true; confirmarFaltas = false; } });
+  // onde o cursor estava na folha, para o Inserir qualificação
+  let ultimo = null;
+  const guardar = () => { const sl = getSelection(); if (sl.rangeCount && ed.folha.contains(sl.getRangeAt(0).commonAncestorContainer)) ultimo = sl.getRangeAt(0).cloneRange(); };
+  for (const ev of ['keyup', 'mouseup', 'input', 'focusout']) ed.folha.addEventListener(ev, guardar);
+  const trocarTexto = novo => {
+    aplicando = true;
+    ed.folha.replaceChildren(htmlSeguro(novo));
+    ed.folha.dispatchEvent(new Event('input'));
+    aplicando = false; editado = false; ultimo = null;
+  };
+  const campoL = (id, rot, el, cls) => h('label', { class: 'msri-c' + (cls ? ' ' + cls : ''), for: id }, h('span', null, rot), el);
+  const ident = h('input', { class: 'inp msri-ident', id: 'mn-ident', readonly: true, 'aria-label': 'Identificação', value: [d0.nucleo && 'Núcleo ' + d0.nucleo, p.municipio, p.interessado].filter(Boolean).join(' · ') || 'Protocolo ' + p.numero });
+  const data = h('input', { class: 'inp', id: 'mn-data', type: 'date', value: hoje() });
+  const titulo = h('input', { class: 'inp', id: 'mn-titulo', autocomplete: 'off' });
+  const grupos = [...new Set(modelos.map(m => m.grupo))];
+  const selModelo = h('select', { class: 'inp', id: 'mn-modelo' }, h('option', { value: '' }),
+    grupos.map(g => h('optgroup', { label: g }, modelos.filter(m => m.grupo === g).map(m => h('option', { value: m.id }, m.nome)))));
+  // trocar o modelo refaz o texto; se o texto já foi mexido, pergunta antes
+  const confirma = h('div', { class: 'nota msri-confirma', hidden: true });
+  const aplicarModelo = () => {
+    const m = modelos.find(x => x.id === selModelo.value), antigo = modelos.find(x => x.id === modeloAtual);
+    if (!titulo.value.trim() || (antigo && titulo.value === antigo.nome)) titulo.value = m ? m.nome : '';
+    modeloAtual = selModelo.value;
+    trocarTexto(m ? preencherModelo(m.html, dados()) : '<p class="t"><br></p>');
+    confirma.hidden = true;
+  };
+  selModelo.addEventListener('change', () => {
+    if (!editado) { aplicarModelo(); return; }
+    confirma.replaceChildren(ico('aviso'), h('span', null, 'Trocar o modelo substitui o texto da minuta.'),
+      h('span', { class: 'msri-confirma-bts' },
+        btn('Substituir', { sm: true, onclick: aplicarModelo }),
+        btn('Manter o texto', { sm: true, onclick: () => { selModelo.value = modeloAtual; confirma.hidden = true; } })));
+    confirma.hidden = false;
+  });
+  // partes envolvidas: as partes do protocolo; dois cliques (ou Inserir qualificação) põem a qualificação onde está o cursor
+  const partes = p.partes.map(x => ({ x, pe: D().pessoas[x.pessoaId] })).filter(y => y.pe);
+  let marcada = null;
+  const inserir = pe => {
+    const q = qualificacao(pe);
+    ed.folha.focus();
+    const sl = getSelection();
+    if (ultimo) { sl.removeAllRanges(); sl.addRange(ultimo); document.execCommand('insertHTML', false, q); }
+    else { ed.folha.append(h('p', { class: 't' }, htmlSeguro(q))); ed.folha.dispatchEvent(new Event('input')); }
+    guardar();
+  };
+  const grade = h('ul', { class: 'itens grade' }, cabGrade('partesMinuta'),
+    partes.length ? partes.map(({ x, pe }) => h('li', null, h('button', {
+      type: 'button', class: 'item linha g-partesMinuta', 'aria-current': 'false',
+      onclick: ev => { marcada = pe; for (const b of grade.querySelectorAll('.item')) b.setAttribute('aria-current', String(b === ev.currentTarget)); bInserir.disabled = bAbrir.disabled = false; },
+      ondblclick: () => inserir(pe), onkeydown: ev => { if (ev.key === 'Enter') { ev.preventDefault(); inserir(pe); } }
+    }, cel('Nome', pe.nome), cel(pe.tipo === 'juridica' ? 'CNPJ' : 'CPF', pe.documento), cel('Qualidade', qualidadeParte(x)),
+      cel('Modalidade', pe.modalidade ? 'Reurb-' + pe.modalidade : ''), cel('Imóvel', imoveisDaPessoa(pe.id).map(v => descImovel(v.imovel)).join('; ')))))
+      : [h('li', { class: 'lat-vazio' }, 'Nenhuma parte no protocolo.')]);
+  const bInserir = btn('Inserir qualificação', { icone: 'mais', sm: true, disabled: true, onclick: () => { if (marcada) inserir(marcada); } });
+  const bAbrir = btn('Abrir cadastro', { icone: 'olho', sm: true, disabled: true, onclick: () => { if (marcada) irPara('pessoas', marcada.id); } });
+  const salvar = ev => {
+    if (!ed.folha.textContent.trim()) { toast('Escreva o texto da minuta ou escolha um modelo.'); ed.folha.focus(); return; }
+    faltas = ed.folha.querySelectorAll('.campo-vazio').length;
+    if (faltas && !confirmarFaltas) {
+      confirmarFaltas = true;
+      toast(`Ainda ${faltas === 1 ? 'há 1 campo' : 'há ' + faltas + ' campos'} [entre colchetes] a preencher. Clique em Salvar de novo para salvar assim mesmo.`);
+      ev.currentTarget.focus();
+      return;
+    }
+    const m = { id: uid('mi'), numero, data: data.value || hoje(), modelo: modeloAtual, titulo: titulo.value.trim() || 'Minuta ' + numero, html: ed.folha.innerHTML, criadaEm: agora(), atualizadaEm: agora() };
+    p.minutas.push(m);
+    registrarAndamento(p, `Minuta nº ${m.numero} “${m.titulo}” salva em Minutas Realizadas.`, m.data);
+    Store.put('protocolos', p, 0);
+    editado = false;
+    aoSalvar(m);
+  };
+  const el = h('div', { class: 'msri' },
+    ident,
+    h('div', { class: 'msri-linha' },
+      campoL('mn-protocolo', 'Protocolo', h('input', { class: 'inp msri-curto', id: 'mn-protocolo', readonly: true, value: p.numero })),
+      campoL('mn-numero', 'Minuta nº', h('input', { class: 'inp msri-num', id: 'mn-numero', readonly: true, value: String(numero) })),
+      campoL('mn-data', 'Data', data)),
+    h('div', { class: 'msri-linha' }, campoL('mn-titulo', 'Título da minuta', titulo, 'msri-largo'), campoL('mn-modelo', 'Modelo', selModelo, 'msri-modelo')),
+    confirma,
+    h('div', { class: 'pr-abas sub-abas msri-abas', role: 'tablist' }, h('button', { type: 'button', class: 'pr-aba', role: 'tab', 'aria-selected': 'true' }, 'Texto/Partes Envolvidas')),
+    h('div', { class: 'msri-texto' }, h('div', { class: 'min-ferramentas' }, ed.barra), h('div', { class: 'min-corpo msri-folha' }, ed.folha)),
+    h('div', { class: 'msri-partes' }, grade, h('div', { class: 'msri-partes-bts' }, bInserir, bAbrir)),
+    h('div', { class: 'msri-pe' }, h('span', { class: 'msri-pe-txt' }, 'Protocolo ' + p.numero),
+      btn('Salvar', { icone: 'salvar', onclick: salvar }), btn('Fechar', { icone: 'sair', cls: 'bt-fechar', onclick: () => fecharDialogo() })));
+  // fechar com a minuta mexida e não salva: o primeiro pedido avisa, o segundo descarta
+  let avisado = false;
+  const antesDeFechar = () => {
+    if (!editado || avisado) return true;
+    avisado = true;
+    toast('A minuta não foi salva. Feche de novo para descartá-la.');
+    setTimeout(() => { avisado = false; }, 5000);
+    return false;
+  };
+  return { el, antesDeFechar, focar: () => selModelo.focus() };
+}
+// A aba Termos do Indicador Pessoal: à esquerda a lista (Adicionar e Excluir), à direita o editor; dois cliques abrem o termo.
 function blocoMinutas(p, op = {}) {
   const chave = op.chave || 'minutas';
   const dados = op.dados || (() => dadosMinuta(p));
@@ -4826,7 +5102,8 @@ async function baixar(nome, conteudo) {
     return;
   }
   const tipo = nome.endsWith('.json') ? 'application/json' : 'text/html';
-  const url = URL.createObjectURL(new Blob([conteudo], { type: tipo + ';charset=utf-8' }));
+  // arquivo pronto (PDF, Word…) vai como binário: o navegador baixa com o nome dado em vez de abrir na própria aba
+  const url = URL.createObjectURL(conteudo instanceof Blob ? new Blob([conteudo], { type: 'application/octet-stream' }) : new Blob([conteudo], { type: tipo + ';charset=utf-8' }));
   const a = h('a', { href: url, download: nome });
   document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 4000);
