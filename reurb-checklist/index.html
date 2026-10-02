@@ -907,6 +907,7 @@ textarea.inp{min-height:40px}
             <button type="button" class="mb-op mb-op-sub" role="menuitem" id="mb-cad-indicadores-btn" aria-haspopup="true" aria-expanded="false" aria-controls="mb-cad-indicadores-sub"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Indicadores</span></button>
             <div class="mb-sub2" id="mb-cad-indicadores-sub" role="menu" aria-labelledby="mb-cad-indicadores-btn">
               <button type="button" class="mb-op" role="menuitem" id="mb-tab-estadoCivil" data-aba="tabelas" data-acao="tabela:estadoCivil"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="15" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>Estado Civil</span></button>
+              <button type="button" class="mb-op" role="menuitem" id="mb-tab-qualidade" data-aba="tabelas" data-acao="tabela:qualidade"><span>Qualidade</span></button>
             </div>
           </div>
         </div>
@@ -1395,6 +1396,11 @@ const TABELAS = {
     nome: 'Estado civil', campo: 'Estado civil', usoEm: 'estadoCivil',
     // estados civis da legislação brasileira (Código Civil, arts. 1.511 e seguintes e 1.571 a 1.582; CPC, art. 733)
     padrao: ['Solteiro(a)', 'Casado(a)', 'Separado(a) judicialmente', 'Separado(a) extrajudicialmente', 'Divorciado(a)', 'Viúvo(a)']
+  },
+  // o que a pessoa é no processo da Reurb; vale para todos os protocolos em que ela é parte
+  qualidade: {
+    nome: 'Qualidade', campo: 'Qualidade', usoEm: 'qualidade', restaurar: 'Incluir as opções padrão que faltam',
+    padrao: ['Beneficiário', 'Intimado', 'Proprietário', 'Confrontante', 'Ocupante', 'Requerente', 'Outro']
   }
 };
 function normalizarTabela(t) {
@@ -1419,8 +1425,6 @@ function opcoesTabela(id, atual) {
 }
 const txt = v => String(v ?? '');
 const SEXOS = ['Feminino', 'Masculino'];
-// o que a pessoa é no processo da Reurb (Indicador Pessoal); vale para todos os protocolos em que ela é parte
-const QUALIDADES_PESSOA = ['Beneficiário', 'Intimado', 'Proprietário', 'Confrontante', 'Ocupante', 'Requerente', 'Outro'];
 const qualidadeParte = x => (D().pessoas[x.pessoaId] || {}).qualidade || x.qualidade;
 const REGIMES = ['Comunhão parcial de bens', 'Comunhão universal de bens', 'Separação convencional de bens', 'Separação obrigatória de bens', 'Participação final nos aquestos'];
 const TIPOS_LOGRADOURO = ['Rua', 'Avenida', 'Travessa', 'Alameda', 'Praça', 'Rodovia', 'Estrada', 'Linha', 'Viela', 'Chácara', 'Sítio', 'Outro'];
@@ -3712,6 +3716,9 @@ function renderTabela(id) {
         // quem usava o nome antigo passa a usar o novo
         let n = 0;
         for (const p of Object.values(D().pessoas)) if (p[def.usoEm] === antigo) { p[def.usoEm] = novo; Store.put('pessoas', p, 0); n++; }
+        if (id === 'qualidade') for (const pr of Object.values(D().protocolos)) {
+          if (pr.partes.some(x => x.qualidade === antigo)) { for (const x of pr.partes) if (x.qualidade === antigo) x.qualidade = novo; Store.put('protocolos', pr, 0); }
+        }
         desenhar();
         toast(n ? `Opção renomeada; ${plural(n, 'cadastro atualizado', 'cadastros atualizados')}.` : 'Opção renomeada.');
       });
@@ -3742,7 +3749,7 @@ function renderTabela(id) {
     t.itens.push({ id: uid('ti'), nome }); salvar();
     novo.value = ''; desenhar(); novo.focus();
   });
-  const restaurar = btn('Incluir as opções da legislação que faltam', { icone: 'livro', fant: true, sm: true, onclick: () => {
+  const restaurar = btn(def.restaurar || 'Incluir as opções da legislação que faltam', { icone: 'livro', fant: true, sm: true, onclick: () => {
     for (const nome of def.padrao) if (!t.itens.some(x => norm(x.nome) === norm(nome))) t.itens.push({ id: uid('ti'), nome });
     salvar(); desenhar();
   } });
@@ -3962,9 +3969,9 @@ function renderPessoa(pe) {
 
   // dados pessoais
   const dados = pj
-    ? [c('nome', 'Razão social', 6), c('documento', 'CNPJ', 3, 'text', { mascara: 'cnpj', validar: validarCnpj }), c('qualidade', 'Qualidade', 3, 'select', { opcoes: QUALIDADES_PESSOA }),
+    ? [c('nome', 'Razão social', 6), c('documento', 'CNPJ', 3, 'text', { mascara: 'cnpj', validar: validarCnpj }), c('qualidade', 'Qualidade', 3, 'select', { opcoes: opcoesTabela('qualidade', pe.qualidade) }),
       c('celular', 'Celular', 4, 'text', { mascara: 'cel' }), c('email', 'E-mail', 8, 'text', { inputmode: 'email' })]
-    : [c('nome', 'Nome', 5), c('qualidade', 'Qualidade', 3, 'select', { opcoes: QUALIDADES_PESSOA }), c('dataNasc', 'Data de nascimento', 2, 'date'), c('dataObito', 'Data de óbito', 2, 'date'),
+    : [c('nome', 'Nome', 5), c('qualidade', 'Qualidade', 3, 'select', { opcoes: opcoesTabela('qualidade', pe.qualidade) }), c('dataNasc', 'Data de nascimento', 2, 'date'), c('dataObito', 'Data de óbito', 2, 'date'),
       c('documento', 'CPF', 3, 'text', { mascara: 'cpf', validar: validarCpf }), c('rg', 'RG', 3),
       c('sexo', 'Sexo', 3, 'select', { opcoes: SEXOS }), c('celular', 'Celular', 3, 'text', { mascara: 'cel' }),
       c('email', 'E-mail', 4, 'text', { inputmode: 'email' }), c('cnh', 'CNH', 3), c('profissao', 'Profissão', 5),
