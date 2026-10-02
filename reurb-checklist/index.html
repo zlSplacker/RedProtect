@@ -379,21 +379,6 @@ select.inp:disabled{background:var(--sup2);color:var(--tinta2);cursor:default;op
 .pr-aba .n{font:500 12px var(--f-mono);color:var(--tinta3)}
 .dados-sub{grid-column:1/-1;margin-top:8px;min-width:0}
 /* financeiro do protocolo */
-.fin-resumo{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
-.fin-tile{border:1px solid var(--linha2);border-radius:9px;padding:10px 12px;background:var(--sup2);display:grid;gap:4px;min-width:0}
-.fin-tile .rot{margin:0}
-.fin-valor{font:600 18px/1.2 var(--f-mono);font-variant-numeric:tabular-nums;letter-spacing:-.01em;overflow-wrap:anywhere}
-.fin-valor.pos{color:var(--ok)}.fin-valor.neg{color:var(--pend)}.fin-valor.alerta{color:var(--aviso)}
-.fin-tile .inp.fin-valor{padding:2px 8px;margin:0 -8px;width:calc(100% + 16px);background:var(--sup);border-color:var(--linha)}
-.fin-form{display:grid;grid-template-columns:150px 160px minmax(0,1fr) 150px auto;gap:8px;align-items:end}
-@container (max-width:900px){.fin-form{grid-template-columns:1fr 1fr}.fin-form .fin-desc{grid-column:1/-1}}
-.tab-rolagem{overflow-x:auto}
-.fin-tab{width:100%;border-collapse:collapse;font-size:14px}
-.fin-tab th{text-align:left;font:600 11px/1 var(--f-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--tinta3);padding:8px;border-bottom:1px solid var(--linha)}
-.fin-tab td{padding:8px;border-bottom:1px solid var(--linha2);vertical-align:middle}
-.fin-tab .num{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
-.fin-tab .dt{font-family:var(--f-mono);white-space:nowrap;color:var(--tinta2)}
-.fin-tab tfoot td{font-weight:600;border-bottom:0}
 .dados-sub .bloco{border:0;padding:0;background:transparent}
 .exig-bloco{display:grid;gap:14px}
 .pr-sub{margin:6px 0 0;font:600 11px/1 var(--f-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--tinta3)}
@@ -715,9 +700,9 @@ textarea.inp{min-height:40px}
 .compacta .ident legend,.compacta .bloco-tit{font-size:12px}
 .nota,.nota-info{background:#FFFFE1;border:1px solid #A0A0A0;border-radius:0;font-size:12px;padding:6px 10px}
 .chip{border-radius:2px;font-weight:400;font-size:11px;padding:0 5px}
-.sobre,.pr-sub,.res-tit,.mm-campos-grupo,.min-modelos h3,.fin-tab th{font:600 12px/1.3 var(--f-ui);letter-spacing:0;text-transform:none;color:#000}
+.sobre,.pr-sub,.res-tit,.mm-campos-grupo,.min-modelos h3{font:600 12px/1.3 var(--f-ui);letter-spacing:0;text-transform:none;color:#000}
 .titulo,.vazio h2,.modal-cab h2,.q-sec-tit{font:600 14px/1.3 var(--f-ui)}
-.item-num,.and-data,.exig-num,.ed-num,.ed-meta,.res-num,.fin-valor,.q-sec-ref,.vinc-nome small,.campo-curto .inp{font-family:var(--f-ui)}
+.item-num,.and-data,.exig-num,.ed-num,.ed-meta,.res-num,.q-sec-ref,.vinc-nome small,.campo-curto .inp{font-family:var(--f-ui)}
 .cab{margin-bottom:8px}
 .reg-rodape{margin-top:10px;padding-top:8px;border-top-color:#D5D5D5}
 .pe-prot{border-top-color:#D5D5D5;padding-top:8px}
@@ -784,11 +769,6 @@ textarea.inp{min-height:40px}
 .item:hover{border-color:#7EB4EA}
 .vinc-nome{font-weight:400}
 .vinc-linha{border-bottom-color:var(--grade)}
-.fin-tab{font-size:12px;background:#fff;border:1px solid #828790}
-.fin-tab th{padding:3px 6px;background:linear-gradient(#FFFFFF,#F1F2F4);border-bottom:1px solid #D5D5D5}
-.fin-tab td{padding:3px 6px;border-bottom-color:var(--grade)}
-.fin-tile{border-radius:0;background:#fff;border-color:#D5D5D5}
-.fin-valor{font-size:15px}
 .exig{border-radius:0;background:#fff;border-color:#D5D5D5}
 .and-item::before{border-width:1px}
 
@@ -858,6 +838,37 @@ textarea.inp{min-height:40px}
 .campo-auto{border-radius:2px;font:600 .82em/1.4 var(--f-ui)}
 .min-fmt{border-radius:2px;color:#2F6DB5}
 .min-editor .mm-uso{flex:0 1 150px;width:auto}
+/* financeiro do protocolo */
+.fin{display:grid;gap:8px}
+.ident.fin-contrato{display:block;padding:6px 10px 10px}
+.fin-campos{clear:both;display:flex;flex-wrap:wrap;align-items:end;gap:8px 12px}
+.fin-num{width:140px;text-align:right}
+.fin-n{width:70px}
+.fin-data{width:140px}
+.fin-edicao{margin-left:auto;display:flex;gap:4px}
+.fin-resumo{display:grid;gap:6px}
+.fin-linha{display:flex;flex-wrap:wrap;row-gap:4px;font-size:12px}
+.fin-item{padding:0 12px;border-left:1px solid #C9CED4;white-space:nowrap}
+.fin-item:first-child{padding-left:0;border-left:0}
+.fin-item b{font-weight:600}
+.fin-item.pos b{color:#2E7549}.fin-item.neg b{color:#B42318}
+.fin-barra{position:relative;height:14px;border:1px solid #ADB2B5;background:#E6E6E6;max-width:520px}
+.fin-barra i{display:block;height:100%;background:linear-gradient(#8EDB8E,#45B045)}
+.fin-barra span{position:absolute;inset:0;text-align:center;font-size:10px;line-height:12px}
+.fin-aviso{margin:0}
+.fin .itens.grade{min-height:130px;max-height:340px;overflow:auto}
+.fin-bts{display:flex;flex-wrap:wrap;gap:4px;padding-top:6px}
+.fin-sep{width:1px;background:#C9CED4;margin:0 4px}
+.g-parcelas{grid-template-columns:minmax(0,1.3fr) 84px 104px 84px minmax(0,1.3fr) minmax(0,1fr) 104px}
+.g-despesas{grid-template-columns:90px minmax(0,1fr) 120px}
+.linha .cel.num,.grade-cab.g-parcelas .cel:nth-child(3),.grade-cab.g-parcelas .cel:nth-child(5),.grade-cab.g-despesas .cel:nth-child(3){text-align:right}
+.fin-dlg{display:grid;gap:8px}
+.fin-dlg-bts{display:flex;justify-content:flex-end;gap:4px;padding-top:8px;border-top:1px solid #D5D5D5}
+@container (max-width:560px){.fin-edicao{margin-left:0}.fin-sep{display:none}.linha .cel.num{text-align:left}}
+/* rodapé das fichas (pessoa, imóvel, checklist, protocolo) fixo embaixo da janela, qualquer que seja a aba ou o tamanho do conteúdo */
+.jan.ver-detalhe .detalhe:has(>.reg-rodape){display:flex;flex-direction:column;min-height:100cqh;padding-bottom:0}
+.detalhe>.reg-rodape,.detalhe>.pe-prot{margin-top:auto;position:sticky;bottom:0;z-index:3;background:var(--chao);padding-bottom:10px}
+.jan.ver-detalhe .detalhe:has(>.pe-prot){padding-bottom:0}
 /* rótulo só para leitores de tela (o nome já está no título do quadro) */
 .so-leitor{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 /* rodapé do protocolo: Excluir no canto esquerdo, Arquivos no direito */
@@ -932,7 +943,7 @@ textarea.inp{min-height:40px}
           <div class="mb-grupo" id="mb-real">
             <button type="button" class="mb-op mb-op-sub" role="menuitem" id="mb-real-btn" aria-haspopup="true" aria-expanded="false" aria-controls="mb-real-sub"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7 M5 9.5V20h14V9.5 M10 20v-5h4v5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Real</span></button>
             <div class="mb-sub2" id="mb-real-sub" role="menu" aria-labelledby="mb-real-btn">
-              <button type="button" class="mb-op" role="menuitem" id="mb-imoveis" data-aba="imoveis" data-acao="pesquisar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M16 16l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Pesquisa</span></button>
+              <button type="button" class="mb-op" role="menuitem" id="mb-imoveis" data-aba="imoveis" data-acao="pesquisar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M16 16l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Pesquisar</span></button>
               <button type="button" class="mb-op" role="menuitem" id="mb-imovel-urbano" data-aba="imoveis" data-acao="urbano"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7 M5 9.5V20h14V9.5 M10 20v-5h4v5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Urbano</span></button>
               <button type="button" class="mb-op" role="menuitem" id="mb-imovel-rural" data-aba="imoveis" data-acao="rural"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20h18 M5 20v-7l5-4 5 4v7 M9 20v-4h2v4 M17 20V9 M17 9c-2 0-3-1.5-3-3.5C16 5.5 17 7 17 9zm0 0c2 0 3-1.5 3-3.5C18 5.5 17 7 17 9z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Rural</span></button>
               <button type="button" class="mb-op" role="menuitem" id="mb-imovel-condominio" data-aba="imoveis" data-acao="condominio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v17 M3 21h18 M9 7h2 M13 7h2 M9 11h2 M13 11h2 M9 15h2 M13 15h2 M11 21v-3h2v3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Condomínio</span></button>
@@ -1312,17 +1323,82 @@ const SITUACOES = {
   concluido: ['Concluído', 'chip-ok'],
   arquivado: ['Arquivado', '']
 };
-/* financeiro do protocolo: honorários contratados e lançamentos (recebimentos e despesas) */
+/* financeiro do protocolo: o contrato (honorários e forma de pagamento), as parcelas com os recebimentos
+   de cada uma e as despesas do processo. Valores em reais, somados em centavos para não errar no arredondamento. */
+const FORMAS_PAGTO = { avista: 'À vista', parcelado: 'Parcelado', etapas: 'Por etapas' };
+const centavos = v => Math.round((Number(v) || 0) * 100);
+const reais = c => c / 100;
+const valorPos = v => reais(Math.abs(centavos(v)));
 function normalizarFinanceiro(f) {
   f = f || {};
-  return {
-    honorarios: Number(f.honorarios) || 0,
-    lancamentos: Array.isArray(f.lancamentos) ? f.lancamentos.filter(x => x && Number(x.valor)).map(x => ({
-      id: String(x.id || uid('fi')), tipo: x.tipo === 'despesa' ? 'despesa' : 'recebimento',
-      data: String(x.data || ''), descricao: String(x.descricao || ''), valor: Math.abs(Number(x.valor)) || 0
+  const fin = {
+    honorarios: valorPos(f.honorarios),
+    forma: FORMAS_PAGTO[f.forma] ? f.forma : 'avista',
+    nParcelas: Math.max(1, Math.min(120, parseInt(f.nParcelas, 10) || 1)),
+    vencimento: String(f.vencimento || ''),
+    parcelas: Array.isArray(f.parcelas) ? f.parcelas.filter(Boolean).map(x => ({
+      id: String(x.id || uid('pa')), descricao: String(x.descricao || ''), vencimento: String(x.vencimento || ''), valor: valorPos(x.valor),
+      pagamentos: Array.isArray(x.pagamentos) ? x.pagamentos.filter(y => y && (Number(y.valor) || Number(y.retencao))).map(y => ({
+        id: String(y.id || uid('pg')), data: String(y.data || ''), valor: valorPos(y.valor), retencao: valorPos(y.retencao), documento: String(y.documento || '')
+      })) : []
+    })) : [],
+    despesas: Array.isArray(f.despesas) ? f.despesas.filter(x => x && Number(x.valor)).map(x => ({
+      id: String(x.id || uid('de')), data: String(x.data || ''), descricao: String(x.descricao || ''), valor: valorPos(x.valor)
     })) : []
   };
+  // formato antigo (lançamentos soltos): cada recebimento vira uma parcela paga e o que faltava do contrato, uma parcela em aberto
+  if (Array.isArray(f.lancamentos) && !Array.isArray(f.parcelas)) {
+    for (const x of f.lancamentos) {
+      if (!x || !Number(x.valor)) continue;
+      const v = valorPos(x.valor), data = String(x.data || ''), id = String(x.id || uid('fi'));
+      if (x.tipo === 'despesa') fin.despesas.push({ id, data, descricao: String(x.descricao || ''), valor: v });
+      else fin.parcelas.push({ id, descricao: String(x.descricao || ''), vencimento: data, valor: v, pagamentos: [{ id: 'pg' + id, data, valor: v, retencao: 0, documento: '' }] });
+    }
+    const falta = centavos(fin.honorarios) - fin.parcelas.reduce((a, x) => a + centavos(x.valor), 0);
+    if (falta > 0) fin.parcelas.push({ id: 'pa-saldo', descricao: 'Saldo', vencimento: '', valor: reais(falta), pagamentos: [] });
+    if (fin.parcelas.length) fin.forma = 'etapas';
+  }
+  return fin;
 }
+// quanto da parcela já foi quitado (recebido mais o retido na fonte) e quanto falta, em centavos
+const quitadoDe = x => x.pagamentos.reduce((a, y) => a + centavos(y.valor) + centavos(y.retencao), 0);
+const faltaDe = x => Math.max(0, centavos(x.valor) - quitadoDe(x));
+function situacaoParcela(x) {
+  const venc = x.vencimento && x.vencimento < hoje();
+  if (!faltaDe(x) && x.valor > 0) return ['Paga', 'chip-ok'];
+  if (x.pagamentos.length) return venc ? ['Parcial, vencida', 'chip-pend'] : ['Parcial', 'chip-ex'];
+  return venc ? ['Vencida', 'chip-pend'] : ['Em aberto', ''];
+}
+// parcelas em ordem de vencimento (as sem data no fim), numeradas 1/5, 2/5…
+function parcelasOrdenadas(f) {
+  const l = f.parcelas.slice().sort((a, b) => (a.vencimento || '9999').localeCompare(b.vencimento || '9999'));
+  return l.map((x, i) => ({ x, num: `${i + 1}/${l.length}` }));
+}
+function rotParcela(f, x) {
+  const n = parcelasOrdenadas(f).find(y => y.x === x);
+  return 'parcela ' + (n ? n.num : '') + (x.descricao ? ` (${x.descricao})` : '');
+}
+// mesma data n meses depois (31/01 + 1 mês = 28 ou 29/02)
+function somarMeses(iso, n) {
+  const [a, m, d] = String(iso).split('-').map(Number);
+  if (!a || !m || !d) return '';
+  const ult = new Date(Date.UTC(a, m + n, 0)).getUTCDate();
+  return new Date(Date.UTC(a, m - 1 + n, Math.min(d, ult))).toISOString().slice(0, 10);
+}
+/* à vista e parcelado: as parcelas em aberto são refeitas a partir do contrato; as que já têm recebimento ficam como estão */
+function gerarParcelas(f) {
+  if (f.forma === 'etapas') return;
+  const pagas = f.parcelas.filter(x => x.pagamentos.length);
+  const resta = centavos(f.honorarios) - pagas.reduce((a, x) => a + centavos(x.valor), 0);
+  const k = resta > 0 ? Math.max(1, (f.forma === 'avista' ? 1 : f.nParcelas) - pagas.length) : 0;
+  const base = k ? Math.floor(resta / k) : 0;
+  const novas = Array.from({ length: k }, (_, i) => ({
+    id: uid('pa'), descricao: '', valor: reais(i === k - 1 ? resta - base * (k - 1) : base), pagamentos: [],
+    vencimento: f.vencimento ? (f.forma === 'avista' ? f.vencimento : somarMeses(f.vencimento, pagas.length + i)) : ''
+  }));
+  f.parcelas = [...pagas, ...novas];
+}
+const descForma = f => (f.forma === 'avista' ? 'à vista' : f.forma === 'parcelado' ? `em ${plural(f.nParcelas, 'parcela', 'parcelas')}` : 'por etapas');
 const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const fmtBRL = v => BRL.format(Number(v) || 0);
 /* aceita 1.234,56 · 1234,56 · 1234.56 · R$ 1.234 */
@@ -1340,9 +1416,17 @@ function lerValor(txt) {
   return isFinite(n) ? Math.round(n * 100) / 100 : NaN;
 }
 function totaisFinanceiro(f) {
-  const recebido = f.lancamentos.filter(x => x.tipo === 'recebimento').reduce((a, x) => a + x.valor, 0);
-  const despesas = f.lancamentos.filter(x => x.tipo === 'despesa').reduce((a, x) => a + x.valor, 0);
-  return { contratado: f.honorarios, recebido, aReceber: Math.max(0, f.honorarios - recebido), despesas, saldo: recebido - despesas };
+  let recebido = 0, retido = 0, aberto = 0, vencido = 0;
+  for (const x of f.parcelas) {
+    for (const y of x.pagamentos) { recebido += centavos(y.valor); retido += centavos(y.retencao); }
+    const falta = faltaDe(x);
+    aberto += falta;
+    if (falta && x.vencimento && x.vencimento < hoje()) vencido += falta;
+  }
+  const despesas = f.despesas.reduce((a, x) => a + centavos(x.valor), 0);
+  // a receber: o que falta do contrato (sem contrato definido, o que falta das parcelas)
+  const aReceber = f.honorarios ? Math.max(0, centavos(f.honorarios) - recebido - retido) : aberto;
+  return { contratado: f.honorarios, recebido: reais(recebido), retido: reais(retido), aReceber: reais(aReceber), vencido: reais(vencido), despesas: reais(despesas), saldo: reais(recebido - despesas) };
 }
 const numeroProtocolo = (ano, seq) => String(seq).padStart(4, '0') + '/' + ano;
 function normalizarProtocolo(p) {
@@ -1764,7 +1848,9 @@ const COLUNAS = {
   pessoas: ['Nome', 'CPF/CNPJ', 'Protocolo vinculado', ''],
   imoveis: ['Núcleo', 'Lote', 'Quadra', 'Cidade', ''],
   analises: ['Núcleo', 'Checklist', 'Protocolo', 'Respondidas', 'Situação'],
-  tabelas: ['Descrição', 'Opções']
+  tabelas: ['Descrição', 'Opções'],
+  parcelas: ['Parcela', 'Vencimento', 'Valor', 'Recebido em', 'Valor recebido', 'Documento', 'Situação'],
+  despesas: ['Data', 'Descrição', 'Valor']
 };
 const cel = (rot, v, cls) => h('span', { class: 'cel' + (cls ? ' ' + cls : ''), 'data-rot': rot || null, title: v ? String(v) : null }, v ? String(v) : null);
 const cabGrade = aba => h('li', { class: 'grade-cab g-' + aba, 'aria-hidden': 'true' }, COLUNAS[aba].map(c => h('span', { class: 'cel' }, c)));
@@ -2305,9 +2391,9 @@ function renderProtocolo(p) {
   const chips = h('div', { class: 'cab-chips' });
   // no alto fica só o alerta de prazo; número, interessado, situação e datas já estão nos campos
   const atualizarChips = () => {
-    const prazo = prazoInfo(p), alerta = prazo && prazo[1];
-    chips.replaceChildren(...(alerta ? [h('span', { class: 'chip ' + prazo[1] }, prazo[0])] : []));
-    chips.hidden = !alerta;
+    const prazo = prazoInfo(p), alerta = prazo && prazo[1], vencida = totaisFinanceiro(p.financeiro).vencido > 0;
+    chips.replaceChildren(...(alerta ? [h('span', { class: 'chip ' + prazo[1] }, prazo[0])] : []), ...(vencida ? [h('span', { class: 'chip chip-pend' }, 'Parcela vencida')] : []));
+    chips.hidden = !alerta && !vencida;
   };
   atualizarChips();
   // Recepção: os campos ficam travados; Editar libera (as mudanças ficam num rascunho da janela) e Salvar grava e trava de novo
@@ -3594,63 +3680,206 @@ function renderModelosMinuta() {
   const aberto = u.mmAberto && acharModelo(u.mmAberto);
   if (aberto) abrir(aberto); else { u.mmAberto = null; vazio(); desenhar(); }
 }
+/* aba Financeiro do protocolo: contrato travado (Editar/Salvar), resumo numa linha e as grades de parcelas e de despesas.
+   Parcela com recebimento não muda nem sai sem estornar; contrato, recebimentos e estornos entram nos andamentos. */
 function blocoFinanceiro(p, aoMudar) {
   const f = p.financeiro;
   const salvar = () => { Store.put('protocolos', p, 0); aoMudar(); };
-  const resumo = h('div', { class: 'fin-resumo' });
-  const tabela = h('div', { class: 'tab-rolagem' });
-  const tile = (rot, valor, cls = '') => h('div', { class: 'fin-tile' }, h('span', { class: 'rot' }, rot), h('span', { class: 'fin-valor ' + cls }, fmtBRL(valor)));
-  const desenhar = () => {
-    const t = totaisFinanceiro(f);
-    resumo.replaceChildren(
-      tileHon,
-      tile('Recebido', t.recebido, t.recebido ? 'pos' : ''),
-      tile('A receber', t.aReceber, t.aReceber ? 'alerta' : ''),
-      tile('Despesas', t.despesas, t.despesas ? 'neg' : ''),
-      h('div', { class: 'fin-tile', title: 'Recebido menos despesas' }, h('span', { class: 'rot' }, 'Saldo'), h('span', { class: 'fin-valor ' + (t.saldo < 0 ? 'neg' : t.saldo > 0 ? 'pos' : '') }, fmtBRL(t.saldo))));
-    const linhas = f.lancamentos.slice().sort((a, b) => String(b.data).localeCompare(String(a.data)));
-    tabela.replaceChildren(linhas.length ? h('table', { class: 'fin-tab' },
-      h('thead', null, h('tr', null, h('th', null, 'Data'), h('th', null, 'Tipo'), h('th', null, 'Descrição'), h('th', { class: 'num' }, 'Valor'), h('th', null, h('span', { class: 'rot', hidden: true }, 'Ações')))),
-      h('tbody', null, linhas.map(x => h('tr', null,
-        h('td', { class: 'dt' }, fmtData(x.data)),
-        h('td', null, h('span', { class: 'chip ' + (x.tipo === 'despesa' ? 'chip-pend' : 'chip-ok') }, x.tipo === 'despesa' ? 'Despesa' : 'Recebimento')),
-        h('td', null, x.descricao || '—'),
-        h('td', { class: 'num' }, (x.tipo === 'despesa' ? '− ' : '') + fmtBRL(x.valor)),
-        h('td', { style: 'width:1%' }, btn('Excluir lançamento', { icone: 'lixo', soIcone: true, fant: true, perigo: true, onclick: ev => armar(ev.currentTarget, () => {
-          f.lancamentos = f.lancamentos.filter(y => y.id !== x.id); salvar(); desenhar();
-        }) }))))))
-      : h('p', { class: 'dica' }, 'Nenhum lançamento.'));
+  const sel = ui.finSel || (ui.finSel = {});
+  const valorTxt = v => (v ? BRL.format(v).replace(/^R\$\s?/, '') : '');
+  const campo = (id, rot, el, cls) => h('label', { class: 'campo' + (cls ? ' ' + cls : ''), for: id }, h('span', { class: 'rot' }, rot), el);
+
+  // contrato
+  const editando = ui.editFin === p.id;
+  if (!editando) ui.rascFin = null;
+  const rasc = editando ? (ui.rascFin || (ui.rascFin = { hon: valorTxt(f.honorarios), forma: f.forma, n: String(f.nParcelas), venc: f.vencimento })) : null;
+  const fonte = rasc || { hon: valorTxt(f.honorarios), forma: f.forma, n: String(f.nParcelas), venc: f.vencimento };
+  const inpHon = h('input', { class: 'inp fin-num', id: 'fin-honorarios', inputmode: 'decimal', value: fonte.hon, readonly: !editando, autocomplete: 'off' });
+  const selForma = h('select', { class: 'inp', id: 'fin-forma', disabled: !editando }, Object.entries(FORMAS_PAGTO).map(([k, r]) => h('option', { value: k, selected: k === fonte.forma }, r)));
+  const inpN = h('input', { class: 'inp fin-n', id: 'fin-nparcelas', type: 'number', min: '1', max: '120', value: fonte.n, readonly: !editando });
+  const inpVenc = h('input', { class: 'inp fin-data', id: 'fin-vencimento', type: 'date', value: fonte.venc, readonly: !editando });
+  const cN = campo('fin-nparcelas', 'Parcelas', inpN);
+  const cVenc = campo('fin-vencimento', 'Vencimento', inpVenc);
+  const ajustar = () => {
+    const forma = selForma.value;
+    cN.hidden = forma !== 'parcelado';
+    cVenc.hidden = forma === 'etapas';
+    cVenc.querySelector('.rot').textContent = forma === 'parcelado' ? '1º vencimento' : 'Vencimento';
   };
-  // honorários contratados
-  const hon = h('input', { class: 'inp fin-valor', id: 'fin-honorarios', inputmode: 'decimal', value: f.honorarios ? BRL.format(f.honorarios).replace(/^R\$\s?/, '') : '', placeholder: '0,00', 'aria-label': 'Honorários contratados' });
-  hon.addEventListener('change', () => {
-    const v = lerValor(hon.value);
-    if (isNaN(v)) { toast('Valor inválido. Use, por exemplo, 3.500,00'); hon.value = f.honorarios ? BRL.format(f.honorarios).replace(/^R\$\s?/, '') : ''; return; }
-    f.honorarios = v; hon.value = v ? BRL.format(v).replace(/^R\$\s?/, '') : ''; salvar(); desenhar();
-  });
-  // o próprio quadro de honorários é editável
-  const tileHon = h('label', { class: 'fin-tile', for: 'fin-honorarios' }, h('span', { class: 'rot' }, 'Honorários (R$)'), hon);
-  // novo lançamento
-  const tipo = h('select', { class: 'inp', id: 'fin-tipo' }, h('option', { value: 'recebimento' }, 'Recebimento'), h('option', { value: 'despesa' }, 'Despesa'));
-  const data = h('input', { class: 'inp', type: 'date', id: 'fin-data', value: hoje() });
-  const desc = h('input', { class: 'inp', id: 'fin-desc', placeholder: 'Ex.: 1ª parcela dos honorários; certidão de matrícula', autocomplete: 'off' });
-  const valor = h('input', { class: 'inp', id: 'fin-valor', inputmode: 'decimal', placeholder: '0,00', style: 'font-family:var(--f-mono)', autocomplete: 'off' });
-  const form = h('form', { class: 'fin-form' },
-    h('label', { class: 'campo', for: 'fin-tipo' }, h('span', { class: 'rot' }, 'Tipo'), tipo),
-    h('label', { class: 'campo', for: 'fin-data' }, h('span', { class: 'rot' }, 'Data'), data),
-    h('label', { class: 'campo fin-desc', for: 'fin-desc' }, h('span', { class: 'rot' }, 'Descrição'), desc),
-    h('label', { class: 'campo', for: 'fin-valor' }, h('span', { class: 'rot' }, 'Valor (R$)'), valor),
-    h('button', { type: 'submit', class: 'btn btn-prim' }, ico('mais'), 'Lançar'));
-  form.addEventListener('submit', ev => {
-    ev.preventDefault();
-    const v = lerValor(valor.value);
-    if (isNaN(v)) { toast('Valor inválido. Use, por exemplo, 1.234,56'); valor.focus(); return; }
-    if (!v || v <= 0) { toast('Informe um valor maior que zero, por exemplo 350,00'); valor.focus(); return; }
-    f.lancamentos.push({ id: uid('fi'), tipo: tipo.value, data: data.value || hoje(), descricao: desc.value.trim(), valor: v });
-    salvar(); desc.value = ''; valor.value = ''; desenhar(); desc.focus();
-  });
-  desenhar();
-  return h('section', { class: 'bloco' }, resumo, form, tabela);
+  ajustar();
+  if (editando) {
+    inpHon.addEventListener('input', () => { rasc.hon = inpHon.value; });
+    selForma.addEventListener('change', () => { rasc.forma = selForma.value; ajustar(); });
+    inpN.addEventListener('input', () => { rasc.n = inpN.value; });
+    inpVenc.addEventListener('input', () => { rasc.venc = inpVenc.value; });
+  }
+  const salvarContrato = () => {
+    const v = lerValor(rasc.hon), n = parseInt(rasc.n, 10);
+    if (isNaN(v)) { toast('Valor inválido. Use, por exemplo, 30.000,00'); inpHon.focus(); return; }
+    if (rasc.forma === 'parcelado' && !(n >= 1 && n <= 120)) { toast('Informe de 1 a 120 parcelas.'); inpN.focus(); return; }
+    const recebidas = f.parcelas.filter(x => x.pagamentos.length).reduce((a, x) => a + centavos(x.valor), 0);
+    if (rasc.forma !== 'etapas' && centavos(v) < recebidas) { toast(`Os honorários não podem ficar abaixo das parcelas já recebidas (${fmtBRL(reais(recebidas))}).`); inpHon.focus(); return; }
+    Object.assign(f, { honorarios: v, forma: rasc.forma, nParcelas: rasc.forma === 'parcelado' ? n : f.nParcelas, vencimento: rasc.venc });
+    gerarParcelas(f);
+    registrarAndamento(p, `Contrato de honorários: ${fmtBRL(v)}, ${descForma(f)}.`);
+    ui.editFin = null; ui.rascFin = null;
+    salvar(); renderDetalhe();
+    toast('Contrato salvo.');
+  };
+  const contrato = h('fieldset', { class: 'ident fin-contrato' }, h('legend', null, 'Contrato'),
+    h('div', { class: 'fin-campos' },
+      campo('fin-honorarios', 'Honorários (R$)', inpHon), campo('fin-forma', 'Pagamento', selForma), cN, cVenc,
+      h('div', { class: 'fin-edicao' },
+        btn('Editar', { icone: 'nota', disabled: editando, onclick: () => {
+          ui.editFin = p.id; ui.rascFin = null; renderDetalhe();
+          const j = J; requestAnimationFrame(() => { usar(j); const x = $('#fin-honorarios'); if (x) x.focus(); });
+        } }),
+        btn('Salvar', { icone: 'salvar', disabled: !editando, onclick: salvarContrato }))));
+
+  // resumo numa linha e a barra do quanto do contrato já foi quitado
+  const t = totaisFinanceiro(f);
+  const item = (rot, v, cls) => h('span', { class: 'fin-item' + (cls ? ' ' + cls : '') }, rot + ' ', h('b', null, fmtBRL(v)));
+  const pct = t.contratado ? Math.min(100, Math.round((t.recebido + t.retido) * 100 / t.contratado)) : 0;
+  const somaParcelas = f.parcelas.reduce((a, x) => a + centavos(x.valor), 0);
+  const resumo = h('div', { class: 'fin-resumo' },
+    h('div', { class: 'fin-linha' },
+      item('Contratado', t.contratado), item('Recebido', t.recebido, t.recebido ? 'pos' : ''), t.retido ? item('Retido', t.retido) : null,
+      item('A receber', t.aReceber), t.vencido ? item('Vencido', t.vencido, 'neg') : null,
+      item('Despesas', t.despesas), item('Saldo', t.saldo, t.saldo < 0 ? 'neg' : '')),
+    t.contratado ? h('div', { class: 'fin-barra', role: 'progressbar', 'aria-label': 'Contrato quitado', 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-valuenow': String(pct) },
+      h('i', { style: `width:${pct}%` }), h('span', null, pct + '%')) : null,
+    f.parcelas.length && somaParcelas !== centavos(f.honorarios)
+      ? h('p', { class: 'nota fin-aviso' }, ico('aviso'), h('span', null, `As parcelas somam ${fmtBRL(reais(somaParcelas))} e o contrato é de ${fmtBRL(f.honorarios)}.`)) : null);
+
+  // formulário pequeno à frente da janela (Receber, parcela, despesa)
+  const campoDlg = (id, rot, attrs = {}) => {
+    const inp = h('input', Object.assign({ class: 'inp', id, autocomplete: 'off' }, attrs));
+    return { inp, el: campo(id, rot, inp) };
+  };
+  const formulario = (titulo, campos, aoSalvar) => {
+    const form = h('form', { class: 'fin-dlg' }, campos.map(c => c.el),
+      h('div', { class: 'fin-dlg-bts' }, h('button', { type: 'submit', class: 'btn' }, ico('salvar'), 'Salvar'), btn('Cancelar', { onclick: () => fecharDialogo() })));
+    form.addEventListener('submit', ev => { ev.preventDefault(); if (aoSalvar() !== false) fecharDialogo(); });
+    abrirDialogo({ titulo, conteudo: form, largura: '440px', aoFechar: renderDetalhe });
+    const prim = campos.find(c => c.inp.type !== 'date') || campos[0];
+    prim.inp.focus(); if (prim.inp.select) prim.inp.select();
+  };
+  const lerOuAvisar = (c, obrigatorio) => {
+    const v = lerValor(c.inp.value);
+    if (isNaN(v)) { toast('Valor inválido. Use, por exemplo, 1.234,56'); c.inp.focus(); return null; }
+    if (obrigatorio && !(v > 0)) { toast('Informe um valor maior que zero.'); c.inp.focus(); return null; }
+    return v;
+  };
+
+  // parcelas
+  const receber = x => {
+    const falta = reais(faltaDe(x));
+    const cData = campoDlg('fin-r-data', 'Data do pagamento', { type: 'date', value: hoje() });
+    const cValor = campoDlg('fin-r-valor', 'Valor recebido (R$)', { inputmode: 'decimal', value: valorTxt(falta) });
+    const cRet = campoDlg('fin-r-ret', 'Retenção de impostos (R$)', { inputmode: 'decimal' });
+    const cDoc = campoDlg('fin-r-doc', 'Documento (NF, empenho, comprovante)');
+    formulario('Receber ' + rotParcela(f, x), [cData, cValor, cRet, cDoc], () => {
+      const v = lerOuAvisar(cValor), r = v == null ? null : lerOuAvisar(cRet);
+      if (v == null || r == null) return false;
+      if (centavos(v) + centavos(r) <= 0) { toast('Informe o valor recebido.'); cValor.inp.focus(); return false; }
+      if (centavos(v) + centavos(r) > faltaDe(x)) { toast(`O valor passa do que falta nesta parcela (${fmtBRL(falta)}).`); cValor.inp.focus(); return false; }
+      const data = cData.inp.value || hoje(), doc = cDoc.inp.value.trim();
+      x.pagamentos.push({ id: uid('pg'), data, valor: v, retencao: r, documento: doc });
+      registrarAndamento(p, `Recebida a ${rotParcela(f, x)}: ${fmtBRL(v)}${r ? `, com retenção de ${fmtBRL(r)}` : ''}${doc ? ` (${doc})` : ''}.`, data);
+      salvar(); toast('Recebimento registrado.');
+    });
+  };
+  const editarParcela = x => {
+    const cDesc = campoDlg('fin-p-desc', 'Descrição', { value: x ? x.descricao : '' });
+    const cVenc = campoDlg('fin-p-venc', 'Vencimento', { type: 'date', value: x ? x.vencimento : '' });
+    const cValor = campoDlg('fin-p-valor', 'Valor (R$)', { inputmode: 'decimal', value: x ? valorTxt(x.valor) : '' });
+    formulario(x ? 'Editar ' + rotParcela(f, x) : 'Nova parcela', [cDesc, cVenc, cValor], () => {
+      const v = lerOuAvisar(cValor, true);
+      if (v == null) return false;
+      const alvo = x || { id: uid('pa'), pagamentos: [] };
+      Object.assign(alvo, { descricao: cDesc.inp.value.trim(), vencimento: cVenc.inp.value, valor: v });
+      if (!x) { f.parcelas.push(alvo); sel.parcelas = alvo.id; }
+      // parcelas definidas à mão: o contrato passa a "por etapas" e não as refaz
+      f.forma = 'etapas';
+      salvar(); toast(x ? 'Parcela alterada.' : 'Parcela incluída.');
+    });
+  };
+  // despesas
+  const editarDespesa = x => {
+    const cData = campoDlg('fin-d-data', 'Data', { type: 'date', value: x ? x.data : hoje() });
+    const cDesc = campoDlg('fin-d-desc', 'Descrição', { value: x ? x.descricao : '' });
+    const cValor = campoDlg('fin-d-valor', 'Valor (R$)', { inputmode: 'decimal', value: x ? valorTxt(x.valor) : '' });
+    formulario(x ? 'Editar despesa' : 'Nova despesa', [cData, cDesc, cValor], () => {
+      const v = lerOuAvisar(cValor, true);
+      if (v == null) return false;
+      const alvo = x || { id: uid('de') };
+      Object.assign(alvo, { data: cData.inp.value || hoje(), descricao: cDesc.inp.value.trim(), valor: v });
+      if (!x) { f.despesas.push(alvo); sel.despesas = alvo.id; }
+      salvar(); toast(x ? 'Despesa alterada.' : 'Despesa lançada.');
+    });
+  };
+
+  // grades no padrão das pesquisas: um clique marca, dois cliques (ou Enter) abrem
+  const aba = ui.finAba === 'despesas' ? 'despesas' : 'parcelas';
+  if (!f.parcelas.some(x => x.id === sel.parcelas)) sel.parcelas = null;
+  if (!f.despesas.some(x => x.id === sel.despesas)) sel.despesas = null;
+  const grade = h('ul', { class: 'itens grade' });
+  const bts = h('div', { class: 'fin-bts' });
+  const marcado = () => (aba === 'parcelas' ? f.parcelas : f.despesas).find(x => x.id === sel[aba]);
+  const atualizarBts = () => {
+    const x = marcado();
+    for (const b of bts.querySelectorAll('[data-quando]')) if (!b.dataset.armado) b.disabled = !(x && { sel: true, aberta: x.pagamentos && faltaDe(x) > 0, paga: x.pagamentos && x.pagamentos.length > 0, livre: !x.pagamentos || !x.pagamentos.length }[b.dataset.quando]);
+  };
+  const daSel = (rot, icone, quando, acao) => { const b = btn(rot, { icone, disabled: true, onclick: ev => { const x = marcado(); if (x) acao(x, ev.currentTarget); } }); b.dataset.quando = quando; return b; };
+  const linha = (id, cels, abrir) => h('li', null, h('button', {
+    type: 'button', class: 'item linha g-' + aba, 'aria-current': String(id === sel[aba]),
+    onclick: ev => { sel[aba] = id; for (const b of grade.querySelectorAll('.item')) b.setAttribute('aria-current', String(b === ev.currentTarget)); atualizarBts(); },
+    ondblclick: abrir, onkeydown: ev => { if (ev.key === 'Enter') { ev.preventDefault(); abrir(); } }
+  }, cels));
+  if (aba === 'parcelas') {
+    const linhas = parcelasOrdenadas(f).map(({ x, num }) => {
+      const [sit, cls] = situacaoParcela(x);
+      const rec = x.pagamentos.reduce((a, y) => a + centavos(y.valor), 0), ret = x.pagamentos.reduce((a, y) => a + centavos(y.retencao), 0);
+      const ult = x.pagamentos[x.pagamentos.length - 1];
+      return linha(x.id, [
+        cel('Parcela', num + (x.descricao ? ' – ' + x.descricao : '')), cel('Vencimento', fmtData(x.vencimento)), cel('Valor', fmtBRL(x.valor), 'num'),
+        cel('Recebido em', ult ? fmtData(ult.data) : ''), cel('Valor recebido', x.pagamentos.length ? fmtBRL(reais(rec)) + (ret ? ' + ' + fmtBRL(reais(ret)) + ' retido' : '') : '', 'num'),
+        cel('Documento', x.pagamentos.map(y => y.documento).filter(Boolean).join(', ')), cel('Situação', sit, 'sit ' + cls)
+      ], () => { if (faltaDe(x)) receber(x); else if (!x.pagamentos.length) editarParcela(x); });
+    });
+    grade.replaceChildren(cabGrade('parcelas'), ...(linhas.length ? linhas : [h('li', { class: 'lat-vazio' }, 'Nenhuma parcela.')]));
+    bts.replaceChildren(
+      daSel('Receber', 'check', 'aberta', receber),
+      daSel('Estornar', 'desfazer', 'paga', (x, b) => armar(b, () => {
+        const y = x.pagamentos.pop();
+        registrarAndamento(p, `Estornado o recebimento de ${fmtBRL(y.valor)} de ${fmtData(y.data)} da ${rotParcela(f, x)}.`);
+        salvar(); renderDetalhe(); toast('Recebimento estornado.');
+      })),
+      h('span', { class: 'fin-sep' }),
+      btn('Nova parcela', { icone: 'mais', onclick: () => editarParcela(null) }),
+      daSel('Editar', 'nota', 'livre', editarParcela),
+      daSel('Excluir', 'lixo', 'livre', (x, b) => armar(b, () => {
+        f.parcelas = f.parcelas.filter(y => y !== x); f.forma = 'etapas'; sel.parcelas = null;
+        salvar(); renderDetalhe(); toast('Parcela excluída.');
+      })));
+  } else {
+    const linhas = f.despesas.slice().sort((a, b) => String(b.data).localeCompare(String(a.data)))
+      .map(x => linha(x.id, [cel('Data', fmtData(x.data)), cel('Descrição', x.descricao), cel('Valor', fmtBRL(x.valor), 'num')], () => editarDespesa(x)));
+    grade.replaceChildren(cabGrade('despesas'), ...(linhas.length ? linhas : [h('li', { class: 'lat-vazio' }, 'Nenhuma despesa.')]));
+    bts.replaceChildren(
+      btn('Nova despesa', { icone: 'mais', onclick: () => editarDespesa(null) }),
+      daSel('Editar', 'nota', 'sel', editarDespesa),
+      daSel('Excluir', 'lixo', 'sel', (x, b) => armar(b, () => {
+        f.despesas = f.despesas.filter(y => y !== x); sel.despesas = null;
+        salvar(); renderDetalhe(); toast('Despesa excluída.');
+      })));
+  }
+  atualizarBts();
+  const abas = h('div', { class: 'pr-abas sub-abas', role: 'tablist', 'aria-label': 'Financeiro' },
+    [['parcelas', 'Parcelas'], ['despesas', 'Despesas']].map(([k, r]) => h('button', {
+      type: 'button', class: 'pr-aba', role: 'tab', id: 'fin-aba-' + k, 'aria-selected': String(aba === k), onclick: () => { ui.finAba = k; renderDetalhe(); }
+    }, r)));
+  return h('section', { class: 'fin' }, contrato, resumo, h('div', null, abas, grade, bts));
 }
 function renderNovoProtocolo() {
   const d = $('#detalhe');
