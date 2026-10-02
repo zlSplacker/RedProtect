@@ -1511,6 +1511,8 @@ function opcoesTabela(id, atual) {
 }
 const txt = v => String(v ?? '');
 const SEXOS = ['Feminino', 'Masculino'];
+// modalidade da Reurb da pessoa: de interesse social (não paga) ou de interesse específico (paga) — Lei 13.465/2017, art. 13
+const MODALIDADES = [['S', 'Reurb-S (gratuita)'], ['E', 'Reurb-E (paga)']];
 const qualidadeParte = x => (D().pessoas[x.pessoaId] || {}).qualidade || x.qualidade;
 const REGIMES = ['Comunhão parcial de bens', 'Comunhão universal de bens', 'Separação convencional de bens', 'Separação obrigatória de bens', 'Participação final nos aquestos'];
 const TIPOS_LOGRADOURO = ['Rua', 'Avenida', 'Travessa', 'Alameda', 'Praça', 'Rodovia', 'Estrada', 'Linha', 'Viela', 'Chácara', 'Sítio', 'Outro'];
@@ -1539,7 +1541,7 @@ function normalizarPessoa(p) {
   }
   return {
     id: txt(p.id) || uid('pe'), tipo: p.tipo === 'juridica' ? 'juridica' : 'fisica',
-    nome: txt(p.nome), nomeSocial: txt(p.nomeSocial), qualidade: txt(p.qualidade), dataNasc: txt(p.dataNasc), dataObito: txt(p.dataObito),
+    nome: txt(p.nome), nomeSocial: txt(p.nomeSocial), qualidade: txt(p.qualidade), modalidade: p.modalidade === 'S' || p.modalidade === 'E' ? p.modalidade : '', dataNasc: txt(p.dataNasc), dataObito: txt(p.dataObito),
     documento: txt(p.documento), rg: txt(p.rg), passaporte: txt(p.passaporte), sexo: txt(p.sexo),
     telefone: txt(p.telefone ?? p.contato), celular: txt(p.celular), email: txt(p.email), cnh: txt(p.cnh), profissao: txt(p.profissao),
     estadoCivil: txt(p.estadoCivil), nacionalidade: txt(p.nacionalidade), naturalidade: txt(p.naturalidade), certidaoNascimento: txt(p.certidaoNascimento),
@@ -1952,7 +1954,7 @@ function renderItens() {
   } else if (aba === 'pessoas') {
     todos = pessoasOrdenadas();
     const protsDe = new Map(todos.map(p => [p.id, protocolosDaPessoa(p.id).map(pr => pr.numero)]));
-    vis = todos.filter(p => !termo || norm([p.nome, p.qualidade, p.documento, p.rg, p.passaporte, p.cnh, p.email, ...protsDe.get(p.id)].join(' ')).includes(termo)
+    vis = todos.filter(p => !termo || norm([p.nome, p.qualidade, p.modalidade && 'Reurb-' + p.modalidade, p.documento, p.rg, p.passaporte, p.cnh, p.email, ...protsDe.get(p.id)].join(' ')).includes(termo)
       || (termo.replace(/\D/g, '') && String(p.documento).replace(/\D/g, '').includes(termo.replace(/\D/g, ''))));
     for (const p of vis) itens.push(linha('pessoas', p.id, [cel('Nome', p.nome), cel(p.tipo === 'juridica' ? 'CNPJ' : 'CPF', p.documento),
       cel('Protocolo vinculado', protsDe.get(p.id).join(', ')), cel('', sel && sel.partes.some(x => x.pessoaId === p.id) ? 'No protocolo' : '', 'cel-marca')]));
@@ -2588,7 +2590,7 @@ function renderProtocolo(p) {
       onkeydown: ev => { if (ev.key === 'Enter') { ev.preventDefault(); if (l.pe) irPara('pessoas', l.pe.id); else irPara('imoveis', l.imoveis[0].id); } }
     },
       h('span', { class: 'pi-pes' + (l.pe ? '' : ' pi-vazio') }, l.pe
-        ? trecho([['Nome', l.pe.nome], [l.pe.tipo === 'juridica' ? 'CNPJ' : 'CPF', l.pe.documento], ['', l.qual]])
+        ? trecho([['Nome', l.pe.nome], [l.pe.tipo === 'juridica' ? 'CNPJ' : 'CPF', l.pe.documento], ['', l.qual], ...(l.pe.modalidade ? [['', 'Reurb-' + l.pe.modalidade]] : [])])
         : 'Sem parte'),
       h('span', { class: 'pi-im' }, l.imoveis.length
         ? l.imoveis.map(i => h('span', { class: 'pi-imovel', 'data-im': i.id }, trecho(paresLote(i))))
@@ -4220,9 +4222,9 @@ function renderPessoa(pe) {
 
   // dados pessoais
   const dados = pj
-    ? [c('nome', 'Razão social', 6), c('documento', 'CNPJ', 3, 'text', { mascara: 'cnpj', validar: validarCnpj }), c('qualidade', 'Qualidade', 3, 'select', { opcoes: opcoesTabela('qualidade', fp.qualidade) }),
+    ? [c('nome', 'Razão social', 5), c('documento', 'CNPJ', 3, 'text', { mascara: 'cnpj', validar: validarCnpj }), c('qualidade', 'Qualidade', 2, 'select', { opcoes: opcoesTabela('qualidade', fp.qualidade) }), c('modalidade', 'Modalidade', 2, 'select', { opcoes: MODALIDADES }),
       c('celular', 'Celular', 4, 'text', { mascara: 'cel' }), c('email', 'E-mail', 8, 'text', { inputmode: 'email' })]
-    : [c('nome', 'Nome', 5), c('qualidade', 'Qualidade', 3, 'select', { opcoes: opcoesTabela('qualidade', fp.qualidade) }), c('dataNasc', 'Data de nascimento', 2, 'date'), c('dataObito', 'Data de óbito', 2, 'date'),
+    : [c('nome', 'Nome', 4), c('qualidade', 'Qualidade', 2, 'select', { opcoes: opcoesTabela('qualidade', fp.qualidade) }), c('modalidade', 'Modalidade', 2, 'select', { opcoes: MODALIDADES }), c('dataNasc', 'Data de nascimento', 2, 'date'), c('dataObito', 'Data de óbito', 2, 'date'),
       c('documento', 'CPF', 3, 'text', { mascara: 'cpf', validar: validarCpf }), c('rg', 'RG', 3),
       c('sexo', 'Sexo', 3, 'select', { opcoes: SEXOS }), c('celular', 'Celular', 3, 'text', { mascara: 'cel' }),
       c('email', 'E-mail', 4, 'text', { inputmode: 'email' }), c('cnh', 'CNH', 3), c('profissao', 'Profissão', 5),
@@ -5228,7 +5230,13 @@ const deMenu = b => { fecharMenus(); b.blur(); const it = b.closest('.mb-item');
 $('#bk-exportar').addEventListener('click', ev => { deMenu(ev.currentTarget); exportarBackup(); });
 $('#bk-importar').addEventListener('click', ev => { deMenu(ev.currentTarget); $('#arquivo').click(); });
 /* barra de ícones: cada botão aciona a opção de menu correspondente */
-for (const b of document.querySelectorAll('.fb')) b.addEventListener('click', () => document.getElementById(b.dataset.alvo).click());
+// (o menu da opção não fica suprimido: o mouse não passou por ele)
+for (const b of document.querySelectorAll('.fb')) b.addEventListener('click', () => {
+  const alvo = document.getElementById(b.dataset.alvo);
+  alvo.click();
+  const it = alvo.closest('.mb-item');
+  if (it) it.classList.remove('suprimir');
+});
 /* logotipo: marca-d'água da área de trabalho e ícone das janelas */
 const logo = document.querySelector('.marca img').getAttribute('src');
 document.querySelector('.marca-dagua img').src = logo;
