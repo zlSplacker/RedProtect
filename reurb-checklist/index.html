@@ -1762,6 +1762,22 @@ function registroSel(col) {
   const id = ui.sel[col], r = ui.rascunho;
   return D()[col][id] || (r && r.col === col && r.obj.id === id ? r.obj : null);
 }
+/* fichas já salvas dos indicadores ficam travadas: Editar abre uma cópia de trabalho da ficha e só o Salvar grava */
+const edicao = (col, r) => (ui.edReg && ui.edReg.col === col && ui.edReg.id === r.id ? ui.edReg : null);
+function editarRegistro(col, r, normalizar, foco) {
+  ui.edReg = { col, id: r.id, obj: normalizar(clone(r)) };
+  renderDetalhe();
+  const j = J;
+  requestAnimationFrame(() => { usar(j); const f = $(foco); if (f) f.focus(); });
+}
+// trava os campos (a troca de abas e o botão de abrir o cônjuge continuam valendo)
+function travar(raiz) {
+  for (const el of raiz.querySelectorAll('input, textarea, select, button')) {
+    if (el.matches('.pr-aba, [data-livre]')) continue;
+    if (el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && el.type !== 'checkbox' && el.type !== 'radio')) el.readOnly = true;
+    else el.disabled = true;
+  }
+}
 function gravarRegistro(col, obj) {
   const r = ui.rascunho;
   if (r && r.obj === obj && r.noBotao) return;
@@ -1782,7 +1798,7 @@ function garantirSelecao() {
 function mostrarDetalhe(sim) { J.el.classList.toggle('ver-detalhe', !!sim); }
 const emDetalhe = () => J.el.classList.contains('ver-detalhe');
 function voltarBtn() {
-  return btn('Voltar à lista', { icone: 'voltar', fant: true, sm: true, onclick: () => { J.direto = false; ui.criando = false; mostrarDetalhe(false); renderItens(); rolarTopo(); } });
+  return btn('Voltar à lista', { icone: 'voltar', fant: true, sm: true, onclick: () => { J.direto = false; ui.criando = false; ui.edReg = null; mostrarDetalhe(false); renderItens(); rolarTopo(); } });
 }
 // Cancelar: a janela aberta direto no formulário fecha; a que veio da lista volta para ela
 function cancelar() {
@@ -1904,7 +1920,7 @@ function renderItens() {
   const lista = $('#itens');
   if (Store.modo === 'carregando' || aba === 'modelosMinuta') { lista.replaceChildren(); atualizarTitulo(); return; }
   const marca = ui.marca || (ui.marca = {});
-  const abrirItem = (col, id) => () => { marca[col] = id; ui.sel[col] = id; ui.criando = false; if (col === 'pessoas') ui.abaPe = 'cadastro'; mostrarDetalhe(true); renderItens(); renderDetalhe(); rolarTopo(); };
+  const abrirItem = (col, id) => () => { marca[col] = id; ui.sel[col] = id; ui.criando = false; ui.edReg = null; if (col === 'pessoas') ui.abaPe = 'cadastro'; mostrarDetalhe(true); renderItens(); renderDetalhe(); rolarTopo(); };
   // janela aberta pelo Adicionar (do protocolo ou da Propriedade de uma pessoa): dois cliques (ou Enter) adicionam
   const sel = ui.selecionar && D().protocolos[ui.selecionar.protocoloId];
   const dono = ui.selecionar && ui.selecionar.pessoaId ? pessoaAlvo(ui.selecionar) : null;
@@ -4105,6 +4121,7 @@ function novoRegistro(col, base, aoSalvar, naMesma) {
   const obj = col === 'pessoas' ? normalizarPessoa(base || {}) : normalizarImovel(base || {});
   if (!(naMesma && J && ui.aba === col)) abrirJanela({ aba: col });
   ui.rascunho = { col, obj, aoSalvar, noBotao: true };
+  ui.edReg = null;
   ui.abaPe = 'cadastro';
   ui.criando = false; ui.sel[col] = obj.id;
   mostrarDetalhe(true);
@@ -4185,46 +4202,43 @@ function excluirPessoa(pe) {
 function excluirRegistro(col, obj, msg) {
   if (D()[col][obj.id]) Store.remover(col, obj.id);
   if (ui.rascunho && ui.rascunho.obj === obj) ui.rascunho = null;
+  ui.edReg = null;
   ui.sel[col] = null; garantirSelecao(); mostrarDetalhe(false); renderTudo();
   toast(msg);
 }
 function renderPessoa(pe) {
   const d = $('#detalhe');
   const pj = pe.tipo === 'juridica';
+  // pessoa nova: campos livres; pessoa salva: travados até o Editar, que edita uma cópia (fp) gravada só no Salvar
+  const salvo = !!D().pessoas[pe.id], ed = edicao('pessoas', pe), editando = !salvo || !!ed, fp = ed ? ed.obj : pe;
   const aoMudar = () => {
-    gravarRegistro('pessoas', pe);
+    if (!ed) gravarRegistro('pessoas', pe);
     renderItens();
   };
-  const c = (k, rot, span, tipo = 'text', opts = {}) => campoReg(pe, 'pe', k, rot, tipo, Object.assign({ aoMudar, span }, opts));
-  const ck = (k, rot) => campoCheck(pe, 'pe', k, rot, aoMudar);
+  const c = (k, rot, span, tipo = 'text', opts = {}) => campoReg(fp, 'pe', k, rot, tipo, Object.assign({ aoMudar, span }, opts));
+  const ck = (k, rot) => campoCheck(fp, 'pe', k, rot, aoMudar);
 
   // dados pessoais
   const dados = pj
-    ? [c('nome', 'Razão social', 6), c('documento', 'CNPJ', 3, 'text', { mascara: 'cnpj', validar: validarCnpj }), c('qualidade', 'Qualidade', 3, 'select', { opcoes: opcoesTabela('qualidade', pe.qualidade) }),
+    ? [c('nome', 'Razão social', 6), c('documento', 'CNPJ', 3, 'text', { mascara: 'cnpj', validar: validarCnpj }), c('qualidade', 'Qualidade', 3, 'select', { opcoes: opcoesTabela('qualidade', fp.qualidade) }),
       c('celular', 'Celular', 4, 'text', { mascara: 'cel' }), c('email', 'E-mail', 8, 'text', { inputmode: 'email' })]
-    : [c('nome', 'Nome', 5), c('qualidade', 'Qualidade', 3, 'select', { opcoes: opcoesTabela('qualidade', pe.qualidade) }), c('dataNasc', 'Data de nascimento', 2, 'date'), c('dataObito', 'Data de óbito', 2, 'date'),
+    : [c('nome', 'Nome', 5), c('qualidade', 'Qualidade', 3, 'select', { opcoes: opcoesTabela('qualidade', fp.qualidade) }), c('dataNasc', 'Data de nascimento', 2, 'date'), c('dataObito', 'Data de óbito', 2, 'date'),
       c('documento', 'CPF', 3, 'text', { mascara: 'cpf', validar: validarCpf }), c('rg', 'RG', 3),
       c('sexo', 'Sexo', 3, 'select', { opcoes: SEXOS }), c('celular', 'Celular', 3, 'text', { mascara: 'cel' }),
       c('email', 'E-mail', 4, 'text', { inputmode: 'email' }), c('cnh', 'CNH', 3), c('profissao', 'Profissão', 5),
-      c('estadoCivil', 'Estado civil', 4, 'select', { opcoes: opcoesTabela('estadoCivil', pe.estadoCivil) }), c('nacionalidade', 'Nacionalidade', 4, 'text', { lista: 'lista-nacionalidades' }),
+      c('estadoCivil', 'Estado civil', 4, 'select', { opcoes: opcoesTabela('estadoCivil', fp.estadoCivil) }), c('nacionalidade', 'Nacionalidade', 4, 'text', { lista: 'lista-nacionalidades' }),
       c('certidaoNascimento', 'Certidão de nascimento', 4, 'text', { placeholder: 'Matrícula ou livro, folha e termo' })];
   const blocos = [h('fieldset', { class: 'ident grade12' }, h('legend', null, pj ? 'Dados da pessoa jurídica' : 'Dados pessoais'), dados)];
 
   // casamento
   if (!pj) {
     const conjuge = h('select', { class: 'inp', id: 'pe-conjugeId' }, h('option', { value: '' }),
-      pessoasOrdenadas().filter(x => x.id !== pe.id && x.tipo === 'fisica').map(x => h('option', { value: x.id, selected: x.id === pe.conjugeId }, (x.nome || 'Sem nome') + (x.documento ? ' · ' + x.documento : ''))));
-    const definirConjuge = novoId => {
-      const antigo = D().pessoas[pe.conjugeId];
-      if (antigo && antigo.conjugeId === pe.id) { antigo.conjugeId = ''; Store.put('pessoas', antigo, 0); }
-      pe.conjugeId = novoId;
-      const outro = D().pessoas[novoId];
-      if (outro && !outro.conjugeId && D().pessoas[pe.id]) { outro.conjugeId = pe.id; Store.put('pessoas', outro, 0); }
-      conjuge.value = novoId;
-      aoMudar('conjugeId');
-    };
+      pessoasOrdenadas().filter(x => x.id !== pe.id && x.tipo === 'fisica').map(x => h('option', { value: x.id, selected: x.id === fp.conjugeId }, (x.nome || 'Sem nome') + (x.documento ? ' · ' + x.documento : ''))));
+    // o cadastro do outro cônjuge acompanha no Salvar
+    const definirConjuge = novoId => { fp.conjugeId = novoId; conjuge.value = novoId; aoMudar('conjugeId'); };
     conjuge.addEventListener('change', () => definirConjuge(conjuge.value));
-    const abrirConj = btn('Abrir cadastro do cônjuge', { icone: 'olho', soIcone: true, onclick: () => { if (pe.conjugeId) irPara('pessoas', pe.conjugeId); } });
+    const abrirConj = btn('Abrir cadastro do cônjuge', { icone: 'olho', soIcone: true, onclick: () => { if (fp.conjugeId) irPara('pessoas', fp.conjugeId); } });
+    abrirConj.dataset.livre = '1';
     const limparConj = btn('Remover cônjuge', { icone: 'x', soIcone: true, onclick: () => definirConjuge('') });
     blocos.push(h('fieldset', { class: 'ident grade12' }, h('legend', null, 'Casamento'),
       c('regimeBens', 'Regime de casamento', 6, 'select', { opcoes: REGIMES }), c('dataCasamento', 'Data do casamento', 3, 'date'),
@@ -4254,7 +4268,8 @@ function renderPessoa(pe) {
     painelEnd.setAttribute('aria-labelledby', idJ('pe-aba-' + ui.abaEnd));
     painelEnd.replaceChildren(...(ui.abaEnd === 'filiacao'
       ? [c('pai', 'Pai', 6), c('mae', 'Mãe', 6)]
-      : camposEndereco(ui.abaEnd === 'profissional' ? pe.enderecoProfissional : pe.enderecoResidencial, 'pe-' + ui.abaEnd)));
+      : camposEndereco(ui.abaEnd === 'profissional' ? fp.enderecoProfissional : fp.enderecoResidencial, 'pe-' + ui.abaEnd)));
+    if (!editando) travar(painelEnd);
   };
   desenharEnd();
   blocos.push(h('section', { class: 'bloco' }, barraEnd, painelEnd));
@@ -4323,6 +4338,20 @@ function renderPessoa(pe) {
     }, rot)));
   const painelPe = h('div', { id: 'pe-painel', role: 'tabpanel', 'aria-labelledby': 'pe-aba-' + ui.abaPe },
     ui.abaPe === 'propriedade' ? blocoPropriedade() : ui.abaPe === 'informacoes' ? blocoInformacoes() : ui.abaPe === 'termos' ? blocoTermos() : h('div', { class: 'reg-pilha compacta' }, blocos));
+  if (!editando && ui.abaPe === 'cadastro') travar(painelPe);
+  const salvarPessoa = () => {
+    const atual = D().pessoas[pe.id];
+    // na edição, arquivos e termos vêm do cadastro gravado (podem ter mudado enquanto se editava)
+    const final = ed ? Object.assign(ed.obj, { arquivos: atual.arquivos, termos: atual.termos }) : pe;
+    // cônjuge: quem deixou de ser cônjuge sai do cadastro do outro; o novo cônjuge, se não tiver um, passa a ter esta pessoa
+    const antigoId = atual ? atual.conjugeId : '';
+    if (antigoId && antigoId !== final.conjugeId) { const a = D().pessoas[antigoId]; if (a && a.conjugeId === pe.id) { a.conjugeId = ''; Store.put('pessoas', a, 0); } }
+    const outro = D().pessoas[final.conjugeId];
+    if (outro && !outro.conjugeId) { outro.conjugeId = pe.id; Store.put('pessoas', outro, 0); }
+    if (!ed) gravarVinculosPendentes(pe);
+    ui.edReg = null;
+    salvarRegistro('pessoas', final, 'Pessoa salva.');
+  };
 
   // Arquivos da pessoa: a mesma janela do protocolo, com os arquivos guardados no próprio indicador
   // (na pessoa ainda não salva, a lista entra no cadastro no Salvar)
@@ -4340,13 +4369,10 @@ function renderPessoa(pe) {
     painelPe,
     // embaixo: Excluir à esquerda, no mesmo tamanho e formato dos outros botões (pessoa nova ainda não existe: não há o que excluir)
     h('div', { class: 'reg-rodape' },
-      D().pessoas[pe.id] && btn('Excluir pessoa', { icone: 'lixo', cls: 'reg-excluir', onclick: ev => armar(ev.currentTarget, () => excluirPessoa(pe)) }),
-      btn('Arquivos', { icone: 'anexo', onclick: abrirArquivosPe }), btn('Salvar', { icone: 'check', prim: true, onclick: () => {
-      const outro = D().pessoas[pe.conjugeId];
-      if (outro && !outro.conjugeId) { outro.conjugeId = pe.id; Store.put('pessoas', outro, 0); }
-      gravarVinculosPendentes(pe);
-      salvarRegistro('pessoas', pe, 'Pessoa salva.');
-    } })));
+      salvo && btn('Excluir pessoa', { icone: 'lixo', cls: 'reg-excluir', onclick: ev => armar(ev.currentTarget, () => excluirPessoa(pe)) }),
+      btn('Arquivos', { icone: 'anexo', onclick: abrirArquivosPe }),
+      btn('Editar', { icone: 'nota', disabled: editando, onclick: () => { ui.abaPe = 'cadastro'; editarRegistro('pessoas', pe, normalizarPessoa, '#pe-nome'); } }),
+      btn('Salvar', { icone: 'check', prim: true, disabled: !editando, onclick: salvarPessoa })));
 }
 /* consulta de CEP (ViaCEP); só no arquivo aberto no navegador, a página publicada não acessa outros sites */
 async function buscarCep(end, pref, cep, depois) {
@@ -4372,20 +4398,22 @@ async function buscarCep(end, pref, cep, depois) {
 }
 function renderImovel(im) {
   const d = $('#detalhe');
-  const titulo = h('h1', { class: 'titulo' }, tituloImovel(im));
-  const sub = h('p', { class: 'subt' }, subImovel(im));
+  // imóvel novo: campos livres; imóvel salvo: travados até o Editar, que edita uma cópia (fi) gravada só no Salvar
+  const salvo = !!D().imoveis[im.id], ed = edicao('imoveis', im), editando = !salvo || !!ed, fi = ed ? ed.obj : im;
+  const titulo = h('h1', { class: 'titulo' }, tituloImovel(fi));
+  const sub = h('p', { class: 'subt' }, subImovel(fi));
   const linksProt = h('div');
   const atualizarLinks = () => linksProt.replaceChildren(botoesProtocolo([D().protocolos[im.protocoloId]].filter(Boolean)) || '');
   atualizarLinks();
   const aoMudar = k => {
-    titulo.textContent = tituloImovel(im);
-    sub.textContent = subImovel(im);
-    gravarRegistro('imoveis', im);
+    titulo.textContent = tituloImovel(fi);
+    sub.textContent = subImovel(fi);
+    if (!ed) gravarRegistro('imoveis', im);
     atualizarLinks();
     renderItens();
     if (k === 'tipo') renderDetalhe();
   };
-  const c = (k, rot, tipo = 'text', opts = {}) => campoReg(im, 'im', k, rot, tipo, Object.assign({ aoMudar }, opts));
+  const c = (k, rot, tipo = 'text', opts = {}) => campoReg(fi, 'im', k, rot, tipo, Object.assign({ aoMudar }, opts));
   const protocolos = protocolosOrdenados();
   const base = [
     c('tipo', 'Tipo', 'select', { semVazio: true, opcoes: Object.entries(TIPOS_IMOVEL) }),
@@ -4413,19 +4441,26 @@ function renderImovel(im) {
       c('municipio', 'Município/UF'), c('logradouro', 'Logradouro e número', 'text', { largo: true })
     ]
   };
-  const campos = [...base, ...porTipo[im.tipo],
+  const campos = [...base, ...porTipo[fi.tipo],
     c('descricao', 'Descrição e confrontações', 'textarea', { largo: true }),
     c('observacoes', 'Observações', 'textarea', { largo: true })
   ];
+  const quadro = h('fieldset', { class: 'ident' }, h('legend', null, 'Identificação do imóvel'), campos);
+  if (!editando) travar(quadro);
   d.replaceChildren(
     h('div', { class: 'cab' },
-      h('div', { class: 'cab-txt' }, voltarBtn(), h('span', { class: 'sobre' }, 'Indicador Real · ' + TIPOS_IMOVEL[im.tipo]), titulo, sub, linksProt)),
-    h('div', { class: 'reg-pilha' },
-      h('fieldset', { class: 'ident' }, h('legend', null, 'Identificação do imóvel'), campos)),
+      h('div', { class: 'cab-txt' }, voltarBtn(), h('span', { class: 'sobre' }, 'Indicador Real · ' + TIPOS_IMOVEL[fi.tipo]), titulo, sub, linksProt)),
+    h('div', { class: 'reg-pilha' }, quadro),
     // embaixo: Excluir à esquerda, no mesmo tamanho e formato dos outros botões (imóvel novo ainda não existe: não há o que excluir)
     h('div', { class: 'reg-rodape' },
-      D().imoveis[im.id] && btn('Excluir imóvel', { icone: 'lixo', cls: 'reg-excluir', onclick: ev => armar(ev.currentTarget, () => excluirRegistro('imoveis', im, 'Imóvel excluído.')) }),
-      btn('Salvar', { icone: 'check', prim: true, onclick: () => salvarRegistro('imoveis', im, 'Imóvel salvo.') })));
+      salvo && btn('Excluir imóvel', { icone: 'lixo', cls: 'reg-excluir', onclick: ev => armar(ev.currentTarget, () => excluirRegistro('imoveis', im, 'Imóvel excluído.')) }),
+      btn('Editar', { icone: 'nota', disabled: editando, onclick: () => editarRegistro('imoveis', im, normalizarImovel, '#im-matricula') }),
+      btn('Salvar', { icone: 'check', prim: true, disabled: !editando, onclick: () => {
+        // na edição, as pessoas vinculadas vêm do cadastro gravado (a Propriedade de cada pessoa cuida delas)
+        const final = ed ? Object.assign(ed.obj, { vinculos: D().imoveis[im.id].vinculos }) : im;
+        ui.edReg = null;
+        salvarRegistro('imoveis', final, 'Imóvel salvo.');
+      } })));
 }
 
 /* ---------- editor de modelo ---------- */
