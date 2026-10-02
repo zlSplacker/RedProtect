@@ -858,6 +858,8 @@ textarea.inp{min-height:40px}
 .campo-auto{border-radius:2px;font:600 .82em/1.4 var(--f-ui)}
 .min-fmt{border-radius:2px;color:#2F6DB5}
 .min-editor .mm-uso{flex:0 1 150px;width:auto}
+/* rótulo só para leitores de tela (o nome já está no título do quadro) */
+.so-leitor{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 /* rodapé do protocolo: Excluir no canto esquerdo, Arquivos no direito */
 .pe-prot{justify-content:space-between;align-items:center}
 /* aba Partes e Imóveis: botões no alto e, abaixo, a lista em duas metades (parte | imóvel) que vai até o rodapé */
@@ -3859,7 +3861,7 @@ function campoReg(obj, prefixo, k, rot, tipo, opts = {}) {
   });
   conferir();
   if (tipo === 'textarea') requestAnimationFrame(() => autoAltura(el));
-  return h('label', { class: 'campo' + (opts.largo ? ' largo' : '') + (opts.span ? ' s' + opts.span : ''), for: id }, h('span', { class: 'rot' }, rot, aviso), opts.junto ? h('div', { class: 'linha-inp' }, el, opts.junto) : el);
+  return h('label', { class: 'campo' + (opts.largo ? ' largo' : '') + (opts.span ? ' s' + opts.span : ''), for: id }, h('span', { class: 'rot' + (opts.semRotulo ? ' so-leitor' : '') }, rot, aviso), opts.junto ? h('div', { class: 'linha-inp' }, el, opts.junto) : el);
 }
 function campoCheck(obj, prefixo, k, rot, aoMudar) {
   const id = prefixo + '-' + k;
@@ -4030,7 +4032,7 @@ function renderPessoa(pe) {
 
   // observação
   blocos.push(h('fieldset', { class: 'ident grade12' }, h('legend', null, 'Observação'),
-    c('observacoes', 'Observação', 12, 'textarea'),
+    c('observacoes', 'Observação', 12, 'textarea', { semRotulo: true }),
     h('div', { style: 'grid-column:1/-1' }, ck('avisoObservacao', 'Mostrar aviso com observação quando consultado?'))));
 
   // Propriedade: imóveis vinculados à pessoa; Adicionar abre a pesquisa do Indicador Real, dois cliques vinculam
