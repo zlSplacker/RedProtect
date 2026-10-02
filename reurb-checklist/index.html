@@ -4227,7 +4227,7 @@ function renderPessoa(pe) {
       c('sexo', 'Sexo', 3, 'select', { opcoes: SEXOS }), c('celular', 'Celular', 3, 'text', { mascara: 'cel' }),
       c('email', 'E-mail', 4, 'text', { inputmode: 'email' }), c('cnh', 'CNH', 3), c('profissao', 'Profissão', 5),
       c('estadoCivil', 'Estado civil', 4, 'select', { opcoes: opcoesTabela('estadoCivil', fp.estadoCivil) }), c('nacionalidade', 'Nacionalidade', 4, 'text', { lista: 'lista-nacionalidades' }),
-      c('certidaoNascimento', 'Certidão de nascimento', 4, 'text', { placeholder: 'Matrícula ou livro, folha e termo' })];
+      c('certidaoNascimento', 'Certidão de nascimento', 4)];
   const blocos = [h('fieldset', { class: 'ident grade12' }, h('legend', null, pj ? 'Dados da pessoa jurídica' : 'Dados pessoais'), dados)];
 
   // casamento
@@ -4243,12 +4243,12 @@ function renderPessoa(pe) {
     blocos.push(h('fieldset', { class: 'ident grade12' }, h('legend', null, 'Casamento'),
       c('regimeBens', 'Regime de casamento', 6, 'select', { opcoes: REGIMES }), c('dataCasamento', 'Data do casamento', 3, 'date'),
       h('div', { class: 'campo s6' }, h('label', { class: 'rot', for: 'pe-conjugeId' }, 'Cônjuge'), h('div', { class: 'linha-inp' }, conjuge, abrirConj, limparConj)),
-      c('pactoAntenupcial', 'Pacto antenupcial', 6, 'text', { placeholder: 'Registro do pacto (livro 3, número)' }),
-      c('certidaoCasamento', 'Certidão de casamento', 8, 'text', { placeholder: 'Matrícula ou livro, folha e termo' })));
+      c('pactoAntenupcial', 'Pacto antenupcial', 6),
+      c('certidaoCasamento', 'Certidão de casamento', 8)));
   }
 
-  // endereços e filiação em abas
-  const abasEnd = pj ? [['residencial', 'Endereço']] : [['residencial', 'Endereço Residencial'], ['profissional', 'Endereço Profissional'], ['filiacao', 'Filiação']];
+  // endereço residencial e filiação em abas (o endereço profissional não aparece mais; o que já estava gravado continua no cadastro)
+  const abasEnd = pj ? [['residencial', 'Endereço']] : [['residencial', 'Endereço Residencial'], ['filiacao', 'Filiação']];
   if (!abasEnd.some(([k]) => k === ui.abaEnd)) ui.abaEnd = 'residencial';
   const painelEnd = h('div', { class: 'grade12', role: 'tabpanel', id: 'pe-painel-end' });
   const barraEnd = h('div', { class: 'pr-abas sub-abas', role: 'tablist', 'aria-label': 'Endereços e filiação' });
@@ -4268,7 +4268,7 @@ function renderPessoa(pe) {
     painelEnd.setAttribute('aria-labelledby', idJ('pe-aba-' + ui.abaEnd));
     painelEnd.replaceChildren(...(ui.abaEnd === 'filiacao'
       ? [c('pai', 'Pai', 6), c('mae', 'Mãe', 6)]
-      : camposEndereco(ui.abaEnd === 'profissional' ? fp.enderecoProfissional : fp.enderecoResidencial, 'pe-' + ui.abaEnd)));
+      : camposEndereco(fp.enderecoResidencial, 'pe-residencial')));
     if (!editando) travar(painelEnd);
   };
   desenharEnd();
@@ -4429,7 +4429,7 @@ function renderImovel(im) {
       c('area', 'Área (m²)', 'text', decimal), c('areaConstruida', 'Construção (m²)', 'text', decimal)
     ],
     rural: [
-      c('denominacao', 'Denominação do imóvel', 'text', { largo: true, placeholder: 'Ex.: Sítio Santa Luzia' }),
+      c('denominacao', 'Denominação do imóvel', 'text', { largo: true }),
       c('localidade', 'Localidade ou distrito'), c('municipio', 'Município/UF'), c('area', 'Área (ha)', 'text', decimal),
       c('ccir', 'Código do imóvel no INCRA (CCIR)'), c('nirf', 'NIRF / CIB'), c('car', 'CAR'),
       c('sigef', 'Certificação SIGEF')
