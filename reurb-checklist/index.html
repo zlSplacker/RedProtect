@@ -3831,7 +3831,7 @@ function campoReg(obj, prefixo, k, rot, tipo, opts = {}) {
   const id = prefixo + '-' + k;
   let el;
   if (tipo === 'select') el = h('select', { class: 'inp', id },
-    opts.semVazio ? null : h('option', { value: '' }, opts.vazio || 'Não informado'),
+    opts.semVazio ? null : h('option', { value: '' }, opts.vazio || ''),
     opts.opcoes.map(o => { const [v, r] = Array.isArray(o) ? o : [o, o]; return h('option', { value: v, selected: v === obj[k] }, r); }));
   else if (tipo === 'textarea') el = h('textarea', { class: 'inp', id, rows: '2', value: obj[k] || '' });
   else el = h('input', { class: 'inp', id, type: tipo === 'date' ? 'date' : 'text', value: obj[k] || '', autocomplete: 'off', placeholder: opts.placeholder || null,
@@ -3974,7 +3974,7 @@ function renderPessoa(pe) {
 
   // casamento
   if (!pj) {
-    const conjuge = h('select', { class: 'inp', id: 'pe-conjugeId' }, h('option', { value: '' }, 'Não informado'),
+    const conjuge = h('select', { class: 'inp', id: 'pe-conjugeId' }, h('option', { value: '' }),
       pessoasOrdenadas().filter(x => x.id !== pe.id && x.tipo === 'fisica').map(x => h('option', { value: x.id, selected: x.id === pe.conjugeId }, (x.nome || 'Sem nome') + (x.documento ? ' · ' + x.documento : ''))));
     const definirConjuge = novoId => {
       const antigo = D().pessoas[pe.conjugeId];
@@ -4152,7 +4152,7 @@ function renderImovel(im) {
   const base = [
     c('tipo', 'Tipo', 'select', { semVazio: true, opcoes: Object.entries(TIPOS_IMOVEL) }),
     c('matricula', 'Matrícula ou transcrição'),
-    c('origem', 'Origem', 'select', { vazio: 'Não informada', opcoes: Object.entries(ORIGENS_IMOVEL) }),
+    c('origem', 'Origem', 'select', { opcoes: Object.entries(ORIGENS_IMOVEL) }),
     c('protocoloId', 'Protocolo', 'select', { vazio: 'Sem protocolo', opcoes: protocolos.map(p => [p.id, `${p.numero} · ${nomeProtocolo(p)}`]) })
   ];
   const decimal = { inputmode: 'decimal' };
