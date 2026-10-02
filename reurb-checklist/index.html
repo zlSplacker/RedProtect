@@ -857,6 +857,32 @@ textarea.inp{min-height:40px}
 .mm-campos,.termos-pe{border-radius:0}
 .campo-auto{border-radius:2px;font:600 .82em/1.4 var(--f-ui)}
 .min-fmt{border-radius:2px;color:#2F6DB5}
+.min-editor .mm-uso{flex:0 1 150px;width:auto}
+/* rodapé do protocolo: Excluir no canto esquerdo, Arquivos no direito */
+.pe-prot{justify-content:space-between;align-items:center}
+/* aba Partes e Imóveis: botões no alto e, abaixo, a lista em duas metades (parte | imóvel) que vai até o rodapé */
+.prot-conteudo:has(.pi){flex:1;min-height:0;display:flex;flex-direction:column}
+.prot-conteudo:has(.pi)>.pr-painel{flex:1;min-height:0;display:flex;flex-direction:column}
+.pi{flex:1;min-height:0;display:flex;flex-direction:column;gap:6px}
+.pi-bts{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.pi-dir{margin-left:auto;display:flex;gap:4px}
+.pi-lista{flex:1;min-height:220px;overflow:auto;border:1px solid #828790;background:linear-gradient(#828790,#828790) 50% 0/1px 100% no-repeat,#fff;align-content:start}
+.pi-linha{display:grid;grid-template-columns:1fr 1fr;width:100%;padding:0;border:0;border-bottom:1px solid #9AA0A6;background:transparent;text-align:left;font-size:12px;color:#000}
+.pi-linha:hover{background:#E5F3FF}
+.pi-linha[aria-pressed="true"]{background:var(--sel)}
+.pi-linha:focus-visible{outline:1px dotted #000;outline-offset:-2px}
+.pi-pes,.pi-im{min-width:0;padding:6px 8px;overflow-wrap:anywhere}
+.pi-im{display:grid;gap:2px;border-left:1px solid #828790}
+.pi-linha b{font-weight:400}
+.pi-sep{margin:0 6px;color:#6D6D6D}
+.pi-vazio,.pi-nada{color:#6D6D6D}
+.pi-nada{margin:0;padding:6px 8px;background:#fff;width:50%}
+@container (max-width:560px){
+  .pi-linha{grid-template-columns:1fr}
+  .pi-im{border-left:0;border-top:1px dotted #C9CED4}
+  .pi-lista{background:#fff}
+  .pi-dir{margin-left:0}
+}
 </style>
 </head>
 <body>
@@ -2286,24 +2312,19 @@ function renderProtocolo(p) {
   const selSit = h('select', { class: 'inp', id: 'pr-situacao', disabled: !editando },
     Object.entries(SITUACOES).map(([k, [rot]]) => h('option', { value: k, selected: k === fonte.situacao }, rot)));
   selSit.addEventListener('change', () => { rasc.situacao = selSit.value; });
-  // excluir fica no canto inferior direito da janela, discreto
+  // os botões abrem quadros à frente da página: Minuta no alto; embaixo, Excluir à esquerda e Arquivos à direita
+  const botaoJanela = (k, rot, icone, abrir) => h('button', { type: 'button', class: 'bp', id: 'pr-bt-' + k, 'aria-haspopup': 'dialog', onclick: abrir }, ico(icone), rot);
   const pe = h('div', { class: 'pe-prot' },
-    btn('Excluir protocolo', { icone: 'lixo', fant: true, sm: true, cls: 'btn-discreto', onclick: ev => armar(ev.currentTarget, () => excluirProtocolo(p)) }));
-  const pendentesExig = p.exigencias.filter(x => !x.cumpridaEm).length;
-  // os botões da barra abrem janelas à frente da página
-  const botaoJanela = (k, rot, icone, abrir, extra) => h('button', { type: 'button', class: 'bp', id: 'pr-bt-' + k, 'aria-haspopup': 'dialog', onclick: abrir }, ico(icone), rot, extra);
-  const bExig = botaoJanela('exigencia', 'Exigência', 'exigencia',
-    () => abrirDialogo({ titulo: 'Exigências', conteudo: blocoExigencias(p, bExig), aoFechar: renderDetalhe, largura: '900px' }),
-    h('span', { class: 'cont', hidden: !pendentesExig }, String(pendentesExig)));
-  const barraProt = h('div', { class: 'barra-prot', role: 'toolbar', 'aria-label': 'Protocolo ' + p.numero },
-    bExig,
+    btn('Excluir protocolo', { icone: 'lixo', onclick: ev => armar(ev.currentTarget, () => excluirProtocolo(p)) }),
     botaoJanela('arquivos', 'Arquivos', 'anexo', () => {
       const b = blocoArquivos(p);
       abrirDialogo({ titulo: 'Arquivos', conteudo: b.el, aoFechar: () => { b.limpar(); renderDetalhe(); }, atualizar: b.desenhar, cls: 'arq' });
-    }),
+    }));
+  // Minuta do protocolo: ofícios do município, decretos… (as minutas das partes ficam nos Termos do Indicador Pessoal)
+  const barraProt = h('div', { class: 'barra-prot', role: 'toolbar', 'aria-label': 'Protocolo ' + p.numero },
     botaoJanela('minuta', 'Minuta', 'minuta', () => {
       const b = blocoMinutas(p);
-      abrirDialogo({ titulo: 'Minutas', conteudo: b.el, aoFechar: renderDetalhe, atualizar: b.desenhar, cls: 'arq' });
+      abrirDialogo({ titulo: 'Minutas do protocolo', conteudo: b.el, aoFechar: renderDetalhe, atualizar: b.desenhar, cls: 'arq' });
     }));
   const cab = h('div', { class: 'cab' },
     h('div', { class: 'cab-txt' }, voltarBtn(), chips));
@@ -2354,18 +2375,13 @@ function renderProtocolo(p) {
   requestAnimationFrame(() => { const t = $('#pr-descricao'); if (t) autoAltura(t); });
 
   // abas do protocolo: tudo o que é feito no processo fica aqui
-  const painel = h('div', { id: 'pr-painel', role: 'tabpanel' });
+  const painel = h('div', { class: 'pr-painel', id: 'pr-painel', role: 'tabpanel' });
   const barraAbas = h('div', { class: 'pr-abas', role: 'tablist', 'aria-label': 'Conteúdo do protocolo' });
   // linha de abas do protocolo: cada aba mostra só o seu conteúdo
-  const ABAS_PROT = [['dados', 'Recepção'], ['andamentos', 'Andamentos'], ['financeiro', 'Financeiro'], ['checklists', 'Checklists'], ['indicadores', 'Dados']];
-  // pessoas e imóveis ficam na aba Dados, ao lado de Checklists
+  const ABAS_PROT = [['dados', 'Recepção'], ['andamentos', 'Andamentos'], ['financeiro', 'Financeiro'], ['checklists', 'Checklists'], ['indicadores', 'Partes e Imóveis']];
+  // pessoas e imóveis ficam na aba Partes e Imóveis, ao lado de Checklists
   if (ui.abaProt === 'imoveis' || ui.abaProt === 'pessoas') ui.abaProt = 'indicadores';
   if (!ABAS_PROT.some(([k]) => k === ui.abaProt)) ui.abaProt = 'dados';
-  // aba Dados: uma lista só, Partes/Imóveis (as partes que moram no núcleo, cada uma com o seu imóvel)
-  const barraDados = h('div', { class: 'pr-abas sub-abas', role: 'tablist', 'aria-label': 'Partes e imóveis do protocolo' },
-    h('button', { type: 'button', class: 'pr-aba', role: 'tab', id: 'pr-aba-partes', 'aria-controls': 'pr-painel-dados', 'aria-selected': 'true' }, 'Partes/Imóveis'));
-  const painelDados = h('div', { id: 'pr-painel-dados', role: 'tabpanel', 'aria-labelledby': 'pr-aba-partes' });
-  const blocoDados = h('section', { class: 'bloco' }, h('div', { class: 'dados-sub' }, barraDados, painelDados));
   const desenharAbas = () => {
     barraAbas.replaceChildren(...ABAS_PROT.map(([k, rot]) => h('button', {
       type: 'button', class: 'pr-aba', role: 'tab', id: 'pr-aba-' + k, 'aria-controls': 'pr-painel', 'aria-selected': String(ui.abaProt === k),
@@ -2418,7 +2434,7 @@ function renderProtocolo(p) {
     })) : h('p', { class: 'dica' }, 'Nenhum checklist aplicado.'),
     h('div', null, btn('Aplicar checklist', { icone: 'mais', sm: true, onclick: () => escolherChecklist(p) })));
 
-  // Partes/Imóveis: a lista do que foi adicionado; depois, uma linha com Adicionar e Excluir
+  // Partes e Imóveis: Cadastrar Pessoa e Cadastrar Imóvel de um lado, Adicionar e Excluir do outro; abaixo, quem está no protocolo
   const selDados = ui.selDados || (ui.selDados = {});
   const jProt = J;
   // Adicionar abre a pesquisa do Indicador Pessoal; dois cliques num nome o adicionam aqui (com os imóveis da Propriedade dele)
@@ -2427,51 +2443,65 @@ function renderProtocolo(p) {
     if (j) { ativar(j); focarJanela(j); return; }
     abrirJanela({ aba: 'pessoas', selecionar: { protocoloId: p.id, origem: jProt } });
   };
+  // Cadastrar: o cadastro abre numa janela; no Salvar entra no protocolo, a janela fecha e o protocolo volta à frente
+  const cadastrar = col => novoRegistro(col, col === 'imoveis' ? { protocoloId: p.id } : null, obj => {
+    if (col === 'pessoas') ligarAoProtocolo(p.id, 'pessoas', obj.id);
+    const jn = J;
+    setTimeout(() => {
+      if (jn && jn.el.isConnected) fecharJanela(jn);
+      if (!jProt.el.isConnected) return;
+      jProt.ui.selDados = Object.assign(jProt.ui.selDados || {}, { partes: (col === 'pessoas' ? 'pe:' : 'im:') + obj.id });
+      redesenhar(jProt); ativar(jProt); focarJanela(jProt);
+    });
+  });
   const blocoPartes = () => {
     const partes = p.partes.map(x => ({ x, pe: D().pessoas[x.pessoaId] })).filter(y => y.pe);
     const idsPartes = new Set(partes.map(y => y.pe.id));
+    // cada linha: a parte de um lado (Nome | CPF | qualidade) e, do outro, a propriedade dela (Lote | Quadra | Área)
     const linhas = [
-      // do outro lado da linha, a propriedade que está no cadastro da parte
-      ...partes.map(({ x, pe }) => ({
-        id: 'pe:' + pe.id, nome: pe.nome || 'Sem nome', chip: qualidadeParte(x), abrir: () => irPara('pessoas', pe.id),
-        info: pe.documento, prop: imoveisDaPessoa(pe.id).map(v => descImovel(v.imovel))
-      })),
+      ...partes.map(({ x, pe }) => ({ id: 'pe:' + pe.id, pe, qual: qualidadeParte(x), imoveis: imoveisDaPessoa(pe.id).map(v => v.imovel) })),
       // imóvel do protocolo sem nenhuma parte ligada a ele
-      ...imoveisDoProtocolo(p.id).filter(i => !i.vinculos.some(v => idsPartes.has(v.pessoaId))).map(i => ({
-        id: 'im:' + i.id, nome: descImovel(i), abrir: () => irPara('imoveis', i.id),
-        info: [TIPOS_IMOVEL[i.tipo], i.matricula && 'Mat. ' + i.matricula].filter(Boolean).join(' · ')
-      }))
+      ...imoveisDoProtocolo(p.id).filter(i => !i.vinculos.some(v => idsPartes.has(v.pessoaId))).map(i => ({ id: 'im:' + i.id, imoveis: [i] }))
     ];
     if (!linhas.some(l => l.id === selDados.partes)) selDados.partes = null;
+    const trecho = pares => pares.map(([rot, v], k) => [k ? h('span', { class: 'pi-sep' }, '|') : null, rot ? rot + ': ' : null, h('b', null, v || '—')]);
     const botoes = linhas.map(l => h('button', {
-      type: 'button', class: 'dl-linha', 'aria-pressed': String(l.id === selDados.partes), title: 'Duplo clique abre o cadastro',
+      type: 'button', class: 'pi-linha', 'aria-pressed': String(l.id === selDados.partes),
       onclick: ev => {
         selDados.partes = l.id;
         for (const b of botoes) b.setAttribute('aria-pressed', String(b === ev.currentTarget));
         bExcluir.disabled = false;
       },
-      ondblclick: l.abrir
-    }, h('span', { class: 'dl-nome' }, l.nome), l.info ? h('small', null, l.info) : null,
-      // do outro lado: a propriedade da parte e a qualidade, juntas (no estreito descem juntas para a linha de baixo)
-      l.prop ? h('span', { class: 'dl-dir' },
-        h('span', { class: 'dl-prop' + (l.prop.length ? '' : ' sem-prop') }, l.prop.length ? l.prop.map(t => h('span', null, t)) : 'Sem propriedade'),
-        h('span', { class: 'chip chip-acento' }, l.chip))
-        : l.chip ? h('span', { class: 'chip chip-acento' }, l.chip) : null));
-    const bExcluir = btn('Excluir', { icone: 'lixo', perigo: true, disabled: !selDados.partes, onclick: ev => armar(ev.currentTarget, () => {
+      // dois cliques: na parte abre a pessoa; no imóvel, o imóvel
+      ondblclick: ev => {
+        const im = ev.target.closest('[data-im]');
+        if (im || !l.pe) irPara('imoveis', im ? im.dataset.im : l.imoveis[0].id); else irPara('pessoas', l.pe.id);
+      },
+      onkeydown: ev => { if (ev.key === 'Enter') { ev.preventDefault(); if (l.pe) irPara('pessoas', l.pe.id); else irPara('imoveis', l.imoveis[0].id); } }
+    },
+      h('span', { class: 'pi-pes' + (l.pe ? '' : ' pi-vazio') }, l.pe
+        ? trecho([['Nome', l.pe.nome], [l.pe.tipo === 'juridica' ? 'CNPJ' : 'CPF', l.pe.documento], ['', l.qual]])
+        : 'Sem parte'),
+      h('span', { class: 'pi-im' }, l.imoveis.length
+        ? l.imoveis.map(i => h('span', { class: 'pi-imovel', 'data-im': i.id }, trecho(paresLote(i))))
+        : h('span', { class: 'pi-vazio' }, 'Sem propriedade'))));
+    const bExcluir = btn('Excluir', { icone: 'lixo', disabled: !selDados.partes, onclick: ev => armar(ev.currentTarget, () => {
       const [tipo, id] = selDados.partes.split(':');
       if (tipo === 'pe') tirarParte(p, id);
       else { const i = D().imoveis[id]; if (i) { i.protocoloId = ''; Store.put('imoveis', i, 0); } }
       selDados.partes = null; desenharPainel(); atualizarContagens();
     }) });
-    return h('section', { class: 'dl' },
-      h('div', { class: 'dl-lista' }, botoes.length ? botoes : h('p', { class: 'dica' }, 'Nenhuma parte adicionada.')),
-      h('div', { class: 'dl-bts' }, btn('Adicionar', { icone: 'mais', prim: true, onclick: abrirPesquisa }), bExcluir));
+    return h('section', { class: 'pi' },
+      h('div', { class: 'pi-bts' },
+        btn('Cadastrar Pessoa', { icone: 'mais', onclick: () => cadastrar('pessoas') }),
+        btn('Cadastrar Imóvel', { icone: 'mais', onclick: () => cadastrar('imoveis') }),
+        h('span', { class: 'pi-dir' }, btn('Adicionar', { icone: 'mais', onclick: abrirPesquisa }), bExcluir)),
+      h('div', { class: 'pi-lista' }, botoes.length ? botoes : h('p', { class: 'pi-nada' }, 'Nenhuma parte adicionada.')));
   };
 
   const desenharPainel = () => {
     painel.setAttribute('aria-labelledby', idJ('pr-aba-' + ui.abaProt));
-    painel.replaceChildren({ dados: () => quadroDados, andamentos: () => blocoAnd, financeiro: () => blocoFinanceiro(p, atualizarContagens), checklists: () => blocoVinc, indicadores: () => blocoDados }[ui.abaProt]());
-    painelDados.replaceChildren(blocoPartes());
+    painel.replaceChildren({ dados: () => quadroDados, andamentos: () => blocoAnd, financeiro: () => blocoFinanceiro(p, atualizarContagens), checklists: () => blocoVinc, indicadores: blocoPartes }[ui.abaProt]());
   };
   desenharAbas();
   desenharPainel();
@@ -2932,7 +2962,7 @@ ${localDataM}${assin('{{nomeRequerente}}', 'Requerente')}` },
 <p class="t"><b>Art. 4º</b> Compete ao(à) [ÓRGÃO MUNICIPAL RESPONSÁVEL] o processamento administrativo do procedimento, a elaboração ou a análise do projeto de regularização fundiária e as demais providências previstas na legislação.</p>
 <p class="t"><b>Art. 5º</b> Este Decreto entra em vigor na data de sua publicação.</p>
 ${localDataM}${assin('[NOME]', 'Prefeito(a) Municipal')}` },
-  { id: 'notificacao', grupo: 'Notificações', nome: 'Notificação de titulares e confinantes', html: `${cab}
+  { id: 'notificacao', uso: 'parte', grupo: 'Notificações', nome: 'Notificação de titulares e confinantes', html: `${cab}
 <p style="text-align:center"><b>NOTIFICAÇÃO</b><br>Regularização Fundiária Urbana – Protocolo nº {{protocolo}}</p>
 <p class="t">A(o) {{qualificacaoNotificado}}.</p>
 <p class="t">O MUNICÍPIO DE {{CIDADE}}, nos termos do art. 31 da Lei nº 13.465, de 11 de julho de 2017, <b>NOTIFICA</b> Vossa Senhoria de que foi instaurado procedimento de Regularização Fundiária Urbana (Reurb) do núcleo urbano informal {{nucleo}}, localizado em {{localizacao}}, que abrange o(s) imóvel(is) objeto da(s) matrícula(s) {{matriculas}}, em relação ao(s) qual(is) Vossa Senhoria figura como {{condicaoNotificado}}.</p>
@@ -2946,7 +2976,7 @@ ${localDataM}${assin('[NOME]', '[CARGO]')}` },
 <p>{{listaImoveis}}</p>
 <p class="t">A ausência de manifestação no prazo será interpretada como concordância com a Reurb. As impugnações deverão ser protocoladas em [ÓRGÃO E ENDEREÇO PARA PROTOCOLO].</p>
 ${localDataM}${assin('[NOME]', '[CARGO]')}` },
-  { id: 'oitiva', grupo: 'Instrução', nome: 'Termo de oitiva', html: `<p style="text-align:center"><b>TERMO DE OITIVA</b><br>Regularização Fundiária Urbana – Protocolo nº {{protocolo}} – Núcleo {{nucleo}}</p>
+  { id: 'oitiva', uso: 'parte', grupo: 'Instrução', nome: 'Termo de oitiva', html: `<p style="text-align:center"><b>TERMO DE OITIVA</b><br>Regularização Fundiária Urbana – Protocolo nº {{protocolo}} – Núcleo {{nucleo}}</p>
 <p class="t">Aos {{data}}, em [LOCAL], compareceu {{qualificacaoOcupante}}, ocupante do imóvel {{imovelOcupante}}, integrante do núcleo urbano informal acima indicado, que, ciente de que suas declarações instruem o procedimento de Reurb, declarou:</p>
 <ol><li>que ocupa o imóvel desde [MÊS/ANO], de forma mansa, pacífica e ininterrupta, sem oposição de quem quer que seja;</li>
 <li>que utiliza o imóvel para [moradia / outra finalidade];</li>
@@ -3018,26 +3048,30 @@ ${localDataM}
 <p class="t">Requeremos a abertura das matrículas das unidades imobiliárias e o registro dos direitos reais conferidos aos ocupantes indicados na CRF. [Tratando-se de Reurb-S, os atos registrais são isentos de custas e emolumentos, nos termos do art. 13, § 1º, da Lei nº 13.465/2017.]</p>
 <p class="t">Atenciosamente,</p>
 ${assin('[NOME]', '[CARGO]')}` },
-  { id: 'branco', grupo: 'Outro', nome: 'Documento em branco', html: '<p class="t"><br></p>' }
+  { id: 'branco', uso: 'ambos', grupo: 'Outro', nome: 'Documento em branco', html: '<p class="t"><br></p>' }
 ];
-/* Cadastros → Modelos de Minuta: os prontos (que podem ser editados) e os criados por você */
+/* Cadastros → Modelos de Minuta: os prontos (que podem ser editados) e os criados por você.
+   Cada modelo é do protocolo (ofícios do município, decretos…), da parte (aparece nos Termos do Indicador Pessoal) ou dos dois */
 const ID_PRONTO = id => 'padrao-' + id;
+const USOS_MINUTA = { protocolo: 'Minuta do protocolo', parte: 'Minuta da parte', ambos: 'Protocolo e parte' };
+const usoDe = (m, base) => (USOS_MINUTA[m && m.uso] ? m.uso : (base && base.uso) || 'protocolo');
+const paraUso = (m, uso) => m.uso === uso || m.uso === 'ambos';
 function normalizarModeloMinuta(m) {
   m = m || {};
-  return { id: txt(m.id) || uid('mm'), nome: txt(m.nome) || 'Modelo sem nome', grupo: txt(m.grupo) || 'Meus modelos', html: txt(m.html), padrao: txt(m.padrao), criadoEm: m.criadoEm || agora(), atualizadoEm: m.atualizadoEm || agora() };
+  return { id: txt(m.id) || uid('mm'), nome: txt(m.nome) || 'Modelo sem nome', grupo: txt(m.grupo) || 'Meus modelos', uso: USOS_MINUTA[m.uso] ? m.uso : '', html: txt(m.html), padrao: txt(m.padrao), criadoEm: m.criadoEm || agora(), atualizadoEm: m.atualizadoEm || agora() };
 }
 function modelosMinuta() {
   const salvos = D().modelosMinuta;
   const prontos = MODELOS_MINUTA.map(b => {
     const o = salvos[ID_PRONTO(b.id)];
-    return o ? Object.assign({}, o, { pronto: b.id, editado: true }) : { id: ID_PRONTO(b.id), nome: b.nome, grupo: b.grupo, html: b.html, pronto: b.id };
+    return o ? Object.assign({}, o, { uso: usoDe(o, b), pronto: b.id, editado: true }) : { id: ID_PRONTO(b.id), nome: b.nome, grupo: b.grupo, uso: usoDe(b), html: b.html, pronto: b.id };
   });
-  const meus = Object.values(salvos).filter(m => !m.padrao).sort((a, b) => numNat(a.grupo, b.grupo) || numNat(a.nome, b.nome));
+  const meus = Object.values(salvos).filter(m => !m.padrao).map(m => Object.assign({}, m, { uso: usoDe(m) })).sort((a, b) => numNat(a.grupo, b.grupo) || numNat(a.nome, b.nome));
   return [...meus, ...prontos];
 }
 // grava o modelo; o pronto editado vira uma cópia com o mesmo id, que "Restaurar original" apaga
 function gravarModeloMinuta(m) {
-  const doc = normalizarModeloMinuta({ id: m.id, nome: m.nome, grupo: m.grupo, html: m.html, padrao: m.pronto || m.padrao || '', criadoEm: m.criadoEm });
+  const doc = normalizarModeloMinuta({ id: m.id, nome: m.nome, grupo: m.grupo, uso: m.uso, html: m.html, padrao: m.pronto || m.padrao || '', criadoEm: m.criadoEm });
   Store.put('modelosMinuta', doc);
   return doc;
 }
@@ -3417,7 +3451,7 @@ function blocoMinutas(p, op = {}) {
     editor.replaceChildren(
       h('div', { class: 'arq-visor-cab' }, h('span', { class: 'arq-visor-nome' }, T.nova),
         btn('Cancelar', { fant: true, sm: true, onclick: () => { escolhendo = false; vazio(); desenhar(); } })),
-      escolhaModelos(modelosMinuta(), criar));
+      escolhaModelos(modelosMinuta().filter(m => paraUso(m, op.termo ? 'parte' : 'protocolo')), criar));
   };
   const criar = modelo => {
     const m = { id: uid('mi'), modelo: modelo.id, titulo: modelo.nome, html: preencherModelo(modelo.html, dados()), criadaEm: agora(), atualizadaEm: agora() };
@@ -3478,7 +3512,7 @@ function renderModelosMinuta() {
   // modelo novo (ou cópia) fica em rascunho até o Salvar
   const acharModelo = id => (u.mmRascunho && u.mmRascunho.id === id ? u.mmRascunho : modelosMinuta().find(m => m.id === id));
   const novo = base => {
-    const m = u.mmRascunho = { id: uid('mm'), nome: base ? 'Cópia de ' + base.nome : 'Novo modelo', grupo: 'Meus modelos', html: base ? comoEtiquetas(base.html) : '<p class="t"><br></p>' };
+    const m = u.mmRascunho = { id: uid('mm'), nome: base ? 'Cópia de ' + base.nome : 'Novo modelo', grupo: 'Meus modelos', uso: base ? base.uso : 'protocolo', html: base ? comoEtiquetas(base.html) : '<p class="t"><br></p>' };
     abrir(m);
     const n = editor.querySelector('.min-titulo');
     if (n) { n.focus(); n.select(); }
@@ -3519,10 +3553,14 @@ function renderModelosMinuta() {
     const grupo = h('input', { class: 'inp mm-grupo', 'aria-label': 'Grupo', title: 'Grupo', value: m.grupo, placeholder: 'Grupo' });
     grupo.setAttribute('list', idJ('mm-grupos'));
     grupo.addEventListener('input', () => { m.grupo = grupo.value.trim() || 'Meus modelos'; salvar(); desenhar(); });
+    // onde o modelo aparece: na Minuta do protocolo, nos Termos da parte ou nos dois
+    const uso = h('select', { class: 'inp mm-uso', 'aria-label': 'Uso do modelo', title: 'Uso do modelo' },
+      Object.entries(USOS_MINUTA).map(([k, r]) => h('option', { value: k, selected: k === m.uso }, r)));
+    uso.addEventListener('change', () => { m.uso = uso.value; salvar(); desenhar(); });
     const ed = editorTexto({ html: comoEtiquetas(m.html), campos: true, aoMudar: html => { m.html = html; salvar(); } });
     mostrarRestaurar();
     editor.replaceChildren(
-      h('div', { class: 'arq-visor-cab min-cab' }, nome, grupo, grupos, restaurar, bSalvar),
+      h('div', { class: 'arq-visor-cab min-cab' }, nome, grupo, grupos, uso, restaurar, bSalvar),
       h('div', { class: 'min-ferramentas' }, ed.barra),
       h('div', { class: 'arq-visor-corpo min-corpo' }, ed.folha));
   };
@@ -3534,7 +3572,7 @@ function renderModelosMinuta() {
       onclick: ev => { u.mmSel = m.id; for (const b of linhas) b.setAttribute('aria-pressed', String(b === ev.currentTarget)); bExcluir.disabled = !!m.pronto; },
       ondblclick: () => { if (m.id !== u.mmAberto) abrir(m); },
       onkeydown: ev => { if (ev.key === 'Enter') { ev.preventDefault(); if (m.id !== u.mmAberto) abrir(m); } }
-    }, h('span', { class: 'dl-nome' }, m.nome), h('small', null, m.grupo + (m.pronto ? (m.editado ? ' · pronto, editado' : ' · pronto') : ''))));
+    }, h('span', { class: 'dl-nome' }, m.nome), h('small', null, [USOS_MINUTA[m.uso], m.grupo].join(' · ') + (m.pronto ? (m.editado ? ' · pronto, editado' : ' · pronto') : ''))));
     const selecionado = todos.find(m => m.id === u.mmSel);
     const bExcluir = btn('Excluir', { icone: 'lixo', perigo: true, disabled: !selecionado || !!selecionado.pronto, title: 'Os modelos prontos não são excluídos; editados, podem voltar ao original', onclick: ev => armar(ev.currentTarget, () => {
       const m = todos.find(x => x.id === u.mmSel);
@@ -3607,55 +3645,6 @@ function blocoFinanceiro(p, aoMudar) {
   });
   desenhar();
   return h('section', { class: 'bloco' }, resumo, form, tabela);
-}
-/* exigências do protocolo: o que o interessado ou o município ainda precisa apresentar */
-function blocoExigencias(p, botao) {
-  const salvar = () => { Store.put('protocolos', p, 0); renderItens(); };
-  const lista = h('ol', { class: 'exig-lista' });
-  const resumo = h('p', { class: 'dica' });
-  const desenhar = () => {
-    const pend = p.exigencias.filter(x => !x.cumpridaEm).length;
-    resumo.textContent = p.exigencias.length ? `${plural(pend, 'pendente', 'pendentes')} · ${plural(p.exigencias.length - pend, 'cumprida', 'cumpridas')}` : 'Nenhuma exigência registrada.';
-    const cont = botao.querySelector('.cont');
-    cont.textContent = String(pend); cont.hidden = !pend;
-    copiarBtn.disabled = !pend;
-    lista.replaceChildren(...p.exigencias.map((x, k) => h('li', { class: 'exig' + (x.cumpridaEm ? ' cumprida' : '') },
-      h('span', { class: 'exig-num' }, String(k + 1) + '.'),
-      h('p', { class: 'exig-txt' }, x.texto),
-      h('div', { class: 'exig-acoes' },
-        x.cumpridaEm
-          ? btn('Reabrir', { icone: 'voltar', sm: true, fant: true, onclick: () => { x.cumpridaEm = ''; registrarAndamento(p, `Exigência ${k + 1} reaberta.`); salvar(); desenhar(); } })
-          : btn('Marcar como cumprida', { icone: 'check', sm: true, onclick: () => { x.cumpridaEm = hoje(); registrarAndamento(p, `Exigência ${k + 1} cumprida.`); salvar(); desenhar(); } }),
-        btn('Excluir exigência', { icone: 'lixo', soIcone: true, fant: true, perigo: true, onclick: ev => armar(ev.currentTarget, () => { p.exigencias.splice(k, 1); salvar(); desenhar(); }) })),
-      h('div', { class: 'exig-meta' },
-        h('span', { class: 'chip ' + (x.cumpridaEm ? 'chip-ok' : 'chip-pend') }, x.cumpridaEm ? 'Cumprida em ' + fmtData(x.cumpridaEm) : 'Pendente'),
-        x.emitidaEm ? 'Emitida em ' + fmtData(x.emitidaEm) : null))));
-  };
-  const texto = h('textarea', { class: 'inp', id: 'exig-texto', rows: '3', placeholder: 'Descreva o que precisa ser apresentado ou corrigido' });
-  texto.addEventListener('input', () => autoAltura(texto));
-  const data = h('input', { class: 'inp', type: 'date', id: 'exig-data', value: hoje(), style: 'max-width:180px', 'aria-label': 'Data de emissão' });
-  const form = h('form', { class: 'exig-form' },
-    h('label', { class: 'campo', for: 'exig-texto' }, h('span', { class: 'rot' }, 'Nova exigência'), texto),
-    h('div', { class: 'linha' }, h('label', { class: 'rot', for: 'exig-data' }, 'Emitida em'), data,
-      h('button', { type: 'submit', class: 'btn btn-prim' }, ico('mais'), 'Registrar exigência')));
-  form.addEventListener('submit', ev => {
-    ev.preventDefault();
-    const t = texto.value.trim();
-    if (!t) { toast('Descreva a exigência antes de registrar.'); texto.focus(); return; }
-    p.exigencias.push({ id: uid('ex'), texto: t, emitidaEm: data.value || hoje(), cumpridaEm: '' });
-    registrarAndamento(p, `Exigência ${p.exigencias.length} registrada.`, data.value || hoje());
-    salvar(); texto.value = ''; autoAltura(texto); desenhar(); texto.focus();
-  });
-  const copiarBtn = btn('Copiar exigências pendentes', { icone: 'copiar', sm: true, onclick: () => {
-    const pend = p.exigencias.map((x, k) => [x, k]).filter(([x]) => !x.cumpridaEm);
-    const linhas = [`Protocolo ${p.numero}${p.interessado ? ' — ' + p.interessado : ''}`, 'Exigências pendentes:', '',
-      ...pend.map(([x, k]) => `${k + 1}. ${x.texto}${x.emitidaEm ? ' (emitida em ' + fmtData(x.emitidaEm) + ')' : ''}`)];
-    copiar(linhas.join('\n'), 'Exigências copiadas.', 'Copiar exigências');
-  } });
-  desenhar();
-  return h('section', { class: 'exig-bloco', id: 'exig-bloco' },
-    h('div', { class: 'lat-cab', style: 'justify-content:space-between;flex-wrap:wrap' }, resumo, copiarBtn),
-    lista, form);
 }
 function renderNovoProtocolo() {
   const d = $('#detalhe');
@@ -3798,6 +3787,9 @@ function levarAoProtocolo(pessoaId, i) {
   if (pr) i.protocoloId = pr.id;
 }
 // lote: Núcleo, Quadra e Lote; os outros tipos, o título do imóvel
+const paresLote = i => i.tipo === 'rural' ? [['Imóvel', i.denominacao || i.localidade], ['Área', i.area && i.area + ' ha']]
+  : i.tipo === 'condominio' ? [['Unidade', i.unidade], ['Bloco', i.bloco], ['Área', (i.areaPrivativa || i.area) && (i.areaPrivativa || i.area) + ' m²']]
+    : [['Lote', i.lote], ['Quadra', i.quadra], ['Área', i.area && i.area + ' m²']];
 const descImovel = i => (i.tipo === 'urbano' && [i.nucleo, i.quadra && 'Quadra ' + i.quadra, i.lote && 'Lote ' + i.lote].filter(Boolean).join(', ')) || tituloImovel(i);
 function gravarVinculosPendentes(pe) {
   for (const v of vinculosPendentes.get(pe) || []) {
