@@ -627,13 +627,14 @@ button:disabled{opacity:1}
 /* barra de status */
 .tarefas{min-height:24px;gap:10px;padding:1px 6px calc(1px + env(safe-area-inset-bottom,0px));background:#F0F0F0;border-top:1px solid #D5D5D5;font-size:12px}
 .status-txt{flex:none;display:flex;align-items:center;gap:10px;white-space:nowrap}
-.status-txt .salvo{font-size:12px;color:#000;border-left:1px solid #A0A0A0;padding-left:10px}
+.status-txt .salvo{font-size:12px;color:#000}
+/* data de hoje (dd/mm/aaaa) na ponta direita da barra de status */
+.status-data{flex:none;white-space:nowrap;padding-left:10px;border-left:1px solid #A0A0A0;font-variant-numeric:tabular-nums}
 .tarefas-lista{justify-content:flex-end;gap:2px}
 .tarefa{flex:0 1 180px;min-width:80px;border:1px solid #ADADAD;border-radius:2px;background:linear-gradient(#FDFDFD,#E9E9E9);padding:1px 8px;font-size:12px;font-weight:400;color:#000}
 .tarefa:hover{background:linear-gradient(#EAF6FD,#BEE6FD);border-color:#3C7FB1}
 .tarefa[aria-pressed="true"]{background:linear-gradient(#C4E5F6,#98D1EF);border-color:#2C628B;color:#000}
 .tarefas #lado-a-lado{display:none}
-@media (max-width:560px){#status-data{display:none}.status-txt .salvo{border-left:0;padding-left:0}}
 
 /* janelas: moldura azul-clara, título de 26px com o ícone do sistema, botões do Windows 7 */
 .jan{border:4px solid var(--moldura-in);border-top:0;border-radius:6px 6px 0 0;box-shadow:0 0 0 1px #8A9DB3,0 6px 22px rgba(0,0,0,.28);background:var(--moldura-in)}
@@ -1026,9 +1027,10 @@ textarea.inp.obs-prot{flex:1;min-height:260px;resize:none;padding:6px 8px;font-s
 </header>
 <main class="area" id="area" aria-label="Área de trabalho"><div class="marca-dagua" aria-hidden="true"><img alt=""><span>SISTEMA FUNDIÁRIO</span></div></main>
 <nav class="tarefas" id="tarefas" aria-label="Janelas abertas">
-  <span class="status-txt"><span id="status-data"></span><span class="salvo" id="salvo" data-estado="carregando">Carregando…</span></span>
+  <span class="status-txt"><span class="salvo" id="salvo" data-estado="carregando">Carregando…</span></span>
   <div class="tarefas-lista" id="tarefas-lista"></div>
   <button type="button" class="btn btn-fant btn-sm" id="lado-a-lado" title="Organizar as janelas lado a lado">Lado a lado</button>
+  <span class="status-data" id="status-data"></span>
 </nav>
 <input type="file" id="arquivo" accept=".json,application/json" hidden>
 <div class="toast" id="toast" role="status" hidden></div>
@@ -5584,7 +5586,10 @@ for (const b of document.querySelectorAll('.fb')) b.addEventListener('click', ()
 const logo = document.querySelector('.marca img').getAttribute('src');
 document.querySelector('.marca-dagua img').src = logo;
 document.documentElement.style.setProperty('--logo', `url("${logo}")`);
-$('#status-data').textContent = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+// data de hoje no formato 03/10/2026; troca sozinha na virada do dia
+const mostrarData = () => { $('#status-data').textContent = new Date().toLocaleDateString('pt-BR'); };
+mostrarData();
+setInterval(mostrarData, 60000);
 $('#arquivo').addEventListener('change', ev => { const f = ev.target.files && ev.target.files[0]; ev.target.value = ''; if (f) importarArquivo(f); });
 Store.aoStatus = (estado, txt) => { const s = $('#salvo'); s.dataset.estado = estado; s.textContent = txt; };
 Store.aoRemoto = () => atualizarJanelas();
