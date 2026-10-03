@@ -72,7 +72,7 @@ Tudo começa na **Recepção de Título**, que cria o protocolo. No topo da fich
 
   > Os modelos são pontos de partida: confira a redação e os dispositivos legais com a legislação vigente e a lei municipal antes de usar.
 
-Na página, abaixo da barra, fica a linha de abas **Recepção**, **Andamentos**, **Financeiro**, **Checklists**, **Partes e Imóveis** e **Minutas Realizadas**. Cada aba mostra só o seu conteúdo, e o protocolo abre em *Recepção*:
+Na página, abaixo da barra, fica a linha de abas **Recepção**, **Andamentos**, **Financeiro**, **Checklists**, **Partes e Imóveis**, **Minutas Realizadas** e **Observação**. Cada aba mostra só o seu conteúdo, e o protocolo abre em *Recepção*:
 
 | Aba | O que tem |
 | --- | --- |
@@ -82,6 +82,7 @@ Na página, abaixo da barra, fica a linha de abas **Recepção**, **Andamentos**
 | **Checklists** | Análises aplicadas ao protocolo, com progresso e pendências, e o botão *Aplicar checklist*. |
 | **Partes e Imóveis** | No alto, **Cadastrar Pessoa** e **Cadastrar Imóvel** de um lado e **Adicionar** e **Excluir** do outro; abaixo, a lista de quem está no protocolo, em duas metades separadas por uma linha: a parte (*Nome \| CPF \| qualidade* — a qualidade vem do cadastro da pessoa; sem ela, *Beneficiário*) e, do outro lado, a propriedade dela (*Lote \| Quadra \| Área*, uma linha por imóvel da aba *Propriedade*) — ou *Sem propriedade*. *Cadastrar Pessoa* e *Cadastrar Imóvel* abrem o cadastro numa janela; no **Salvar** ele entra no protocolo, a janela fecha e o protocolo volta à frente com a linha marcada. *Adicionar* abre a pesquisa do Indicador Pessoal: dê dois cliques no nome (ou marque e clique em *Selecionar*) para adicionar a parte — os imóveis dela que ainda não estão em nenhum protocolo entram junto. Um imóvel vinculado depois a quem já é parte também entra no protocolo. *Excluir* tira a parte do protocolo com os imóveis que só ela ocupava (confirmando no segundo clique). Imóveis do protocolo sem nenhuma parte aparecem numa linha *Sem parte*. Dois cliques na metade da parte abrem a pessoa; na metade do imóvel, o imóvel. |
 | **Minutas Realizadas** | As minutas salvas pela tela *Minuta*, em PDF: à esquerda a grade *Nº \| Título \| Data*; um clique mostra o PDF ao lado (A4, Times 12, margens de 3 e 2 cm), com **Baixar PDF**; dois cliques baixam o PDF. **Excluir Minuta** apaga a marcada (confirma no segundo clique) e registra o andamento. O PDF é montado a partir do texto guardado no protocolo, por isso entra no backup em JSON; na primeira vez é preciso estar conectado à internet. |
+| **Observação** | Um campo livre, em branco, para anotar o que quiser sobre o protocolo. Fica travado como a Recepção: **Editar** libera e **Salvar** grava (antes do *Salvar*, nada é gravado). |
 
 Imóveis e análises mostram um botão *Protocolo 0000/AAAA*, que abre (ou traz para a frente) a janela do protocolo de origem; na pessoa, os protocolos ficam na aba *Informações*.
 

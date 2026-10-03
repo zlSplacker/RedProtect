@@ -888,6 +888,12 @@ textarea.inp{min-height:40px}
 .msri-pe{flex:none;display:flex;align-items:center;justify-content:flex-end;gap:4px;padding-top:6px;border-top:1px solid #D5D5D5}
 .msri-pe-txt{margin-right:8px;font-weight:600}
 @container (max-width:640px){.msri-partes{grid-template-columns:1fr;height:auto}.msri-partes .itens.grade{max-height:160px}.msri-partes-bts{flex-direction:row}}
+/* Observação do protocolo: o campo ocupa a aba até o rodapé, com Editar e Salvar embaixo */
+.prot-conteudo:has(.obs){flex:1;min-height:0;display:flex;flex-direction:column}
+.prot-conteudo:has(.obs)>.pr-painel{flex:1;min-height:0;display:flex;flex-direction:column}
+.obs{flex:1;min-height:0;display:flex;flex-direction:column;gap:6px}
+textarea.inp.obs-prot{flex:1;min-height:260px;resize:none;padding:6px 8px;font-size:13px;line-height:1.5}
+.obs-bts{display:flex;justify-content:flex-end;gap:4px}
 /* Minutas Realizadas: a lista à esquerda e o PDF ao lado, até o rodapé */
 .jan.ver-detalhe .detalhe:has(.mr){height:100cqh}
 .prot-conteudo:has(.mr){flex:1;min-height:0;display:flex;flex-direction:column}
@@ -1475,7 +1481,7 @@ function normalizarProtocolo(p) {
     exigencias: Array.isArray(p.exigencias) ? p.exigencias.filter(x => x && String(x.texto || '').trim()).map(x => ({ id: String(x.id || uid('ex')), texto: String(x.texto), emitidaEm: String(x.emitidaEm || ''), cumpridaEm: String(x.cumpridaEm || '') })) : [],
     partes: Array.isArray(p.partes) ? p.partes.filter(x => x && x.pessoaId).map(x => ({ pessoaId: String(x.pessoaId), qualidade: String(x.qualidade || 'Beneficiário') })) : [],
     arquivos: normalizarArquivos(p.arquivos),
-    minutas: normalizarMinutas(p.minutas),
+    minutas: normalizarMinutas(p.minutas), observacao: String(p.observacao || ''),
     exemplo: !!p.exemplo,
     criadoEm: p.criadoEm || agora(),
     atualizadoEm: p.atualizadoEm || agora()
@@ -2532,7 +2538,7 @@ function renderProtocolo(p) {
   const painel = h('div', { class: 'pr-painel', id: 'pr-painel', role: 'tabpanel' });
   const barraAbas = h('div', { class: 'pr-abas', role: 'tablist', 'aria-label': 'Conteúdo do protocolo' });
   // linha de abas do protocolo: cada aba mostra só o seu conteúdo
-  const ABAS_PROT = [['dados', 'Recepção'], ['andamentos', 'Andamentos'], ['financeiro', 'Financeiro'], ['checklists', 'Checklists'], ['indicadores', 'Partes e Imóveis'], ['minutas', 'Minutas Realizadas']];
+  const ABAS_PROT = [['dados', 'Recepção'], ['andamentos', 'Andamentos'], ['financeiro', 'Financeiro'], ['checklists', 'Checklists'], ['indicadores', 'Partes e Imóveis'], ['minutas', 'Minutas Realizadas'], ['observacao', 'Observação']];
   // pessoas e imóveis ficam na aba Partes e Imóveis, ao lado de Checklists
   if (ui.abaProt === 'imoveis' || ui.abaProt === 'pessoas') ui.abaProt = 'indicadores';
   if (!ABAS_PROT.some(([k]) => k === ui.abaProt)) ui.abaProt = 'dados';
@@ -2653,6 +2659,26 @@ function renderProtocolo(p) {
       h('div', { class: 'pi-lista' }, botoes.length ? botoes : h('p', { class: 'pi-nada' }, 'Nenhuma parte adicionada.')));
   };
 
+  // Observação: um campo livre do protocolo, travado como a Recepção (Editar libera, Salvar grava)
+  const blocoObservacao = () => {
+    const editando = ui.editObs === p.id;
+    if (!editando) ui.rascObs = null;
+    if (editando && ui.rascObs == null) ui.rascObs = p.observacao;
+    const ta = h('textarea', { class: 'inp obs-prot', id: 'pr-observacao', 'aria-label': 'Observação', readonly: !editando, value: editando ? ui.rascObs : p.observacao });
+    if (editando) ta.addEventListener('input', () => { ui.rascObs = ta.value; });
+    return h('section', { class: 'obs' }, ta, h('div', { class: 'obs-bts' },
+      btn('Editar', { icone: 'nota', disabled: editando, onclick: () => {
+        ui.editObs = p.id; ui.rascObs = null; desenharPainel();
+        const j = J; requestAnimationFrame(() => { usar(j); const x = $('#pr-observacao'); if (x) { x.focus(); x.setSelectionRange(x.value.length, x.value.length); } });
+      } }),
+      btn('Salvar', { icone: 'salvar', disabled: !editando, onclick: () => {
+        p.observacao = ui.rascObs ?? ta.value;
+        ui.editObs = null; ui.rascObs = null;
+        Store.put('protocolos', p, 0);
+        desenharPainel();
+        toast('Observação salva.');
+      } })));
+  };
   // Minutas Realizadas: a lista das minutas salvas e, ao lado, o PDF da marcada; Excluir Minuta embaixo
   const blocoMinutasRealizadas = () => {
     if (ui.minViz) ui.minViz.limpar();
@@ -2688,7 +2714,7 @@ function renderProtocolo(p) {
   };
   const desenharPainel = () => {
     painel.setAttribute('aria-labelledby', idJ('pr-aba-' + ui.abaProt));
-    painel.replaceChildren({ dados: () => quadroDados, andamentos: () => blocoAnd, financeiro: () => blocoFinanceiro(p, atualizarContagens), checklists: () => blocoVinc, indicadores: blocoPartes, minutas: blocoMinutasRealizadas }[ui.abaProt]());
+    painel.replaceChildren({ dados: () => quadroDados, andamentos: () => blocoAnd, financeiro: () => blocoFinanceiro(p, atualizarContagens), checklists: () => blocoVinc, indicadores: blocoPartes, minutas: blocoMinutasRealizadas, observacao: blocoObservacao }[ui.abaProt]());
   };
   desenharAbas();
   desenharPainel();
