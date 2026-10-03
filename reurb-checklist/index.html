@@ -3302,15 +3302,17 @@ const usoDe = (m, base) => (USOS_MINUTA[m && m.uso] ? m.uso : (base && base.uso)
 const paraUso = (m, uso) => m.uso === uso || m.uso === 'ambos';
 function normalizarModeloMinuta(m) {
   m = m || {};
-  return { id: txt(m.id) || uid('mm'), nome: txt(m.nome) || 'Modelo sem nome', grupo: txt(m.grupo) || 'Meus modelos', uso: USOS_MINUTA[m.uso] ? m.uso : '', html: txt(m.html), padrao: txt(m.padrao), criadoEm: m.criadoEm || agora(), atualizadoEm: m.atualizadoEm || agora() };
+  return { id: txt(m.id) || uid('mm'), nome: txt(m.nome) || 'Modelo sem nome', grupo: txt(m.grupo) || 'Meus modelos', uso: USOS_MINUTA[m.uso] ? m.uso : '', html: txt(m.html), padrao: txt(m.padrao), excluido: !!m.excluido, criadoEm: m.criadoEm || agora(), atualizadoEm: m.atualizadoEm || agora() };
 }
+// modelo pronto excluído: fica gravada só a marca de excluído (e ele pode ser restaurado no Adicionar)
+const prontoExcluido = b => { const o = D().modelosMinuta[ID_PRONTO(b.id)]; return !!(o && o.excluido); };
 function modelosMinuta() {
   const salvos = D().modelosMinuta;
-  const prontos = MODELOS_MINUTA.map(b => {
+  const prontos = MODELOS_MINUTA.filter(b => !prontoExcluido(b)).map(b => {
     const o = salvos[ID_PRONTO(b.id)];
     return o ? Object.assign({}, o, { uso: usoDe(o, b), pronto: b.id, editado: true }) : { id: ID_PRONTO(b.id), nome: b.nome, grupo: b.grupo, uso: usoDe(b), html: b.html, pronto: b.id };
   });
-  const meus = Object.values(salvos).filter(m => !m.padrao).map(m => Object.assign({}, m, { uso: usoDe(m) })).sort((a, b) => numNat(a.grupo, b.grupo) || numNat(a.nome, b.nome));
+  const meus = Object.values(salvos).filter(m => !m.padrao && !m.excluido).map(m => Object.assign({}, m, { uso: usoDe(m) })).sort((a, b) => numNat(a.grupo, b.grupo) || numNat(a.nome, b.nome));
   return [...meus, ...prontos];
 }
 // grava o modelo; o pronto editado vira uma cópia com o mesmo id, que "Restaurar original" apaga
@@ -3946,6 +3948,7 @@ function renderModelosMinuta() {
     if (n) { n.focus(); n.select(); }
   };
   const escolher = () => {
+    const excluidos = MODELOS_MINUTA.filter(prontoExcluido);
     u.mmAberto = null; u.mmEscolhendo = true; desenhar();
     editor.replaceChildren(
       h('div', { class: 'arq-visor-cab' }, h('span', { class: 'arq-visor-nome' }, 'Novo modelo'),
@@ -3953,6 +3956,14 @@ function renderModelosMinuta() {
       escolhaModelos(modelosMinuta(), base => { u.mmEscolhendo = false; novo(base); },
         h('section', null, h('h3', null, 'Começar'), h('div', { class: 'min-modelos-grade' },
           h('button', { type: 'button', class: 'min-modelo', onclick: () => { u.mmEscolhendo = false; novo(null); } }, ico('mais'), h('span', null, 'Modelo em branco'))),
+          excluidos.length ? [h('h3', { class: 'mm-copiar' }, 'Restaurar modelo pronto excluído'), h('div', { class: 'min-modelos-grade' }, excluidos.map(b => h('button', {
+            type: 'button', class: 'min-modelo', onclick: () => {
+              Store.remover('modelosMinuta', ID_PRONTO(b.id));
+              u.mmEscolhendo = false;
+              abrir(acharModelo(ID_PRONTO(b.id)));
+              toast('Modelo restaurado.');
+            }
+          }, ico('voltar'), h('span', null, b.nome))))] : null,
           h('h3', { class: 'mm-copiar' }, 'Ou copiar um modelo existente'))));
   };
   const abrir = m => {
@@ -3997,15 +4008,17 @@ function renderModelosMinuta() {
     if (!todos.some(m => m.id === u.mmSel)) u.mmSel = null;
     const linhas = todos.map(m => h('button', {
       type: 'button', class: 'dl-linha' + (m.id === u.mmAberto ? ' aberto' : ''), 'aria-pressed': String(m.id === u.mmSel), title: 'Dois cliques abrem o modelo',
-      onclick: ev => { u.mmSel = m.id; for (const b of linhas) b.setAttribute('aria-pressed', String(b === ev.currentTarget)); bExcluir.disabled = !!m.pronto; },
+      onclick: ev => { u.mmSel = m.id; for (const b of linhas) b.setAttribute('aria-pressed', String(b === ev.currentTarget)); bExcluir.disabled = false; },
       ondblclick: () => { if (m.id !== u.mmAberto) abrir(m); },
       onkeydown: ev => { if (ev.key === 'Enter') { ev.preventDefault(); if (m.id !== u.mmAberto) abrir(m); } }
     }, h('span', { class: 'dl-nome' }, m.nome), h('small', null, [USOS_MINUTA[m.uso], m.grupo].join(' · ') + (m.pronto ? (m.editado ? ' · pronto, editado' : ' · pronto') : ''))));
     const selecionado = todos.find(m => m.id === u.mmSel);
-    const bExcluir = btn('Excluir', { icone: 'lixo', perigo: true, disabled: !selecionado || !!selecionado.pronto, title: 'Os modelos prontos não são excluídos; editados, podem voltar ao original', onclick: ev => armar(ev.currentTarget, () => {
+    const bExcluir = btn('Excluir', { icone: 'lixo', perigo: true, disabled: !selecionado, onclick: ev => armar(ev.currentTarget, () => {
       const m = todos.find(x => x.id === u.mmSel);
-      if (!m || m.pronto) return;
-      Store.remover('modelosMinuta', m.id);
+      if (!m) return;
+      // o pronto (editado ou não) fica marcado como excluído; o seu sai de vez
+      if (m.pronto) { const b = MODELOS_MINUTA.find(x => x.id === m.pronto); Store.put('modelosMinuta', normalizarModeloMinuta({ id: ID_PRONTO(m.pronto), padrao: m.pronto, nome: b ? b.nome : m.nome, grupo: b ? b.grupo : m.grupo, excluido: true }), 0); }
+      else Store.remover('modelosMinuta', m.id);
       if (u.mmAberto === m.id) { u.mmAberto = null; vazio(); }
       u.mmSel = null;
       desenhar();
