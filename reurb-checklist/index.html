@@ -2473,14 +2473,10 @@ function renderProtocolo(p) {
   const selSit = h('select', { class: 'inp', id: 'pr-situacao', disabled: !editando },
     Object.entries(SITUACOES).map(([k, [rot]]) => h('option', { value: k, selected: k === fonte.situacao }, rot)));
   selSit.addEventListener('change', () => { rasc.situacao = selSit.value; });
-  // os botões abrem quadros à frente da página: Minuta no alto; embaixo, Excluir à esquerda e Arquivos à direita
+  // os botões abrem quadros à frente da página: Minuta e Arquivos no alto; embaixo, à esquerda, Excluir protocolo
   const botaoJanela = (k, rot, icone, abrir) => h('button', { type: 'button', class: 'bp', id: 'pr-bt-' + k, 'aria-haspopup': 'dialog', onclick: abrir }, ico(icone), rot);
   const pe = h('div', { class: 'pe-prot' },
-    btn('Excluir protocolo', { icone: 'lixo', onclick: ev => armar(ev.currentTarget, () => excluirProtocolo(p)) }),
-    botaoJanela('arquivos', 'Arquivos', 'anexo', () => {
-      const b = blocoArquivos(p);
-      abrirDialogo({ titulo: 'Arquivos', conteudo: b.el, aoFechar: () => { b.limpar(); renderDetalhe(); }, atualizar: b.desenhar, cls: 'arq' });
-    }));
+    btn('Excluir protocolo', { icone: 'lixo', onclick: ev => armar(ev.currentTarget, () => excluirProtocolo(p)) }));
   // Minuta do protocolo: ofícios do município, decretos… (as minutas das partes ficam nos Termos do Indicador Pessoal)
   const barraProt = h('div', { class: 'barra-prot', role: 'toolbar', 'aria-label': 'Protocolo ' + p.numero },
     botaoJanela('minuta', 'Minuta', 'minuta', () => {
@@ -2492,6 +2488,10 @@ function renderProtocolo(p) {
       });
       abrirDialogo({ titulo: 'Minuta · Protocolo ' + p.numero, conteudo: b.el, aoFechar: renderDetalhe, cls: 'arq min-sri', antesDeFechar: b.antesDeFechar });
       b.focar();
+    }),
+    botaoJanela('arquivos', 'Arquivos', 'anexo', () => {
+      const b = blocoArquivos(p);
+      abrirDialogo({ titulo: 'Arquivos', conteudo: b.el, aoFechar: () => { b.limpar(); renderDetalhe(); }, atualizar: b.desenhar, cls: 'arq' });
     }));
   const cab = h('div', { class: 'cab' },
     h('div', { class: 'cab-txt' }, voltarBtn(), chips));
@@ -4202,6 +4202,14 @@ function blocoFinanceiro(p, aoMudar) {
         salvar(); renderDetalhe(); toast('Despesa excluída.');
       })));
   }
+  // apaga contrato, parcelas (com os recebimentos) e despesas de uma vez; confirma no segundo clique e fica nos andamentos
+  bts.append(btn('Excluir todo financeiro', { icone: 'lixo', disabled: !f.honorarios && !f.parcelas.length && !f.despesas.length, onclick: ev => armar(ev.currentTarget, () => {
+    p.financeiro = normalizarFinanceiro({});
+    ui.editFin = null; ui.rascFin = null; sel.parcelas = null; sel.despesas = null;
+    registrarAndamento(p, 'Financeiro excluído: contrato, parcelas, recebimentos e despesas.');
+    salvar(); renderDetalhe();
+    toast('Financeiro excluído.');
+  }) }));
   atualizarBts();
   const abas = h('div', { class: 'pr-abas sub-abas', role: 'tablist', 'aria-label': 'Financeiro' },
     [['parcelas', 'Parcelas'], ['despesas', 'Despesas']].map(([k, r]) => h('button', {
