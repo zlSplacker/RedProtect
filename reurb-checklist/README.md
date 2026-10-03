@@ -90,7 +90,9 @@ Imóveis e análises mostram um botão *Protocolo 0000/AAAA*, que abre (ou traz 
 
 - **Ordem de protocolo**: número automático por ano (`0001/2026`, `0002/2026`…), exibido no início do quadro *Dados do protocolo* e sem possibilidade de alteração.
 - **Abertura**: data e hora registradas automaticamente no clique em *Recepção de Título*, sem possibilidade de alteração.
-- **Dados do protocolo**: interessado (quem está contratando), contato, município, prazo estimado e descrição do pedido.
+- **Dados do protocolo**: interessado (quem está contratando), contato, município, nome do núcleo, prazo estimado e descrição do pedido.
+- **Contato**: só números, no formato `(XX) XXXXX-XXXX` (o sistema põe parênteses, espaço e hífen enquanto você digita).
+- **Nome do núcleo**: ao lado de *Situação*. É o núcleo que aparece na identificação da *Minuta* e no campo *Núcleo* dos modelos de minuta (antes do núcleo do checklist ou dos imóveis), e também entra no filtro da consulta de protocolos.
 - **Situação**: aberto, em análise, aguardando documentos, concluído ou arquivado. Cada mudança fica registrada nos andamentos.
 - **Prazo estimado**: o protocolo avisa quando faltam 7 dias ou menos e quando o prazo venceu.
 - **Andamentos**: histórico datado de tudo o que aconteceu no processo.

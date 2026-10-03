@@ -174,6 +174,7 @@ textarea.inp{resize:vertical;min-height:38px;display:block}
 .inp[readonly]{background:var(--sup2);color:var(--tinta2);cursor:default}
 .linha-ordem{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:12px;align-items:end}
 .linha-ordem .campo-situacao .inp{width:200px;max-width:100%}
+.linha-ordem .campo-nucleo .inp{width:260px;max-width:100%}
 .linha-dir{margin-left:auto;display:flex;flex-wrap:wrap;gap:12px;align-items:end}
 .linha-dir .inp{width:185px;max-width:100%}
 @container (max-width:640px){.linha-dir{margin-left:0}}
@@ -1473,7 +1474,7 @@ function normalizarProtocolo(p) {
   return {
     id: String(p.id || uid('p')), ano, seq, numero: String(p.numero || numeroProtocolo(ano, seq)),
     abertura: String(p.abertura || hoje()), abertoEm: String(p.abertoEm || ''),
-    interessado: String(p.interessado || ''), contato: String(p.contato || ''), municipio: String(p.municipio || ''),
+    interessado: String(p.interessado || ''), contato: String(p.contato || ''), municipio: String(p.municipio || ''), nucleo: String(p.nucleo || ''),
     prazo: String(p.prazo || ''), descricao: String(p.descricao || ''),
     situacao: SITUACOES[p.situacao] ? p.situacao : 'aberto',
     andamentos: Array.isArray(p.andamentos) ? p.andamentos.map(x => ({ id: String(x.id || uid('n')), data: String(x.data || ''), texto: String(x.texto || ''), em: x.em || '' })) : [],
@@ -2019,7 +2020,7 @@ function renderItens() {
     vazios = ['Nenhum imóvel cadastrado.', 'Nenhum imóvel corresponde ao filtro.'];
   } else if (aba === 'protocolos') {
     todos = protocolosOrdenados();
-    vis = todos.filter(p => !termo || norm([p.numero, p.municipio, p.interessado].join(' ')).includes(termo));
+    vis = todos.filter(p => !termo || norm([p.numero, p.municipio, p.interessado, p.nucleo].join(' ')).includes(termo));
     for (const p of vis) itens.push(linha('protocolos', p.id, celsProtocolo(p)));
     vazios = ['Nenhum protocolo aberto.', 'Nenhum protocolo corresponde ao filtro.'];
   } else if (aba === 'analises') {
@@ -2224,7 +2225,7 @@ function montarQuestionario(modelo, resp, aoMudar) {
 // análise aplicada a um protocolo: município e número vêm do próprio protocolo
 function identAnalise(a) {
   const p = D().protocolos[a.protocoloId];
-  return p ? Object.assign({}, a.ident, { municipio: p.municipio || a.ident.municipio, processo: p.numero }) : a.ident;
+  return p ? Object.assign({}, a.ident, { municipio: p.municipio || a.ident.municipio, processo: p.numero, nucleo: a.ident.nucleo || p.nucleo }) : a.ident;
 }
 const tituloAnalise = a => a.ident.nucleo || a.modelo.nome;
 function subtituloAnalise(a) {
@@ -2446,7 +2447,13 @@ function campoProt(p, k, rot, tipo, extra = {}) {
   if (tipo === 'fixo') el = h('input', { class: 'inp', id, type: 'text', readonly: true, value: extra.valor || '' });
   else if (tipo === 'textarea') el = h('textarea', { class: 'inp', id, rows: '2', value: p[k] || '' });
   else el = h('input', { class: 'inp', id, type: tipo, value: p[k] || '', autocomplete: 'off' });
-  return { k, el, rotulo: h('label', { class: 'campo' + (extra.largo ? ' largo' : '') + (extra.curto ? ' campo-curto' : ''), for: id }, h('span', { class: 'rot' }, rot), el) };
+  return { k, el, rotulo: h('label', { class: 'campo' + (extra.largo ? ' largo' : '') + (extra.curto ? ' campo-curto' : '') + (extra.cls ? ' ' + extra.cls : ''), for: id }, h('span', { class: 'rot' }, rot), el) };
+}
+// contato do protocolo: só números, no formato (XX) XXXXX-XXXX (a máscara entra antes de o valor ser lido)
+function mascaraTelefone(el) {
+  el.inputMode = 'numeric';
+  el.maxLength = MASCARAS.cel.length;
+  el.addEventListener('input', () => { el.value = mascarar(el.value, MASCARAS.cel); });
 }
 function renderProtocolo(p) {
   const d = $('#detalhe');
@@ -2461,7 +2468,7 @@ function renderProtocolo(p) {
   // Recepção: os campos ficam travados; Editar libera (as mudanças ficam num rascunho da janela) e Salvar grava e trava de novo
   const editando = ui.editProt === p.id;
   if (!editando) ui.rascProt = null;
-  const rasc = editando ? (ui.rascProt || (ui.rascProt = { interessado: p.interessado, contato: p.contato, municipio: p.municipio, prazo: p.prazo, descricao: p.descricao, situacao: p.situacao })) : null;
+  const rasc = editando ? (ui.rascProt || (ui.rascProt = { interessado: p.interessado, contato: p.contato, municipio: p.municipio, nucleo: p.nucleo, prazo: p.prazo, descricao: p.descricao, situacao: p.situacao })) : null;
   const fonte = rasc || p;
   const selSit = h('select', { class: 'inp', id: 'pr-situacao', disabled: !editando },
     Object.entries(SITUACOES).map(([k, [rot]]) => h('option', { value: k, selected: k === fonte.situacao }, rot)));
@@ -2496,12 +2503,13 @@ function renderProtocolo(p) {
     campoProt(p, 'numero', 'Ordem de protocolo', 'fixo', { valor: p.numero, curto: true }),
     campoProt(p, 'abertura', 'Abertura', 'fixo', { valor: fmtAbertura(p) }),
     campoProt(fonte, 'interessado', 'Interessado', 'text'), campoProt(fonte, 'contato', 'Contato', 'text'),
-    campoProt(fonte, 'municipio', 'Município/UF', 'text'), campoProt(fonte, 'prazo', 'Prazo estimado', 'date'),
+    campoProt(fonte, 'municipio', 'Município/UF', 'text'), campoProt(fonte, 'nucleo', 'Nome do núcleo', 'text', { cls: 'campo-nucleo' }), campoProt(fonte, 'prazo', 'Prazo estimado', 'date'),
     campoProt(fonte, 'descricao', 'Descrição do pedido', 'textarea', { largo: true })
   ];
   for (const c of campos) {
     if (c.el.readOnly) continue;
     if (!editando) { c.el.readOnly = true; continue; }
+    if (c.k === 'contato') mascaraTelefone(c.el);
     c.el.addEventListener('input', () => {
       rasc[c.k] = c.el.value;
       if (c.el.tagName === 'TEXTAREA') autoAltura(c.el);
@@ -2512,7 +2520,7 @@ function renderProtocolo(p) {
     const j = J; requestAnimationFrame(() => { usar(j); const f = $('#pr-interessado'); if (f) f.focus(); });
   } });
   const bSalvar = btn('Salvar', { icone: 'check', prim: true, disabled: !editando, onclick: () => {
-    for (const k of ['interessado', 'contato', 'municipio', 'prazo', 'descricao']) p[k] = rasc[k];
+    for (const k of ['interessado', 'contato', 'municipio', 'nucleo', 'prazo', 'descricao']) p[k] = rasc[k];
     if (rasc.situacao !== p.situacao) {
       p.situacao = rasc.situacao;
       registrarAndamento(p, `Situação alterada para “${SITUACOES[p.situacao][0]}”.`);
@@ -2526,7 +2534,7 @@ function renderProtocolo(p) {
   // primeira linha: ordem e situação à esquerda; abertura e prazo estimado do outro lado
   const rot = Object.fromEntries(campos.map(c => [c.k, c.rotulo]));
   const linhaOrdem = h('div', { class: 'linha-ordem' }, rot.numero,
-    h('label', { class: 'campo campo-situacao', for: 'pr-situacao' }, h('span', { class: 'rot' }, 'Situação'), selSit),
+    h('label', { class: 'campo campo-situacao', for: 'pr-situacao' }, h('span', { class: 'rot' }, 'Situação'), selSit), rot.nucleo,
     h('div', { class: 'linha-dir' }, rot.abertura, rot.prazo));
   const quadroDados = h('fieldset', { class: 'ident' }, h('legend', null, 'Dados do protocolo'), linhaOrdem,
     h('div', { class: 'linha-3' }, rot.municipio, rot.interessado, rot.contato), rot.descricao,
@@ -3019,7 +3027,7 @@ function dadosMinuta(p) {
   const imoveis = imoveisDoProtocolo(p.id);
   const analise = analisesDoProtocolo(p.id)[0] || null;
   const [cidade, uf] = String(p.municipio || '').split('/').map(s => s.trim());
-  const nucleo = (analise && analise.ident.nucleo) || (imoveis.find(i => i.nucleo) || {}).nucleo || '';
+  const nucleo = p.nucleo || (analise && analise.ident.nucleo) || (imoveis.find(i => i.nucleo) || {}).nucleo || '';
   const local = (imoveis.find(i => i.logradouro) || {}).logradouro || '';
   const comQualidade = (...q) => partes.filter(x => q.includes(x.qualidade));
   return { p, partes, imoveis, analise, cidade: cidade || '', uf: uf || '', nucleo, local, comQualidade, ano: hoje().slice(0, 4) };
@@ -4210,8 +4218,9 @@ function renderNovoProtocolo() {
     campo('np-numero', 'Ordem de protocolo', { readonly: true, value: numeroProtocolo(anoAtual(), proximoSeq(anoAtual())), tabindex: '-1', largo: true, curto: true }),
     campo('np-abertura', 'Abertura', { readonly: true, value: fmtData(hoje()), tabindex: '-1' }),
     campo('np-interessado', 'Interessado', { required: true, placeholder: 'Nome de quem está contratando' }),
-    campo('np-contato', 'Contato', { placeholder: 'Telefone ou e-mail' }),
+    campo('np-contato', 'Contato'),
     campo('np-municipio', 'Município/UF', { placeholder: 'Ex.: Assis Chateaubriand/PR' }),
+    campo('np-nucleo', 'Nome do núcleo'),
     campo('np-prazo', 'Prazo estimado', { type: 'date' }),
     h('label', { class: 'campo largo', for: 'np-descricao' }, h('span', { class: 'rot' }, 'Descrição do pedido'),
       h('textarea', { class: 'inp', id: 'np-descricao', rows: '3' })),
@@ -4225,7 +4234,7 @@ function renderNovoProtocolo() {
     const ano = anoAtual(), abertura = hoje(), abertoEm = agora();
     const p = normalizarProtocolo({
       id: uid('p'), ano, seq: proximoSeq(ano), abertura, abertoEm,
-      interessado: v('np-interessado'), contato: v('np-contato'), municipio: v('np-municipio'),
+      interessado: v('np-interessado'), contato: v('np-contato'), municipio: v('np-municipio'), nucleo: v('np-nucleo'),
       prazo: v('np-prazo'), descricao: v('np-descricao'), situacao: 'aberto',
       andamentos: [{ id: uid('n'), data: abertura, texto: 'Protocolo aberto.', em: abertoEm }]
     });
@@ -4236,6 +4245,7 @@ function renderNovoProtocolo() {
     toast(`Protocolo ${p.numero} aberto.`);
   });
   d.replaceChildren(h('div', { class: 'cab' }, h('div', { class: 'cab-txt' }, voltarBtn(), h('span', { class: 'sobre' }, 'Recepção'), h('h1', { class: 'titulo' }, 'Recepção de Título'))), form);
+  mascaraTelefone($('#np-contato'));
   $('#np-interessado').focus();
 }
 
