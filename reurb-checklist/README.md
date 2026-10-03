@@ -90,12 +90,13 @@ Imóveis e análises mostram um botão *Protocolo 0000/AAAA*, que abre (ou traz 
 
 - **Ordem de protocolo**: número automático por ano (`0001/2026`, `0002/2026`…), exibido no início do quadro *Dados do protocolo* e sem possibilidade de alteração.
 - **Abertura**: data e hora registradas automaticamente no clique em *Recepção de Título*, sem possibilidade de alteração.
-- **Dados do protocolo**: interessado (quem está contratando), contato, município, nome do núcleo, prazo estimado e descrição do pedido.
+- **Dados do protocolo**: interessado (quem está contratando), contato, e-mail, município, nome do núcleo, prazo estimado e descrição do pedido.
 - **Contato**: só números, no formato `(XX) XXXXX-XXXX` (o sistema põe parênteses, espaço e hífen enquanto você digita).
+- **E-mail**: ao lado de *Contato*, na Recepção de Título e na aba Recepção; o *Salvar* não aceita e-mail mal escrito.
 - **Nome do núcleo**: ao lado de *Situação*. É o núcleo que aparece na identificação da *Minuta* e no campo *Núcleo* dos modelos de minuta (antes do núcleo do checklist ou dos imóveis), e também entra no filtro da consulta de protocolos.
 - **Situação**: aberto, em análise, aguardando documentos, concluído ou arquivado. Cada mudança fica registrada nos andamentos.
 - **Prazo estimado**: o protocolo avisa quando faltam 7 dias ou menos e quando o prazo venceu.
-- **Andamentos**: histórico datado de tudo o que aconteceu no processo.
+- **Andamentos**: histórico datado de tudo o que aconteceu no processo, em ordem cronológica — o mais antigo em cima e o novo entrando embaixo (fica destacado por um instante).
 - **Aplicar checklist** (na aba *Checklists*): mostra só os nomes dos checklists cadastrados (modelos em branco, sem nenhuma pergunta escrita, ficam de fora); ali não se cria checklist. Ao escolher um, a análise do núcleo abre vinculada ao protocolo, pronta para responder (município e número vêm do protocolo). A análise mostra o link de volta para o protocolo.
 - **Excluir protocolo**: fica no canto inferior esquerdo da janela, abaixo de uma linha fina, e pede confirmação no segundo clique. Esse rodapé fica sempre no mesmo lugar, embaixo da janela, em qualquer aba — o mesmo vale para o rodapé do Indicador Pessoal (*Excluir pessoa*, *Arquivos*, *Salvar*), do Indicador Real e do checklist. Imóveis, pessoas e checklists continuam cadastrados.
 

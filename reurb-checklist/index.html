@@ -371,6 +371,7 @@ select.inp:disabled{background:var(--sup2);color:var(--tinta2);cursor:default;op
 .and-item::before{content:"";position:absolute;left:-7px;top:14px;width:12px;height:12px;border-radius:50%;background:var(--sup);border:2px solid var(--acento)}
 .and-data{font:500 12.5px/1.7 var(--f-mono);color:var(--tinta2);white-space:nowrap;font-variant-numeric:tabular-nums}
 .and-txt{overflow-wrap:anywhere;line-height:1.5;padding-top:2px}
+.and-item.and-novo{background:#E5F3FF;transition:background .4s}
 .vinc{list-style:none;margin:0;padding:0;display:grid;gap:4px}
 /* o protocolo como centro do trabalho: abas internas */
 .pr-abas{display:flex;flex-wrap:wrap;gap:2px;border-bottom:1px solid var(--linha);margin:0 0 16px}
@@ -1474,7 +1475,7 @@ function normalizarProtocolo(p) {
   return {
     id: String(p.id || uid('p')), ano, seq, numero: String(p.numero || numeroProtocolo(ano, seq)),
     abertura: String(p.abertura || hoje()), abertoEm: String(p.abertoEm || ''),
-    interessado: String(p.interessado || ''), contato: String(p.contato || ''), municipio: String(p.municipio || ''), nucleo: String(p.nucleo || ''),
+    interessado: String(p.interessado || ''), contato: String(p.contato || ''), email: String(p.email || ''), municipio: String(p.municipio || ''), nucleo: String(p.nucleo || ''),
     prazo: String(p.prazo || ''), descricao: String(p.descricao || ''),
     situacao: SITUACOES[p.situacao] ? p.situacao : 'aberto',
     andamentos: Array.isArray(p.andamentos) ? p.andamentos.map(x => ({ id: String(x.id || uid('n')), data: String(x.data || ''), texto: String(x.texto || ''), em: x.em || '' })) : [],
@@ -1503,8 +1504,9 @@ function proximoSeq(ano) {
 function registrarAndamento(p, texto, data) {
   p.andamentos.push({ id: uid('n'), data: data || hoje(), texto, em: agora() });
 }
+// em ordem cronológica: o mais antigo em cima e o mais novo embaixo
 function andamentosOrdenados(p) {
-  return p.andamentos.slice().sort((a, b) => String(b.data).localeCompare(String(a.data)) || String(b.em).localeCompare(String(a.em)));
+  return p.andamentos.slice().sort((a, b) => String(a.data).localeCompare(String(b.data)) || String(a.em).localeCompare(String(b.em)));
 }
 function prazoInfo(p) {
   if (!p.prazo || p.situacao === 'concluido' || p.situacao === 'arquivado') return null;
@@ -2449,6 +2451,7 @@ function campoProt(p, k, rot, tipo, extra = {}) {
   else el = h('input', { class: 'inp', id, type: tipo, value: p[k] || '', autocomplete: 'off' });
   return { k, el, rotulo: h('label', { class: 'campo' + (extra.largo ? ' largo' : '') + (extra.curto ? ' campo-curto' : '') + (extra.cls ? ' ' + extra.cls : ''), for: id }, h('span', { class: 'rot' }, rot), el) };
 }
+const emailValido = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v).trim());
 // contato do protocolo: só números, no formato (XX) XXXXX-XXXX (a máscara entra antes de o valor ser lido)
 function mascaraTelefone(el) {
   el.inputMode = 'numeric';
@@ -2468,7 +2471,7 @@ function renderProtocolo(p) {
   // Recepção: os campos ficam travados; Editar libera (as mudanças ficam num rascunho da janela) e Salvar grava e trava de novo
   const editando = ui.editProt === p.id;
   if (!editando) ui.rascProt = null;
-  const rasc = editando ? (ui.rascProt || (ui.rascProt = { interessado: p.interessado, contato: p.contato, municipio: p.municipio, nucleo: p.nucleo, prazo: p.prazo, descricao: p.descricao, situacao: p.situacao })) : null;
+  const rasc = editando ? (ui.rascProt || (ui.rascProt = { interessado: p.interessado, contato: p.contato, email: p.email, municipio: p.municipio, nucleo: p.nucleo, prazo: p.prazo, descricao: p.descricao, situacao: p.situacao })) : null;
   const fonte = rasc || p;
   const selSit = h('select', { class: 'inp', id: 'pr-situacao', disabled: !editando },
     Object.entries(SITUACOES).map(([k, [rot]]) => h('option', { value: k, selected: k === fonte.situacao }, rot)));
@@ -2502,7 +2505,7 @@ function renderProtocolo(p) {
   const campos = [
     campoProt(p, 'numero', 'Ordem de protocolo', 'fixo', { valor: p.numero, curto: true }),
     campoProt(p, 'abertura', 'Abertura', 'fixo', { valor: fmtAbertura(p) }),
-    campoProt(fonte, 'interessado', 'Interessado', 'text'), campoProt(fonte, 'contato', 'Contato', 'text'),
+    campoProt(fonte, 'interessado', 'Interessado', 'text'), campoProt(fonte, 'contato', 'Contato', 'text'), campoProt(fonte, 'email', 'E-mail', 'email'),
     campoProt(fonte, 'municipio', 'Município/UF', 'text'), campoProt(fonte, 'nucleo', 'Nome do núcleo', 'text', { cls: 'campo-nucleo' }), campoProt(fonte, 'prazo', 'Prazo estimado', 'date'),
     campoProt(fonte, 'descricao', 'Descrição do pedido', 'textarea', { largo: true })
   ];
@@ -2520,7 +2523,9 @@ function renderProtocolo(p) {
     const j = J; requestAnimationFrame(() => { usar(j); const f = $('#pr-interessado'); if (f) f.focus(); });
   } });
   const bSalvar = btn('Salvar', { icone: 'check', prim: true, disabled: !editando, onclick: () => {
-    for (const k of ['interessado', 'contato', 'municipio', 'nucleo', 'prazo', 'descricao']) p[k] = rasc[k];
+    if (rasc.email && !emailValido(rasc.email)) { toast('E-mail inválido. Confira, por exemplo: nome@prefeitura.pr.gov.br'); const x = $('#pr-email'); if (x) x.focus(); return; }
+    for (const k of ['interessado', 'contato', 'email', 'municipio', 'nucleo', 'prazo', 'descricao']) p[k] = rasc[k];
+    p.email = String(p.email || '').trim();
     if (rasc.situacao !== p.situacao) {
       p.situacao = rasc.situacao;
       registrarAndamento(p, `Situação alterada para “${SITUACOES[p.situacao][0]}”.`);
@@ -2537,7 +2542,7 @@ function renderProtocolo(p) {
     h('label', { class: 'campo campo-situacao', for: 'pr-situacao' }, h('span', { class: 'rot' }, 'Situação'), selSit), rot.nucleo,
     h('div', { class: 'linha-dir' }, rot.abertura, rot.prazo));
   const quadroDados = h('fieldset', { class: 'ident' }, h('legend', null, 'Dados do protocolo'), linhaOrdem,
-    h('div', { class: 'linha-3' }, rot.municipio, rot.interessado, rot.contato), rot.descricao,
+    h('div', { class: 'linha-3' }, rot.municipio, rot.interessado, rot.contato, rot.email), rot.descricao,
     h('div', { class: 'prot-edicao' }, bEditar, bSalvar));
   blocos.push(quadroDados);
   requestAnimationFrame(() => { const t = $('#pr-descricao'); if (t) autoAltura(t); });
@@ -2583,7 +2588,10 @@ function renderProtocolo(p) {
     Store.put('protocolos', p, 0);
     andTexto.value = '';
     desenharAndamentos(); atualizarContagens();
-    andTexto.focus();
+    // o andamento novo aparece no lugar dele na lista (em geral, embaixo)
+    andTexto.focus({ preventScroll: true });
+    const novo = p.andamentos[p.andamentos.length - 1], i = andamentosOrdenados(p).indexOf(novo), li = lista.children[i];
+    if (li) { li.classList.add('and-novo'); li.scrollIntoView({ block: 'nearest' }); setTimeout(() => li.classList.remove('and-novo'), 1600); }
   });
   const blocoAnd = h('section', { class: 'bloco' }, formAnd, lista);
 
@@ -4227,6 +4235,7 @@ function renderNovoProtocolo() {
     campo('np-abertura', 'Abertura', { readonly: true, value: fmtData(hoje()), tabindex: '-1' }),
     campo('np-interessado', 'Interessado', { required: true, placeholder: 'Nome de quem está contratando' }),
     campo('np-contato', 'Contato'),
+    campo('np-email', 'E-mail', { type: 'email' }),
     campo('np-municipio', 'Município/UF', { placeholder: 'Ex.: Assis Chateaubriand/PR' }),
     campo('np-nucleo', 'Nome do núcleo'),
     campo('np-prazo', 'Prazo estimado', { type: 'date' }),
@@ -4242,7 +4251,7 @@ function renderNovoProtocolo() {
     const ano = anoAtual(), abertura = hoje(), abertoEm = agora();
     const p = normalizarProtocolo({
       id: uid('p'), ano, seq: proximoSeq(ano), abertura, abertoEm,
-      interessado: v('np-interessado'), contato: v('np-contato'), municipio: v('np-municipio'), nucleo: v('np-nucleo'),
+      interessado: v('np-interessado'), contato: v('np-contato'), email: v('np-email'), municipio: v('np-municipio'), nucleo: v('np-nucleo'),
       prazo: v('np-prazo'), descricao: v('np-descricao'), situacao: 'aberto',
       andamentos: [{ id: uid('n'), data: abertura, texto: 'Protocolo aberto.', em: abertoEm }]
     });
