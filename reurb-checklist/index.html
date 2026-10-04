@@ -3760,7 +3760,16 @@ function escolhaModelos(modelos, aoEscolher, extra) {
    (barra de formatação, a folha e as partes do protocolo) e, embaixo, Salvar e Fechar. Serve só para criar:
    no Salvar a minuta vai para a aba Minutas Realizadas, onde fica o PDF. */
 function criarMinuta(p, aoSalvar) {
-  const dados = () => dadosMinuta(p);
+  // partes tiradas desta minuta (Remover parte): saem da grade e dos campos de pessoa do modelo; o protocolo não muda
+  const removidas = new Set();
+  const dados = () => {
+    const d = dadosMinuta(p);
+    if (removidas.size) {
+      d.partes = d.partes.filter(x => !removidas.has(x.pe.id));
+      d.comQualidade = (...q) => d.partes.filter(x => q.includes(x.qualidade));
+    }
+    return d;
+  };
   const d0 = dados();
   const modelos = modelosMinuta().filter(m => paraUso(m, 'protocolo'));
   const numero = p.minutas.reduce((a, x) => Math.max(a, x.numero || 0), 0) + 1;
@@ -3811,16 +3820,31 @@ function criarMinuta(p, aoSalvar) {
     else { ed.folha.append(h('p', { class: 't' }, htmlSeguro(q))); ed.folha.dispatchEvent(new Event('input')); }
     guardar();
   };
-  const grade = h('ul', { class: 'itens grade' }, cabGrade('partesMinuta'),
-    partes.length ? partes.map(({ x, pe }) => h('li', null, h('button', {
-      type: 'button', class: 'item linha g-partesMinuta', 'aria-current': 'false',
-      onclick: ev => { marcada = pe; for (const b of grade.querySelectorAll('.item')) b.setAttribute('aria-current', String(b === ev.currentTarget)); bInserir.disabled = bAbrir.disabled = false; },
+  const grade = h('ul', { class: 'itens grade' });
+  const marcar = pe => { marcada = pe; bInserir.disabled = bAbrir.disabled = bRemover.disabled = !pe; };
+  const desenharPartes = () => {
+    const vis = partes.filter(({ pe }) => !removidas.has(pe.id));
+    grade.replaceChildren(cabGrade('partesMinuta'), ...(vis.length ? vis.map(({ x, pe }) => h('li', null, h('button', {
+      type: 'button', class: 'item linha g-partesMinuta', 'aria-current': String(pe === marcada),
+      onclick: ev => { marcar(pe); for (const b of grade.querySelectorAll('.item')) b.setAttribute('aria-current', String(b === ev.currentTarget)); },
       ondblclick: () => inserir(pe), onkeydown: ev => { if (ev.key === 'Enter') { ev.preventDefault(); inserir(pe); } }
     }, cel('Nome', pe.nome), cel(pe.tipo === 'juridica' ? 'CNPJ' : 'CPF', pe.documento), cel('Qualidade', qualidadeParte(x)),
       cel('Modalidade', pe.modalidade ? 'Reurb-' + pe.modalidade : ''), cel('Imóvel', imoveisDaPessoa(pe.id).map(v => descImovel(v.imovel)).join('; ')))))
-      : [h('li', { class: 'lat-vazio' }, 'Nenhuma parte no protocolo.')]);
+      : [h('li', { class: 'lat-vazio' }, partes.length ? 'Todas as partes foram removidas desta minuta.' : 'Nenhuma parte no protocolo.')]));
+  };
   const bInserir = btn('Inserir qualificação', { icone: 'mais', sm: true, disabled: true, onclick: () => { if (marcada) inserir(marcada); } });
   const bAbrir = btn('Abrir cadastro', { icone: 'olho', sm: true, disabled: true, onclick: () => { if (marcada) irPara('pessoas', marcada.id); } });
+  // tira a parte só desta minuta; com o texto do modelo ainda sem mexer, ele é refeito sem ela
+  const bRemover = btn('Remover parte', { icone: 'x', sm: true, disabled: true, onclick: () => {
+    if (!marcada) return;
+    removidas.add(marcada.id);
+    marcar(null);
+    desenharPartes();
+    const m = modelos.find(x => x.id === modeloAtual);
+    if (m && !editado) trocarTexto(preencherModelo(m.html, dados()));
+    toast('Parte removida desta minuta.');
+  } });
+  desenharPartes();
   const salvar = ev => {
     if (!ed.folha.textContent.trim()) { toast('Escreva o texto da minuta ou escolha um modelo.'); ed.folha.focus(); return; }
     faltas = ed.folha.querySelectorAll('.campo-vazio').length;
@@ -3847,7 +3871,7 @@ function criarMinuta(p, aoSalvar) {
     confirma,
     h('div', { class: 'pr-abas sub-abas msri-abas', role: 'tablist' }, h('button', { type: 'button', class: 'pr-aba', role: 'tab', 'aria-selected': 'true' }, 'Texto/Partes Envolvidas')),
     h('div', { class: 'msri-texto' }, h('div', { class: 'min-ferramentas' }, ed.barra), h('div', { class: 'min-corpo msri-folha' }, ed.folha)),
-    h('div', { class: 'msri-partes' }, grade, h('div', { class: 'msri-partes-bts' }, bInserir, bAbrir)),
+    h('div', { class: 'msri-partes' }, grade, h('div', { class: 'msri-partes-bts' }, bInserir, bAbrir, bRemover)),
     h('div', { class: 'msri-pe' }, h('span', { class: 'msri-pe-txt' }, 'Protocolo ' + p.numero),
       btn('Salvar', { icone: 'salvar', onclick: salvar }), btn('Fechar', { icone: 'sair', cls: 'bt-fechar', onclick: () => fecharDialogo() })));
   // fechar com a minuta mexida e não salva: o primeiro pedido avisa, o segundo descarta
