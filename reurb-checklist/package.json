@@ -1,0 +1,13 @@
+{
+  "name": "sistema-fundiario",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sistema Fundiário (REURB) com login por usuário",
+  "main": "servidor.js",
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning servidor.js"
+  },
+  "engines": {
+    "node": "22.x"
+  }
+}

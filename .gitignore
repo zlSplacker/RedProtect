@@ -2,3 +2,6 @@
 *.iml
 */target/*
 /target/
+
+# dados do servidor do Sistema Fundiário (banco e anexos)
+reurb-checklist/dados/

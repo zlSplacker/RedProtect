@@ -9,6 +9,16 @@ Ferramenta de checklist para consultoria jurídica em processos de Regularizaç�
 
 Abra `index.html` no navegador (Chrome, Edge ou Firefox). Não precisa instalar nada nem estar online. Os dados ficam salvos no próprio navegador.
 
+### Na internet, com login por usuário
+
+O `servidor.js` coloca o sistema no ar para o escritório inteiro: cada pessoa entra com **usuário e senha**, os dados ficam no servidor e aparecem ao vivo em todas as telas abertas, e os anexos também ficam guardados lá. O passo a passo da publicação (Railway) está em **[PUBLICAR.md](PUBLICAR.md)**.
+
+- **Tela de acesso**: usuário e senha, no padrão das janelas do sistema. Se a sessão terminar no meio do trabalho, a tela volta por cima e, depois de entrar, tudo continua de onde parou (nada do que estava sendo salvo se perde).
+- **Barra de status**: mostra quem está usando (*Usuário: …*) ao lado da data, e *Salvo no servidor*. Sem conexão, mostra *Sem conexão com o servidor* e reconecta sozinha.
+- **Sistema → Usuários** (só administrador): lista com nome, usuário, perfil, situação e último acesso; **Novo**, **Editar** (ou clique duplo), **Desativar/Ativar** e **Excluir** (pede confirmação). Desativar ou excluir derruba na hora a sessão da pessoa.
+- **Sistema → Alterar senha** e **Sistema → Sair**.
+- Sem o servidor, o `index.html` continua funcionando como antes (sem login, salvando no navegador).
+
 > A versão anterior às mudanças do protocolo (interface do S.R.I., com Exigência e a aba Dados) está guardada, sem alterações, no ramo `backup/sistema-fundiario-v1`.
 
 ### Área de trabalho e janelas

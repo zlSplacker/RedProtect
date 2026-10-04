@@ -631,6 +631,27 @@ button:disabled{opacity:1}
 /* data de hoje (dd/mm/aaaa) na ponta direita da barra de status */
 .status-data{flex:none;white-space:nowrap;padding-left:10px;border-left:1px solid #A0A0A0;font-variant-numeric:tabular-nums}
 .tarefas-lista{justify-content:flex-end;gap:2px}
+.status-usuario{flex:none;white-space:nowrap;padding-left:10px;border-left:1px solid #A0A0A0;max-width:40vw;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:560px){.status-usuario{max-width:30vw}}
+.mb-sep{height:1px;margin:3px 2px;background:#D5D5D5}
+/* tela de acesso (sistema rodando no servidor) */
+.acesso{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:16px;overflow:auto;background:linear-gradient(160deg,#F3F4F6 0%,#E6E9ED 55%,#DCE0E5 100%)}
+.acesso.sobre{background:rgba(0,0,0,.35)}
+.acesso-painel{width:100%;max-width:400px;background:var(--chao);border:1px solid #5F7FA3;box-shadow:0 6px 22px rgba(0,0,0,.3)}
+.acesso-cab{display:flex;align-items:center;gap:6px;margin:0;padding:3px 8px;background:linear-gradient(#D7E4F2,var(--moldura));border-bottom:1px solid #8EA4BE;font:400 12px/20px var(--f-ui)}
+.acesso-cab::before{content:"";flex:none;width:16px;height:16px;background:var(--logo) center/contain no-repeat}
+.acesso-corpo{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:start;gap:14px;padding:14px 14px 8px}
+.acesso-corpo img{width:64px;height:64px}
+.acesso-campos{display:grid;gap:8px}
+.acesso-msg{min-height:16px;margin:0;font-size:12px;color:#B42318}
+.acesso-bts,.dlg-bts{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:4px;padding:6px 8px;border-top:1px solid #D5D5D5}
+@media (max-width:400px){.acesso-corpo{grid-template-columns:1fr}.acesso-corpo img{display:none}}
+.dlg-form{display:grid;gap:8px}
+.dlg-form .dlg-bts{padding:8px 0 0}
+.usr{container-type:inline-size;display:grid;gap:6px}
+.usr .itens.grade{min-height:180px;max-height:50vh}
+.usr .dlg-bts{justify-content:flex-start;padding:0;border:0}
+.g-usuarios{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) 104px 84px 118px}
 .tarefa{flex:0 1 180px;min-width:80px;border:1px solid #ADADAD;border-radius:2px;background:linear-gradient(#FDFDFD,#E9E9E9);padding:1px 8px;font-size:12px;font-weight:400;color:#000}
 .tarefa:hover{background:linear-gradient(#EAF6FD,#BEE6FD);border-color:#3C7FB1}
 .tarefa[aria-pressed="true"]{background:linear-gradient(#C4E5F6,#98D1EF);border-color:#2C628B;color:#000}
@@ -1006,6 +1027,10 @@ textarea.inp.obs-prot{flex:1;min-height:260px;resize:none;padding:6px 8px;font-s
         <div class="mb-sub" id="mb-sistema-sub" role="menu" aria-labelledby="mb-sistema-btn">
           <button type="button" class="mb-op" role="menuitem" id="bk-exportar"><span>Exportar backup (JSON)</span></button>
           <button type="button" class="mb-op" role="menuitem" id="bk-importar"><span>Importar arquivo JSON</span></button>
+          <div class="mb-sep" id="sis-sep" role="separator" hidden></div>
+          <button type="button" class="mb-op" role="menuitem" id="sis-usuarios" hidden><span>Usuários</span></button>
+          <button type="button" class="mb-op" role="menuitem" id="sis-senha" hidden><span>Alterar senha</span></button>
+          <button type="button" class="mb-op" role="menuitem" id="sis-sair" hidden><span>Sair</span></button>
         </div>
       </div>
     </nav>
@@ -1030,6 +1055,7 @@ textarea.inp.obs-prot{flex:1;min-height:260px;resize:none;padding:6px 8px;font-s
   <span class="status-txt"><span class="salvo" id="salvo" data-estado="carregando">Carregando…</span></span>
   <div class="tarefas-lista" id="tarefas-lista"></div>
   <button type="button" class="btn btn-fant btn-sm" id="lado-a-lado" title="Organizar as janelas lado a lado">Lado a lado</button>
+  <span class="status-usuario" id="status-usuario" hidden></span>
   <span class="status-data" id="status-data"></span>
 </nav>
 <input type="file" id="arquivo" accept=".json,application/json" hidden>
@@ -1567,7 +1593,7 @@ const normEndereco = e => Object.fromEntries(Object.keys(ENDERECO_VAZIO).map(k =
 function normalizarArquivos(l) {
   return Array.isArray(l) ? l.filter(x => x && x.ref).map(x => ({
     id: String(x.id || uid('a')), nome: String(x.nome || 'arquivo'), tamanho: Number(x.tamanho) || 0, tipo: String(x.tipo || ''),
-    em: String(x.em || ''), ref: String(x.ref), via: x.via === 'asset' ? 'asset' : 'local', embrulhado: !!x.embrulhado })) : [];
+    em: String(x.em || ''), ref: String(x.ref), via: x.via === 'asset' || x.via === 'servidor' ? x.via : 'local', embrulhado: !!x.embrulhado })) : [];
 }
 // minutas do protocolo e termos do Indicador Pessoal: o mesmo formato
 function normalizarMinutas(l) {
@@ -1637,7 +1663,151 @@ function normalizarImovel(i) {
 }
 const NORMALIZAR = { modelosMinuta: m => normalizarModeloMinuta(m), tabelas: t => normalizarTabela(t), modelos: m => normalizarModelo(m), analises: a => normalizarAnalise(a), protocolos: p => normalizarProtocolo(p), pessoas: p => normalizarPessoa(p), imoveis: i => normalizarImovel(i) };
 
-/* ---------- armazenamento: db do artifact quando disponível, senão este navegador ---------- */
+/* ---------- servidor próprio (servidor.js): login por usuário e dados no banco do servidor ----------
+   A página pergunta /api/eu: se o servidor responder, entra no modo servidor (pede o login quando
+   preciso); senão segue como antes (artifact ou este navegador). Os dados chegam por um canal ao vivo
+   (/api/eventos) com o mesmo formato do db do artifact, então o Store usa o mesmo modo 'db'. */
+const espera = ms => new Promise(ok => setTimeout(ok, ms));
+const Servidor = {
+  ativo: false, usuario: null, persistente: true, senhaMin: 8, novo: false, conectado: false, relogin: null,
+  async detectar() {
+    if (Store.emArtifact || !/^https?:$/.test(location.protocol)) return false;
+    let r, j = null;
+    try { r = await fetch('/api/eu', { cache: 'no-store', credentials: 'same-origin' }); j = await r.json(); }
+    catch (e) { return false; }
+    if (!j || j.sistema !== 'fundiario' || (!r.ok && r.status !== 401)) return false;
+    this.ativo = true;
+    this.entrou(r.ok ? j : await telaAcesso());
+    return true;
+  },
+  entrou(j) {
+    this.usuario = j.usuario;
+    this.persistente = j.persistente !== false;
+    this.senhaMin = j.senhaMin || 8;
+    mostrarUsuario();
+  },
+  // a sessão caiu (expirou ou foi encerrada): uma tela de acesso só, e as chamadas pendentes seguem depois
+  relogar() {
+    if (!this.relogin) {
+      this.conectado = false; Store.status();
+      this.relogin = telaAcesso('Sua sessão terminou. Entre novamente para continuar.', this.usuario && this.usuario.usuario)
+        .then(j => { this.relogin = null; this.entrou(j); return j; });
+    }
+    return this.relogin;
+  },
+  async req(metodo, url, corpo, op = {}) {
+    const bin = corpo instanceof Blob;
+    const txt = corpo === undefined || bin ? corpo : JSON.stringify(corpo);
+    for (let tentativa = 0; ; tentativa++) {
+      let r;
+      try {
+        r = await fetch(url, {
+          method: metodo, credentials: 'same-origin', cache: 'no-store', body: txt,
+          // ao fechar a aba, a última gravação ainda chega ao servidor
+          keepalive: document.visibilityState === 'hidden' && typeof txt === 'string' && txt.length < 60000,
+          headers: Object.assign({ 'X-Fundiario': '1' }, typeof txt === 'string' ? { 'Content-Type': 'application/json' } : {}, op.headers)
+        });
+      } catch (e) {
+        if (op.insistir && tentativa < 5) { await espera(1000 * 2 ** tentativa); continue; }
+        throw { code: 'unavailable', message: 'sem conexão com o servidor' };
+      }
+      if (r.status === 401 && !op.semRelogin) { await this.relogar(); continue; }
+      if (r.status >= 500 && op.insistir && tentativa < 3) { await espera(1500 * (tentativa + 1)); continue; }
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw { code: r.status === 413 ? 'too_large' : r.status === 429 ? 'resource_exhausted' : r.status === 403 ? 'permission_denied' : 'erro', status: r.status, message: j.erro || 'erro ' + r.status };
+      return j;
+    }
+  },
+  // o mesmo formato do db do artifact: collection(col).onSnapshot / doc(id).set / doc(id).delete
+  db() {
+    const ouv = {}, conhecidos = {};
+    let agendado = false;
+    const aplicar = (col, mud) => { if (ouv[col] && mud.length) ouv[col](({ docChanges: () => mud })); };
+    const conectar = () => {
+      const es = new EventSource('/api/eventos');
+      es.addEventListener('inicio', ev => {
+        const j = JSON.parse(ev.data);
+        this.novo = !!j.novo;
+        this.conectado = true;
+        // na reconexão, o que sumiu enquanto a conexão estava fora sai também daqui
+        for (const col of Object.keys(ouv)) {
+          const docs = j.dados[col] || {}, antes = conhecidos[col] || new Set(), agora = new Set(Object.keys(docs));
+          const mud = [...agora].map(id => ({ type: antes.has(id) ? 'modified' : 'added', doc: { id, data: () => docs[id] } }));
+          for (const id of antes) if (!agora.has(id)) mud.push({ type: 'removed', doc: { id, data: () => null } });
+          conhecidos[col] = agora;
+          if (mud.length) aplicar(col, mud); else ouv[col]({ docChanges: () => [] });
+        }
+        Store.status();
+      });
+      es.addEventListener('doc', ev => {
+        const j = JSON.parse(ev.data);
+        const k = conhecidos[j.col] || (conhecidos[j.col] = new Set());
+        if (j.dados) { const tipo = k.has(j.id) ? 'modified' : 'added'; k.add(j.id); aplicar(j.col, [{ type: tipo, doc: { id: j.id, data: () => j.dados } }]); }
+        else { k.delete(j.id); aplicar(j.col, [{ type: 'removed', doc: { id: j.id, data: () => null } }]); }
+      });
+      es.addEventListener('sair', () => { es.close(); this.relogar().then(conectar); });
+      es.onerror = () => {
+        this.conectado = false; Store.status();
+        // conexão recusada (sessão caiu ou o servidor reiniciou): confere a sessão e tenta de novo
+        if (es.readyState === EventSource.CLOSED) setTimeout(async () => { try { await this.req('GET', '/api/eu'); } catch (e) { /* tenta de novo */ } conectar(); }, 3000);
+      };
+    };
+    return {
+      collection: col => ({
+        onSnapshot: cb => { ouv[col] = cb; if (!agendado) { agendado = true; setTimeout(conectar); } return () => { delete ouv[col]; }; },
+        doc: id => ({
+          set: obj => this.req('PUT', `/api/dados/${col}/${encodeURIComponent(id)}`, obj, { insistir: true }),
+          delete: () => this.req('DELETE', `/api/dados/${col}/${encodeURIComponent(id)}`, undefined, { insistir: true })
+        })
+      })
+    };
+  }
+};
+// a tela de acesso e os diálogos do menu Sistema ficam fora das janelas: os ids não ganham o prefixo da janela em uso
+const foraDasJanelas = fn => (...a) => { const j = J, u = ui; J = null; ui = null; try { return fn(...a); } finally { J = j; ui = u; } };
+// tela de acesso no padrão das janelas do sistema; resolve com o usuário que entrou
+function telaAcesso(aviso, login) {
+  return new Promise(resolve => foraDasJanelas(() => {
+    const usuario = h('input', { class: 'inp', id: 'acesso-usuario', autocomplete: 'username', autocapitalize: 'none', spellcheck: 'false', required: true, value: login || '' });
+    const senha = h('input', { class: 'inp', id: 'acesso-senha', type: 'password', autocomplete: 'current-password', required: true });
+    const msg = h('p', { class: 'acesso-msg', id: 'acesso-msg', role: 'alert' }, aviso || '');
+    const bEntrar = h('button', { type: 'submit', class: 'btn btn-prim', id: 'acesso-entrar' }, 'Entrar');
+    const logo = document.querySelector('.marca img');
+    const form = h('form', { class: 'acesso-painel', 'aria-labelledby': 'acesso-tit' },
+      h('h1', { class: 'acesso-cab', id: 'acesso-tit' }, 'Sistema Fundiário — Acesso'),
+      h('div', { class: 'acesso-corpo' }, logo ? h('img', { src: logo.getAttribute('src'), alt: '' }) : null,
+        h('div', { class: 'acesso-campos' },
+          h('label', { class: 'campo', for: 'acesso-usuario' }, h('span', { class: 'rot' }, 'Usuário'), usuario),
+          h('label', { class: 'campo', for: 'acesso-senha' }, h('span', { class: 'rot' }, 'Senha'), senha), msg)),
+      h('div', { class: 'acesso-bts' }, bEntrar));
+    const tela = h('div', { class: 'acesso' + (aviso ? ' sobre' : ''), role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'acesso-tit' }, form);
+    form.addEventListener('submit', async ev => {
+      ev.preventDefault();
+      bEntrar.disabled = true; msg.textContent = '';
+      try {
+        const r = await fetch('/api/login', { method: 'POST', credentials: 'same-origin', cache: 'no-store',
+          headers: { 'Content-Type': 'application/json', 'X-Fundiario': '1' }, body: JSON.stringify({ usuario: usuario.value.trim(), senha: senha.value }) });
+        const j = await r.json().catch(() => ({}));
+        if (r.ok && j.usuario) { tela.remove(); resolve(j); return; }
+        msg.textContent = j.erro || 'Não foi possível entrar.';
+        senha.value = ''; senha.focus();
+      } catch (e) { msg.textContent = 'Sem conexão com o servidor. Tente de novo.'; }
+      finally { bEntrar.disabled = false; }
+    });
+    document.body.append(tela);
+    (login ? senha : usuario).focus();
+  })());
+}
+function mostrarUsuario() {
+  const u = Servidor.usuario, s = document.getElementById('status-usuario');
+  s.hidden = !u;
+  s.textContent = u ? 'Usuário: ' + u.nome : '';
+  s.title = u ? u.usuario : '';
+  for (const id of ['sis-sep', 'sis-senha', 'sis-sair']) document.getElementById(id).hidden = !u;
+  document.getElementById('sis-usuarios').hidden = !(u && u.perfil === 'admin');
+}
+
+/* ---------- armazenamento: servidor, db do artifact ou este navegador ---------- */
 const Store = {
   modo: 'carregando', emArtifact: false, db: null,
   dados: { modelos: {}, analises: {}, protocolos: {}, pessoas: {}, imoveis: {}, tabelas: {}, modelosMinuta: {} },
@@ -1647,8 +1817,12 @@ const Store = {
     this.emArtifact = !!(window.claude && typeof window.claude.use === 'function');
     let db = null;
     if (this.emArtifact) { try { db = await window.claude.use('db'); } catch (e) { db = null; } }
-    if (db) { this.db = db; this.modo = 'db'; await this.iniciarDb(); }
-    else this.iniciarLocal();
+    else if (await Servidor.detectar()) db = Servidor.db();
+    if (db) {
+      this.db = db; this.modo = 'db'; await this.iniciarDb();
+      // servidor recém-instalado: começa com o checklist da Lei 13.465/2017
+      if (Servidor.novo && !Object.keys(this.dados.modelos).length) this.put('modelos', normalizarModelo(clone(BIB.modelos[0])), 0);
+    } else this.iniciarLocal();
     this.status();
   },
   iniciarLocal() {
@@ -1782,8 +1956,10 @@ const Store = {
   status() {
     let estado = 'ok', txt;
     if (this.modo === 'carregando') { estado = 'carregando'; txt = 'Carregando…'; }
+    else if (Servidor.ativo && !Servidor.conectado) { estado = 'aviso'; txt = this.pendentes.size ? 'Sem conexão: aguardando para salvar…' : 'Sem conexão com o servidor'; }
     else if (this.pendentes.size) { estado = 'salvando'; txt = 'Salvando…'; }
-    else if (this.modo === 'db') txt = 'Salvo e sincronizado';
+    else if (Servidor.ativo && !Servidor.persistente) { estado = 'aviso'; txt = 'Servidor sem disco permanente'; }
+    else if (this.modo === 'db') txt = Servidor.ativo ? 'Salvo no servidor' : 'Salvo e sincronizado';
     else if (this.modo === 'local') txt = this.emArtifact ? 'Salvo só neste navegador' : 'Salvo neste navegador';
     else { estado = 'aviso'; txt = 'Sem armazenamento: exporte um backup'; }
     if (this.aoStatus) this.aoStatus(estado, txt);
@@ -2773,6 +2949,11 @@ const lerBase64 = f => new Promise((ok, falha) => {
 const Arquivos = {
   // PDF, imagens e vídeos vão como estão; os outros tipos (Word, Excel, ZIP…) vão dentro de um JSON
   async guardar(f) {
+    if (Servidor.ativo) {
+      if (f.size > 50 * MB) throw { code: 'too_large' };
+      const j = await Servidor.req('POST', '/api/arquivos', f, { headers: { 'Content-Type': f.type || 'application/octet-stream', 'X-Nome': encodeURIComponent(f.name) } });
+      return { ref: j.id, via: 'servidor', embrulhado: false };
+    }
     if (Store.emArtifact) {
       const as = await assetsNs();
       if (!as) throw { code: 'sem_armazenamento' };
@@ -2792,6 +2973,11 @@ const Arquivos = {
   },
   async obter(a) {
     if (a.via === 'local') return idbArquivos('readonly', st => st.get(a.ref));
+    if (a.via === 'servidor') {
+      const r = await fetch('/api/arquivos/' + encodeURIComponent(a.ref), { credentials: 'same-origin' });
+      if (r.status === 401) { await Servidor.relogar(); return this.obter(a); }
+      return r.ok ? r.blob() : null;
+    }
     const r = await fetch('/_blob/' + a.ref);
     if (!r.ok) return null;
     if (!a.embrulhado) return r.blob();
@@ -2802,6 +2988,7 @@ const Arquivos = {
   },
   async apagar(a) {
     if (a.via === 'local') return idbArquivos('readwrite', st => st.delete(a.ref));
+    if (a.via === 'servidor') return Servidor.req('DELETE', '/api/arquivos/' + encodeURIComponent(a.ref));
     const as = await assetsNs();
     if (!as) throw { code: 'sem_armazenamento' };
     return as.delete(a.ref);
@@ -5232,6 +5419,123 @@ async function importarArquivo(arq) {
   toast('Importado: ' + [np && plural(np, 'protocolo', 'protocolos'), npe && plural(npe, 'pessoa', 'pessoas'), nim && plural(nim, 'imóvel', 'imóveis'), plural(nm, 'modelo', 'modelos'), na && plural(na, 'análise', 'análises')].filter(Boolean).join(', ') + '.');
 }
 
+/* ---------- Sistema: usuários, senha e saída (só com o servidor) ---------- */
+// diálogo da página (fora das janelas), no mesmo padrão dos diálogos do sistema
+function dialogoSistema(titulo, conteudo, largura = '420px') {
+  const id = uid('dt');
+  const fechar = () => m.remove();
+  const m = h('div', { class: 'modal janela', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': id },
+    h('div', { class: 'modal-painel', style: 'max-width:' + largura },
+      h('div', { class: 'modal-cab' }, h('h2', { id }, titulo), btn('Fechar', { icone: 'x', onclick: fechar })),
+      h('div', { class: 'modal-corpo' }, conteudo)));
+  m.addEventListener('click', ev => { if (ev.target === m) fechar(); });
+  m._fechar = fechar;
+  document.body.append(m);
+  return { el: m, fechar };
+}
+const campoDlg = (id, rot, el) => h('label', { class: 'campo', for: id }, h('span', { class: 'rot' }, rot), el);
+const inpSenha = (id, auto) => h('input', { class: 'inp', id, type: 'password', autocomplete: auto, maxlength: '200' });
+const dlgSenha = foraDasJanelas(() => {
+  const atual = inpSenha('sn-atual', 'current-password'), nova = inpSenha('sn-nova', 'new-password'), conf = inpSenha('sn-conf', 'new-password');
+  const msg = h('p', { class: 'acesso-msg', role: 'alert' });
+  const form = h('form', { class: 'dlg-form' },
+    campoDlg('sn-atual', 'Senha atual', atual), campoDlg('sn-nova', 'Nova senha', nova), campoDlg('sn-conf', 'Confirmar nova senha', conf), msg,
+    h('div', { class: 'dlg-bts' }, h('button', { type: 'submit', class: 'btn' }, ico('salvar'), 'Salvar'), btn('Cancelar', { onclick: () => d.fechar() })));
+  form.addEventListener('submit', async ev => {
+    ev.preventDefault();
+    if (nova.value.length < Servidor.senhaMin) { msg.textContent = `A nova senha precisa de pelo menos ${Servidor.senhaMin} caracteres.`; nova.focus(); return; }
+    if (nova.value !== conf.value) { msg.textContent = 'A confirmação não confere com a nova senha.'; conf.focus(); return; }
+    try { await Servidor.req('POST', '/api/senha', { atual: atual.value, nova: nova.value }); d.fechar(); toast('Senha alterada.'); }
+    catch (e) { msg.textContent = e.message || 'Não foi possível alterar a senha.'; }
+  });
+  const d = dialogoSistema('Alterar senha', form, '380px');
+  atual.focus();
+});
+const PERFIS = { usuario: 'Usuário', admin: 'Administrador' };
+const fmtDataHora = iso => { const t = new Date(iso); return isNaN(t) ? '' : t.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }); };
+const dlgUsuarios = foraDasJanelas(() => {
+  let lista = [], sel = null;
+  const corpo = h('div', { class: 'usr' }, h('p', { class: 'lat-vazio' }, 'Carregando…'));
+  const d = dialogoSistema('Usuários', corpo, '720px');
+  const carregar = async () => {
+    try { lista = (await Servidor.req('GET', '/api/usuarios')).usuarios; }
+    catch (e) { toast(e.message || 'Não foi possível carregar os usuários.'); }
+    desenharLista();
+  };
+  const atual = () => lista.find(u => u.id === sel);
+  const desenharLista = foraDasJanelas(() => {
+    if (!atual()) sel = null;
+    const marcar = () => {
+      for (const b of grade.querySelectorAll('.item')) b.setAttribute('aria-current', String(b.dataset.id === sel));
+      const u = atual();
+      bEditar.disabled = bAtivar.disabled = bExcluir.disabled = !u;
+      bAtivar.replaceChildren(u && !u.ativo ? 'Ativar' : 'Desativar');
+    };
+    const grade = h('ul', { class: 'itens grade', id: 'usr-lista' },
+      h('li', { class: 'grade-cab g-usuarios', 'aria-hidden': 'true' }, ['Nome', 'Usuário', 'Perfil', 'Situação', 'Último acesso'].map(c => h('span', { class: 'cel' }, c))),
+      lista.map(u => h('li', null, h('button', {
+        type: 'button', class: 'item linha g-usuarios', 'data-id': u.id, 'aria-current': String(u.id === sel),
+        onclick: () => { sel = u.id; marcar(); }, ondblclick: () => formulario(u),
+        onkeydown: ev => { if (ev.key === 'Enter') { ev.preventDefault(); formulario(u); } }
+      }, cel('Nome', u.nome), cel('Usuário', u.usuario), cel('Perfil', PERFIS[u.perfil]),
+        cel('Situação', u.ativo ? 'Ativo' : 'Desativado', 'sit ' + (u.ativo ? 'chip-ok' : 'chip-pend')), cel('Último acesso', u.ultimoAcesso ? fmtDataHora(u.ultimoAcesso) : '')))));
+    const mudar = async (metodo, dados, ok) => {
+      const u = atual();
+      if (!u) return;
+      try { await Servidor.req(metodo, '/api/usuarios/' + u.id, dados); toast(ok); await carregar(); }
+      catch (e) { toast(e.message || 'Não foi possível concluir.'); }
+    };
+    const bEditar = btn('Editar', { icone: 'nota', id: 'usr-editar', onclick: () => formulario(atual()) });
+    const bAtivar = btn('Desativar', { id: 'usr-ativar', onclick: () => { const u = atual(); if (u) mudar('PATCH', { ativo: !u.ativo }, u.ativo ? 'Usuário desativado.' : 'Usuário ativado.'); } });
+    const bExcluir = btn('Excluir', { icone: 'lixo', id: 'usr-excluir', onclick: ev => armar(ev.currentTarget, () => mudar('DELETE', undefined, 'Usuário excluído.')) });
+    const bNovo = btn('Novo', { icone: 'mais', id: 'usr-novo', onclick: () => formulario(null) });
+    corpo.replaceChildren(grade, h('div', { class: 'dlg-bts' }, bNovo, bEditar, bAtivar, bExcluir));
+    marcar();
+    if (!corpo.contains(document.activeElement)) (grade.querySelector('.item[aria-current="true"]') || bNovo).focus();
+  });
+  // novo usuário ou edição; na edição a senha em branco fica como está
+  const formulario = foraDasJanelas(u => {
+    if (!u && u !== null) return;
+    const nome = h('input', { class: 'inp', id: 'usr-nome', autocomplete: 'off', maxlength: '120', value: u ? u.nome : '' });
+    const login = h('input', { class: 'inp', id: 'usr-login', autocomplete: 'off', autocapitalize: 'none', spellcheck: 'false', maxlength: '40', value: u ? u.usuario : '' });
+    const perfil = h('select', { class: 'inp', id: 'usr-perfil' }, Object.entries(PERFIS).map(([v, r]) => h('option', { value: v, selected: u ? u.perfil === v : v === 'usuario' }, r)));
+    const senha = inpSenha('usr-senha', 'new-password'), conf = inpSenha('usr-conf', 'new-password');
+    const msg = h('p', { class: 'acesso-msg', role: 'alert' });
+    const form = h('form', { class: 'dlg-form' },
+      campoDlg('usr-nome', 'Nome', nome), campoDlg('usr-login', 'Usuário', login), campoDlg('usr-perfil', 'Perfil', perfil),
+      campoDlg('usr-senha', u ? 'Nova senha (em branco: não muda)' : 'Senha', senha), campoDlg('usr-conf', 'Confirmar senha', conf), msg,
+      h('div', { class: 'dlg-bts' }, h('button', { type: 'submit', class: 'btn', id: 'usr-salvar' }, ico('salvar'), 'Salvar'), btn('Cancelar', { onclick: desenharLista })));
+    form.addEventListener('submit', async ev => {
+      ev.preventDefault();
+      const dados = { nome: nome.value.trim(), usuario: login.value.trim().toLowerCase(), perfil: perfil.value };
+      if (!dados.nome) { msg.textContent = 'Informe o nome.'; nome.focus(); return; }
+      if (!/^[a-z0-9._-]{2,40}$/.test(dados.usuario)) { msg.textContent = 'Usuário: de 2 a 40 letras, números, ponto, hífen ou sublinhado, sem espaços.'; login.focus(); return; }
+      if (senha.value || !u) {
+        if (senha.value.length < Servidor.senhaMin) { msg.textContent = `A senha precisa de pelo menos ${Servidor.senhaMin} caracteres.`; senha.focus(); return; }
+        if (senha.value !== conf.value) { msg.textContent = 'A confirmação não confere com a senha.'; conf.focus(); return; }
+        dados.senha = senha.value;
+      }
+      try {
+        if (u) await Servidor.req('PATCH', '/api/usuarios/' + u.id, dados);
+        else sel = (await Servidor.req('POST', '/api/usuarios', dados)).id;
+        // o próprio administrador mudou o nome ou o login: a barra de status acompanha
+        if (u && Servidor.usuario && u.id === Servidor.usuario.id) Servidor.entrou(await Servidor.req('GET', '/api/eu'));
+        toast(u ? 'Usuário alterado.' : 'Usuário cadastrado.');
+        await carregar();
+      } catch (e) { msg.textContent = e.message || 'Não foi possível salvar.'; }
+    });
+    corpo.replaceChildren(form);
+    nome.focus();
+  });
+  carregar();
+});
+async function sair() {
+  Store.descarregar();
+  await Promise.allSettled(Object.values(Store.cadeias));
+  try { await Servidor.req('POST', '/api/logout', {}, { semRelogin: true }); } catch (e) { /* sai mesmo assim */ }
+  location.reload();
+}
+
 /* ---------- área de trabalho: janelas soltas sobre a área cinza-clara do sistema ---------- */
 const area = document.getElementById('area'), tarefas = document.getElementById('tarefas');
 const janelas = [];
@@ -5580,13 +5884,13 @@ for (const b of document.querySelectorAll('[data-aba]')) b.addEventListener('cli
   if (jm) { ativar(jm); focarJanela(jm); return; }
   abrirJanela({ aba: b.dataset.aba, criando: !!b.dataset.novo });
 });
-// Esc fecha o diálogo mais à frente: o da janela em uso ou, fora das janelas, o da página
+// Esc fecha o diálogo mais à frente: o da página (fica sobre tudo) ou o da janela em uso
 document.addEventListener('keydown', ev => {
-  if (ev.key !== 'Escape') return;
+  if (ev.key !== 'Escape' || document.querySelector('.acesso')) return;
   // sem foco em lugar nenhum (o botão clicado saiu da tela), vale a janela ativa
   const ativa = janelas.find(x => x.el.classList.contains('ativa'));
   const dono = (ev.target.closest && ev.target.closest('.jan')) || (ev.target === document.body && ativa ? ativa.el : null);
-  const m = [...(dono ? dono.querySelectorAll(':scope > .modal') : document.querySelectorAll('body > .modal'))].pop();
+  const m = [...document.querySelectorAll('body > .modal')].pop() || [...(dono ? dono.querySelectorAll(':scope > .modal') : [])].pop();
   if (m && m._fechar) { ev.preventDefault(); m._fechar(); }
 });
 const bLado = document.getElementById('lado-a-lado');
@@ -5598,6 +5902,9 @@ else addEventListener('resize', ajustarJanelas);
 const deMenu = b => { fecharMenus(); b.blur(); const it = b.closest('.mb-item'); if (it) it.classList.add('suprimir'); };
 $('#bk-exportar').addEventListener('click', ev => { deMenu(ev.currentTarget); exportarBackup(); });
 $('#bk-importar').addEventListener('click', ev => { deMenu(ev.currentTarget); $('#arquivo').click(); });
+$('#sis-usuarios').addEventListener('click', ev => { deMenu(ev.currentTarget); dlgUsuarios(); });
+$('#sis-senha').addEventListener('click', ev => { deMenu(ev.currentTarget); dlgSenha(); });
+$('#sis-sair').addEventListener('click', ev => { deMenu(ev.currentTarget); sair(); });
 /* barra de ícones: cada botão aciona a opção de menu correspondente */
 // (o menu da opção não fica suprimido: o mouse não passou por ele)
 for (const b of document.querySelectorAll('.fb')) b.addEventListener('click', () => {
