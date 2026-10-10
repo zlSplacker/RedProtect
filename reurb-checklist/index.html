@@ -4734,14 +4734,14 @@ function blocoDespesasEmpresa() {
     const inp = (id, attrs = {}) => h('input', Object.assign({ class: 'inp', id, autocomplete: 'off' }, attrs));
     const cData = inp('desp-data', { type: 'date', value: x ? x.data : hoje() });
     const cDesc = inp('desp-desc', { value: x ? x.descricao : '', maxlength: '200' });
-    const cCat = inp('desp-categoria', { value: x ? x.categoria : '', list: 'desp-cats' });
+    // as mesmas categorias do filtro, numa lista para escolher
+    const cCat = h('select', { class: 'inp', id: 'desp-categoria' }, h('option', { value: '' }), cats.map(c => h('option', { value: c, selected: !!x && x.categoria === c }, c)));
     const cForn = inp('desp-fornecedor', { value: x ? x.fornecedor : '' });
     const cForma = h('select', { class: 'inp', id: 'desp-forma' }, h('option', { value: '' }), FORMAS_DESPESA.map(v => h('option', { value: v, selected: x && x.forma === v }, v)));
     const cValor = inp('desp-valor', { inputmode: 'decimal', value: x ? BRL.format(x.valor).replace(/^R\$\s?/, '') : '' });
     const cObs = h('textarea', { class: 'inp', id: 'desp-obs', rows: '2', value: x ? x.observacao : '' });
     const campo = (id, rot, el) => h('label', { class: 'campo', for: id }, h('span', { class: 'rot' }, rot), el);
     const form = h('form', { class: 'fin-dlg' },
-      h('datalist', { id: 'desp-cats' }, cats.map(c => h('option', { value: c }))),
       campo('desp-data', 'Data', cData), campo('desp-desc', 'Descrição', cDesc), campo('desp-categoria', 'Categoria', cCat),
       campo('desp-fornecedor', 'Fornecedor', cForn), campo('desp-forma', 'Pagamento', cForma), campo('desp-valor', 'Valor (R$)', cValor), campo('desp-obs', 'Observação', cObs),
       h('div', { class: 'fin-dlg-bts' }, h('button', { type: 'submit', class: 'btn' }, ico('salvar'), 'Salvar'), btn('Cancelar', { onclick: () => fecharDialogo() })));
@@ -4751,7 +4751,7 @@ function blocoDespesasEmpresa() {
       const v = lerValor(cValor.value);
       if (isNaN(v) || !(v > 0)) { toast('Informe um valor maior que zero. Use, por exemplo, 1.234,56'); cValor.focus(); return; }
       const alvo = x ? D().despesas[x.id] || x : normalizarDespesa({});
-      Object.assign(alvo, { data: cData.value || hoje(), descricao: cDesc.value.trim(), categoria: cCat.value.trim(), fornecedor: cForn.value.trim(), forma: cForma.value, valor: v, observacao: cObs.value.trim() });
+      Object.assign(alvo, { data: cData.value || hoje(), descricao: cDesc.value.trim(), categoria: cCat.value, fornecedor: cForn.value.trim(), forma: cForma.value, valor: v, observacao: cObs.value.trim() });
       Store.put('despesas', alvo, 0);
       ui.despSel = alvo.id;
       fecharDialogo();
