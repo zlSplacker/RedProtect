@@ -1165,6 +1165,7 @@ const ICONES = {
   exigencia: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5z"/><path d="M14 3v5h5M12 11v4M12 18h.01"/>',
   dados: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>',
   lupa: '<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/>',
+  alfinete: '<path d="M9 3.5h6M10 3.5l-.6 6.2L6 13.5h12l-3.4-3.8-.6-6.2" fill="#D8433A" stroke="#8E241E" stroke-linejoin="round"/><path d="M12 13.5V21" stroke="#5B6875" stroke-width="1.8" stroke-linecap="round"/>',
   livro: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5z"/><path d="M4 19a2 2 0 0 1 2-2h13"/>',
   pasta: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/>',
   minimizar: '<path d="M6 17h12"/>',
@@ -3935,8 +3936,24 @@ function editorTexto({ html, aoMudar, campos }) {
     } catch (e) { toast('Não foi possível ler este arquivo do Word.'); }
   });
 
+  // alfinete: pula de campo amarelo em campo amarelo (a partir do cursor), já com o campo selecionado para digitar por cima
+  const irCampo = volta => {
+    const lista = [...folha.querySelectorAll('.campo-vazio')];
+    if (!lista.length) { toast('Nenhum campo amarelo para preencher.'); folha.focus(); return; }
+    const r = selecaoNaFolha() || guardada;
+    const alvo = !r ? lista[0] : volta
+      ? [...lista].reverse().find(x => r.comparePoint(x, x.childNodes.length) < 0) || lista[lista.length - 1]
+      : lista.find(x => r.comparePoint(x, 0) > 0) || lista[0];
+    folha.focus();
+    const nr = document.createRange(); nr.selectNodeContents(alvo);
+    const sl = getSelection(); sl.removeAllRanges(); sl.addRange(nr);
+    guardada = nr.cloneRange();
+    alvo.scrollIntoView({ block: 'center' });
+  };
+  const bAlfinete = campos ? null : bt('Próximo campo a preencher (F2; Shift+F2 volta)', ico('alfinete'), () => irCampo(false));
   folha.addEventListener('keydown', ev => {
-    if (ev.altKey && ev.key === 'F3') { ev.preventDefault(); popCaixa.abrir(); }
+    if (!campos && ev.key === 'F2') { ev.preventDefault(); irCampo(ev.shiftKey); }
+    else if (ev.altKey && ev.key === 'F3') { ev.preventDefault(); popCaixa.abrir(); }
     else if (ev.key === 'Escape' && pops.some(q => q.aberto())) { ev.stopPropagation(); fecharPops(); }
   });
   const sep = () => h('span', { class: 'min-sep' });
@@ -3948,7 +3965,7 @@ function editorTexto({ html, aoMudar, campos }) {
     bt('Diminuir recuo', ico('recuoMenos'), recuo(-1.25)), bt('Aumentar recuo', ico('recuoMais'), recuo(1.25)), sep(),
     popCaixa.caixa, cmd('Limpar formatação', ico('borracha'), 'removeFormat'), sep(),
     popTab.caixa, bt('Quebra de página', ico('quebraPagina'), () => { const novo = h('p', { class: 't' }, h('br')); inserirDepois(h('p', { class: 'quebra' }), novo); cursorEm(novo); mudou(); }), sep(),
-    popLoc.caixa, bOrt, sep(),
+    popLoc.caixa, bAlfinete, bOrt, sep(),
     bt('Copiar o texto', ico('copiar'), () => copiar(folha.innerText, 'Texto copiado.', 'Copiar o texto')),
     bt('Trazer texto de um arquivo do Word (.docx)', ico('word'), () => { guardar(); entradaDocx.click(); }), entradaDocx);
   if (campos) {
