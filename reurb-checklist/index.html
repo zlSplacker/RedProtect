@@ -1693,7 +1693,7 @@ function normalizarEmpresa(e) {
     inscricaoEstadual: txt(e.inscricaoEstadual), inscricaoMunicipal: txt(e.inscricaoMunicipal), dataAbertura: txt(e.dataAbertura),
     regime: txt(e.regime), atividade: txt(e.atividade), telefone: txt(e.telefone), email: txt(e.email), endereco: normEndereco(e.endereco),
     socios: Array.isArray(e.socios) ? e.socios.filter(Boolean).map(x => ({ id: txt(x.id) || uid('so'), nome: txt(x.nome), cpf: txt(x.cpf), participacao: txt(x.participacao) })) : [],
-    observacoes: txt(e.observacoes), criadoEm: e.criadoEm || agora(), atualizadoEm: e.atualizadoEm || agora()
+    observacoes: txt(e.observacoes), arquivos: normalizarArquivos(e.arquivos), criadoEm: e.criadoEm || agora(), atualizadoEm: e.atualizadoEm || agora()
   };
 }
 function normalizarDespesa(x) {
@@ -4683,13 +4683,26 @@ function renderEmpresa() {
     if (String(e.cnpj).replace(/\D/g, '').length && !cnpjValido(e.cnpj)) { toast('Confira o CNPJ: o número não é válido.'); $('#emp-cnpj').focus(); return; }
     if (e.email.trim() && !emailValido(e.email)) { toast('Confira o e-mail.'); $('#emp-email').focus(); return; }
     e.socios = e.socios.filter(x => x.nome.trim() || x.cpf.trim());
+    // os arquivos vêm do cadastro gravado (podem ter mudado enquanto se editava)
+    const atual = D().empresa[EMPRESA_ID];
+    if (atual) e.arquivos = atual.arquivos;
     Store.put('empresa', e, 0);
     ui.edEmp = null;
     renderDetalhe();
     toast('Dados da empresa salvos.');
   };
+  // Arquivos da empresa (contrato social, cartão CNPJ, alvarás…): a mesma janela de arquivos do protocolo e do Indicador Pessoal;
+  // gravam na hora no cadastro salvo; antes do primeiro Salvar, entram junto com ele
+  const abrirArquivosEmp = () => {
+    const alvo = D().empresa[EMPRESA_ID] || ui.edEmp;
+    const b = blocoArquivos(alvo, { rotulo: 'Arquivos da empresa', registrar: () => {}, salvar: () => { if (D().empresa[EMPRESA_ID]) Store.put('empresa', alvo, 0); } });
+    abrirDialogo({ titulo: 'Arquivos', conteudo: b.el, aoFechar: () => { b.limpar(); renderDetalhe(); }, atualizar: b.desenhar, cls: 'arq' });
+  };
+  const bArquivos = btn('Arquivos', { icone: 'anexo', id: 'emp-arquivos', onclick: abrirArquivosEmp });
+  bArquivos.dataset.livre = '1';
   d.replaceChildren(barra, painel,
     h('div', { class: 'reg-rodape' },
+      bArquivos,
       btn('Editar', { icone: 'nota', disabled: editando, onclick: () => {
         ui.edEmp = normalizarEmpresa(clone(salva)); renderDetalhe();
         const j = J; requestAnimationFrame(() => { usar(j); const f = $('#emp-razaoSocial'); if (f) f.focus(); });
