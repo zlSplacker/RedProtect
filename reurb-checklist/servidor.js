@@ -33,7 +33,10 @@ const CONFIAR_PROXY = process.env.TRUST_PROXY ? process.env.TRUST_PROXY !== '0' 
 const PERSISTENTE = !process.env.RAILWAY_ENVIRONMENT || !!(VOLUME || process.env.DATA_DIR);
 const SESSAO_MS = (Number(process.env.SESSAO_DIAS) || 7) * 86400e3;
 const SESSAO_MAX_MS = 30 * 86400e3;
-const COLECOES = new Set(['modelos', 'analises', 'protocolos', 'pessoas', 'imoveis', 'tabelas', 'modelosMinuta']);
+const COLECOES = new Set(['modelos', 'analises', 'protocolos', 'pessoas', 'imoveis', 'tabelas', 'modelosMinuta', 'empresa', 'despesas']);
+// menu Empresa (dados e despesas da empresa): só os sócios administradores leem e gravam
+const RESTRITAS = new Set(['empresa', 'despesas']);
+const vePara = (perfil, col) => !RESTRITAS.has(col) || perfil === 'admin';
 const ID_OK = /^[\w.:-]{1,128}$/;
 const LIMITE_DOC = 8 * 1024 * 1024;
 const LIMITE_ARQUIVO = 50 * 1024 * 1024;
@@ -264,16 +267,16 @@ setInterval(() => { const lim = Date.now() - JANELA; for (const [k, l] of falhas
 /* ---------- atualização ao vivo (Server-Sent Events) ---------- */
 const ouvintes = new Set();
 function enviar(o, evento, dados) { o.res.write(`event: ${evento}\ndata: ${dados}\n\n`); }
-function avisarTodos(evento, dados) { for (const o of ouvintes) enviar(o, evento, dados); }
+function avisarTodos(evento, dados, col) { for (const o of ouvintes) if (!col || vePara(o.perfil, col)) enviar(o, evento, dados); }
 function encerrarOuvintes(filtro) {
   for (const o of [...ouvintes]) if (filtro(o)) { enviar(o, 'sair', '{}'); o.res.end(); ouvintes.delete(o); }
 }
-function fotografia() {
+function fotografia(s) {
   const por = {};
-  for (const c of COLECOES) por[c] = [];
+  for (const c of COLECOES) if (vePara(s.perfil, c)) por[c] = [];
   for (const r of Q.docs.all()) if (por[r.col]) por[r.col].push(JSON.stringify(r.id) + ':' + r.dados);
-  const cols = [...COLECOES].map(c => JSON.stringify(c) + ':{' + por[c].join(',') + '}').join(',');
-  return `{"novo":${!Q.meta.get('iniciado')},"dados":{${cols}}}`;
+  const cols = Object.keys(por).map(c => JSON.stringify(c) + ':{' + por[c].join(',') + '}').join(',');
+  return `{"novo":${!Q.meta.get('iniciado')},"usuario":${JSON.stringify(publico(s))},"dados":{${cols}}}`;
 }
 setInterval(() => {
   for (const o of [...ouvintes]) {
@@ -335,10 +338,10 @@ async function api(req, res, url, s) {
 
   if (p === '/api/eventos' && m === 'GET') {
     res.writeHead(200, { 'Content-Type': 'text/event-stream; charset=utf-8', 'Cache-Control': 'no-cache, no-transform', 'X-Accel-Buffering': 'no', Connection: 'keep-alive' });
-    const o = { res, token: s.token, usuarioId: s.id };
+    const o = { res, token: s.token, usuarioId: s.id, perfil: s.perfil };
     res.on('error', () => ouvintes.delete(o));
     res.write('retry: 3000\n\n');
-    enviar(o, 'inicio', fotografia());
+    enviar(o, 'inicio', fotografia(s));
     ouvintes.add(o);
     req.on('close', () => ouvintes.delete(o));
     return;
@@ -347,6 +350,7 @@ async function api(req, res, url, s) {
   if ((r = p.match(/^\/api\/dados\/([^/]+)\/([^/]+)$/))) {
     const col = r[1], id = decodeURIComponent(r[2]);
     if (!COLECOES.has(col) || !ID_OK.test(id)) return erro(res, 400, 'Registro inválido.');
+    if (!vePara(s.perfil, col)) return erro(res, 403, 'Só os sócios administradores acessam a Empresa.');
     if (m === 'PUT') {
       let obj = null;
       try { obj = JSON.parse((await lerCorpo(req, LIMITE_DOC)).toString('utf8') || 'null'); }
@@ -356,12 +360,12 @@ async function api(req, res, url, s) {
       const txt = JSON.stringify(obj);
       Q.gravarDoc.run(col, id, txt, agora(), s.usuario);
       if (!Q.meta.get('iniciado')) Q.gravarMeta.run('iniciado', agora());
-      avisarTodos('doc', `{"col":${JSON.stringify(col)},"id":${JSON.stringify(id)},"dados":${txt}}`);
+      avisarTodos('doc', `{"col":${JSON.stringify(col)},"id":${JSON.stringify(id)},"dados":${txt}}`, col);
       return json(res, 200, { ok: true });
     }
     if (m === 'DELETE') {
       Q.apagarDoc.run(col, id);
-      avisarTodos('doc', `{"col":${JSON.stringify(col)},"id":${JSON.stringify(id)},"dados":null}`);
+      avisarTodos('doc', `{"col":${JSON.stringify(col)},"id":${JSON.stringify(id)},"dados":null}`, col);
       return json(res, 200, { ok: true });
     }
   }
@@ -462,6 +466,8 @@ async function api(req, res, url, s) {
         }
         db.prepare('UPDATE usuarios SET usuario = ?, nome = ?, perfil = ?, ativo = ?, hash = ? WHERE id = ?').run(login, nome, perfil, ativo, hash, u.id);
         // senha trocada ou acesso retirado: as sessões abertas daquele usuário caem
+        // perfil mudou: o canal ao vivo dessa pessoa reconecta e passa a receber (ou não) os dados da Empresa
+        if (perfil !== u.perfil) for (const o of [...ouvintes]) if (o.usuarioId === u.id) { o.res.end(); ouvintes.delete(o); }
         if (!ativo || hash !== u.hash) {
           if (u.id === s.id) { Q.apagarOutrasSessoes.run(u.id, s.token); encerrarOuvintes(o => o.usuarioId === u.id && o.token !== s.token); }
           else { Q.apagarSessoesDe.run(u.id); encerrarOuvintes(o => o.usuarioId === u.id); }

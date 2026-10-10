@@ -15,11 +15,18 @@ O `servidor.js` coloca o sistema no ar para o escritório inteiro: cada pessoa e
 
 - **Tela de acesso**: usuário e senha, no padrão das janelas do sistema. Se a sessão terminar no meio do trabalho, a tela volta por cima e, depois de entrar, tudo continua de onde parou (nada do que estava sendo salvo se perde).
 - **Barra de status**: mostra quem está usando (*Usuário: …*) ao lado da data, e *Salvo no servidor*. Sem conexão, mostra *Sem conexão com o servidor* e reconecta sozinha.
-- **Sistema → Usuários** (só administrador): lista com nome, usuário, perfil, situação e último acesso; **Novo**, **Editar** (ou clique duplo), **Desativar/Ativar** e **Excluir** (pede confirmação). Desativar ou excluir derruba na hora a sessão da pessoa.
+- **Sistema → Usuários** (só sócio administrador): lista com nome, usuário, perfil (*Usuário* ou *Sócio administrador*), situação e último acesso; **Novo**, **Editar** (ou clique duplo), **Desativar/Ativar** e **Excluir** (pede confirmação). Desativar ou excluir derruba na hora a sessão da pessoa.
 - **Sistema → Alterar senha** e **Sistema → Sair**.
 - Sem o servidor, o `index.html` continua funcionando como antes (sem login, salvando no navegador).
 
 > A versão anterior às mudanças do protocolo (interface do S.R.I., com Exigência e a aba Dados) está guardada, sem alterações, no ramo `backup/sistema-fundiario-v1`.
+
+### Empresa (sócios administradores)
+
+O menu **Empresa**, entre *Indicadores* e *Sistema*, abre uma janela só com duas abas. No servidor, ele aparece apenas para quem tem o perfil **Sócio administrador**: os outros usuários não veem o menu e os dados da empresa nem chegam ao navegador deles. Se o perfil de alguém mudar, o menu aparece ou some na hora.
+
+- **Dados da Empresa**: razão social, nome fantasia, CNPJ (com máscara e conferência), inscrições estadual e municipal, data de abertura, regime tributário, atividade (CNAE), telefone, e-mail, endereço (com busca pelo CEP), sócios (nome, CPF e participação) e observação. Os campos ficam travados: **Editar** libera, **Salvar** grava.
+- **Despesas**: gastos da empresa (compra de notebook, manutenção, software, aluguel, impostos…). Cada despesa tem data, descrição, categoria, fornecedor, forma de pagamento, valor e observação, e pode receber **Comprovantes** (nota fiscal, recibo). Filtro por ano, mês e categoria, com o **total do período** e quanto foi em cada categoria. **Nova despesa**, **Editar** (ou clique duplo), **Excluir** (pede confirmação) e **Exportar planilha (CSV)** para o contador.
 
 ### Área de trabalho e janelas
 

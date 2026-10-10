@@ -651,6 +651,16 @@ button:disabled{opacity:1}
 .usr{container-type:inline-size;display:grid;gap:6px}
 .usr .itens.grade{min-height:180px;max-height:50vh}
 .usr .dlg-bts{justify-content:flex-start;padding:0;border:0}
+.emp{display:grid;gap:8px}
+.emp-socios{display:grid;gap:6px;grid-column:1/-1}
+.emp-socio{display:grid;grid-template-columns:minmax(0,1fr) 150px 110px auto;gap:6px 10px;align-items:end}
+.emp-socio .btn{min-height:24px}
+@container (max-width:560px){.emp-socio{grid-template-columns:1fr 1fr}.emp-socio>.campo:first-child{grid-column:1/-1}}
+.emp-filtros{display:flex;flex-wrap:wrap;align-items:end;gap:6px 12px}
+.emp-filtros .inp{width:auto;min-width:96px}
+.emp-desp .itens.grade{min-height:220px;max-height:460px;overflow:auto}
+.g-despEmp{grid-template-columns:84px minmax(0,1.6fr) minmax(0,1.1fr) minmax(0,1fr) 112px 110px 56px}
+.grade-cab.g-despEmp .cel:nth-child(6){text-align:right}
 .g-usuarios{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) 104px 84px 118px}
 .tarefa{flex:0 1 180px;min-width:80px;border:1px solid #ADADAD;border-radius:2px;background:linear-gradient(#FDFDFD,#E9E9E9);padding:1px 8px;font-size:12px;font-weight:400;color:#000}
 .tarefa:hover{background:linear-gradient(#EAF6FD,#BEE6FD);border-color:#3C7FB1}
@@ -1020,6 +1030,13 @@ textarea.inp.obs-prot{flex:1;min-height:260px;resize:none;padding:6px 8px;font-s
               <button type="button" class="mb-op" role="menuitem" id="mb-pessoa-juridica" data-aba="pessoas" data-acao="juridica"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16 M15 10h4a1 1 0 0 1 1 1v10 M3 21h18 M8 8h3 M8 12h3 M8 16h3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Pessoa Jurídica</span></button>
             </div>
           </div>
+        </div>
+      </div>
+      <div class="mb-item" id="mb-empresa">
+        <button type="button" class="mb-btn" id="mb-empresa-btn" aria-haspopup="true" aria-expanded="false" aria-controls="mb-empresa-sub">Empresa<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="mb-sub" id="mb-empresa-sub" role="menu" aria-labelledby="mb-empresa-btn">
+          <button type="button" class="mb-op" role="menuitem" id="mb-empresa-dados" data-aba="empresa" data-acao="empresa:dados"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16 M15 10h4a1 1 0 0 1 1 1v10 M3 21h18 M8 8h3 M8 12h3 M8 16h3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Dados da Empresa</span></button>
+          <button type="button" class="mb-op" role="menuitem" id="mb-empresa-despesas" data-aba="empresa" data-acao="empresa:despesas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v12H4z M4 10h16 M8 15h3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Despesas</span></button>
         </div>
       </div>
       <div class="mb-item" id="mb-sistema">
@@ -1661,7 +1678,30 @@ function normalizarImovel(i) {
     criadoEm: i.criadoEm || agora(), atualizadoEm: i.atualizadoEm || agora()
   };
 }
-const NORMALIZAR = { modelosMinuta: m => normalizarModeloMinuta(m), tabelas: t => normalizarTabela(t), modelos: m => normalizarModelo(m), analises: a => normalizarAnalise(a), protocolos: p => normalizarProtocolo(p), pessoas: p => normalizarPessoa(p), imoveis: i => normalizarImovel(i) };
+/* ---------- Empresa: dados cadastrais (um registro só) e despesas da empresa (um registro por despesa) ---------- */
+const EMPRESA_ID = 'empresa';
+const REGIMES_TRIB = ['Simples Nacional', 'Lucro Presumido', 'Lucro Real', 'MEI'];
+const CATEGORIAS_DESPESA = ['Equipamentos e informática', 'Manutenção', 'Software e assinaturas', 'Aluguel e condomínio', 'Água, luz, internet e telefone', 'Material de escritório', 'Impostos e taxas', 'Contabilidade e serviços de terceiros', 'Deslocamento e viagens', 'Outros'];
+const FORMAS_DESPESA = ['Pix', 'Boleto', 'Cartão de crédito', 'Cartão de débito', 'Transferência', 'Dinheiro'];
+function normalizarEmpresa(e) {
+  e = e || {};
+  return {
+    id: EMPRESA_ID, razaoSocial: txt(e.razaoSocial), nomeFantasia: txt(e.nomeFantasia), cnpj: txt(e.cnpj),
+    inscricaoEstadual: txt(e.inscricaoEstadual), inscricaoMunicipal: txt(e.inscricaoMunicipal), dataAbertura: txt(e.dataAbertura),
+    regime: txt(e.regime), atividade: txt(e.atividade), telefone: txt(e.telefone), email: txt(e.email), endereco: normEndereco(e.endereco),
+    socios: Array.isArray(e.socios) ? e.socios.filter(Boolean).map(x => ({ id: txt(x.id) || uid('so'), nome: txt(x.nome), cpf: txt(x.cpf), participacao: txt(x.participacao) })) : [],
+    observacoes: txt(e.observacoes), criadoEm: e.criadoEm || agora(), atualizadoEm: e.atualizadoEm || agora()
+  };
+}
+function normalizarDespesa(x) {
+  x = x || {};
+  return {
+    id: txt(x.id) || uid('dx'), data: txt(x.data), descricao: txt(x.descricao), categoria: txt(x.categoria), fornecedor: txt(x.fornecedor),
+    forma: txt(x.forma), valor: Math.round((Number(x.valor) || 0) * 100) / 100, observacao: txt(x.observacao), arquivos: normalizarArquivos(x.arquivos),
+    criadoEm: x.criadoEm || agora(), atualizadoEm: x.atualizadoEm || agora()
+  };
+}
+const NORMALIZAR = { empresa: e => normalizarEmpresa(e), despesas: x => normalizarDespesa(x), modelosMinuta: m => normalizarModeloMinuta(m), tabelas: t => normalizarTabela(t), modelos: m => normalizarModelo(m), analises: a => normalizarAnalise(a), protocolos: p => normalizarProtocolo(p), pessoas: p => normalizarPessoa(p), imoveis: i => normalizarImovel(i) };
 
 /* ---------- servidor próprio (servidor.js): login por usuário e dados no banco do servidor ----------
    A página pergunta /api/eu: se o servidor responder, entra no modo servidor (pede o login quando
@@ -1729,6 +1769,7 @@ const Servidor = {
         const j = JSON.parse(ev.data);
         this.novo = !!j.novo;
         this.conectado = true;
+        if (j.usuario) { this.usuario = j.usuario; mostrarUsuario(); }
         // na reconexão, o que sumiu enquanto a conexão estava fora sai também daqui
         for (const col of Object.keys(ouv)) {
           const docs = j.dados[col] || {}, antes = conhecidos[col] || new Set(), agora = new Set(Object.keys(docs));
@@ -1798,8 +1839,12 @@ function telaAcesso(aviso, login) {
     (login ? senha : usuario).focus();
   })());
 }
+// menu Empresa: no servidor, só os sócios administradores; sem servidor (este navegador ou artifact), quem usa o sistema
+const podeEmpresa = () => !Servidor.ativo || !!(Servidor.usuario && Servidor.usuario.perfil === 'admin');
 function mostrarUsuario() {
   const u = Servidor.usuario, s = document.getElementById('status-usuario');
+  document.getElementById('mb-empresa').hidden = !podeEmpresa();
+  if (!podeEmpresa()) for (const j of janelas.filter(x => x.ui.aba === 'empresa')) fecharJanela(j);
   s.hidden = !u;
   s.textContent = u ? 'Usuário: ' + u.nome : '';
   s.title = u ? u.usuario : '';
@@ -1810,7 +1855,7 @@ function mostrarUsuario() {
 /* ---------- armazenamento: servidor, db do artifact ou este navegador ---------- */
 const Store = {
   modo: 'carregando', emArtifact: false, db: null,
-  dados: { modelos: {}, analises: {}, protocolos: {}, pessoas: {}, imoveis: {}, tabelas: {}, modelosMinuta: {} },
+  dados: { modelos: {}, analises: {}, protocolos: {}, pessoas: {}, imoveis: {}, tabelas: {}, modelosMinuta: {}, empresa: {}, despesas: {} },
   revs: {}, timers: {}, cadeias: {}, pendentes: new Set(),
   aoRemoto: null, aoStatus: null,
   async iniciar() {
@@ -1839,6 +1884,8 @@ const Store = {
       for (const i of Object.values(d.imoveis || {})) { const x = normalizarImovel(i); this.dados.imoveis[x.id] = x; }
       for (const t of Object.values(d.tabelas || {})) { const x = normalizarTabela(t); this.dados.tabelas[x.id] = x; }
       for (const m of Object.values(d.modelosMinuta || {})) { const x = normalizarModeloMinuta(m); this.dados.modelosMinuta[x.id] = x; }
+      for (const e of Object.values(d.empresa || {})) { const x = normalizarEmpresa(e); this.dados.empresa[x.id] = x; }
+      for (const e of Object.values(d.despesas || {})) { const x = normalizarDespesa(e); this.dados.despesas[x.id] = x; }
     } else {
       semear(this.dados);
       this.salvarLocal();
@@ -1851,10 +1898,11 @@ const Store = {
   },
   iniciarDb() {
     return new Promise(resolve => {
-      let faltam = 7;
+      const cols = Object.keys(this.dados);
+      let faltam = cols.length;
       const pronto = () => { if (--faltam <= 0) resolve(); };
       setTimeout(resolve, 9000);
-      for (const col of ['modelos', 'analises', 'protocolos', 'pessoas', 'imoveis', 'tabelas', 'modelosMinuta']) {
+      for (const col of cols) {
         let primeira = true;
         this.db.collection(col).onSnapshot(snap => {
           this.aplicarSnap(col, snap, !primeira);
@@ -2071,6 +2119,9 @@ function marcarMenu() {
   marcar('mb-modelos', u.aba === 'modelos');
   marcar('mb-cadastros-btn', u.aba === 'modelos' || u.aba === 'tabelas' || u.aba === 'modelosMinuta');
   marcar('mb-modelos-minuta', u.aba === 'modelosMinuta');
+  marcar('mb-empresa-btn', u.aba === 'empresa');
+  marcar('mb-empresa-dados', u.aba === 'empresa' && u.abaEmp !== 'despesas');
+  marcar('mb-empresa-despesas', u.aba === 'empresa' && u.abaEmp === 'despesas');
   marcar('mb-cad-indicadores-btn', u.aba === 'tabelas');
   for (const id of Object.keys(TABELAS)) marcar('mb-tab-' + id, u.aba === 'tabelas' && u.tabela === id);
   marcar('mb-recepcao-btn', u.aba === 'protocolos' && u.criando);
@@ -2093,7 +2144,8 @@ const COLUNAS = {
   parcelas: ['Parcela', 'Vencimento', 'Valor', 'Recebido em', 'Valor recebido', 'Documento', 'Situação'],
   despesas: ['Data', 'Descrição', 'Valor'],
   minutas: ['Nº', 'Título', 'Data'],
-  partesMinuta: ['Nome', 'CPF/CNPJ', 'Qualidade', 'Modalidade', 'Imóvel']
+  partesMinuta: ['Nome', 'CPF/CNPJ', 'Qualidade', 'Modalidade', 'Imóvel'],
+  despEmp: ['Data', 'Descrição', 'Categoria', 'Fornecedor', 'Pagamento', 'Valor', 'Anexos']
 };
 const cel = (rot, v, cls) => h('span', { class: 'cel' + (cls ? ' ' + cls : ''), 'data-rot': rot || null, title: v ? String(v) : null }, v ? String(v) : null);
 const cabGrade = aba => h('li', { class: 'grade-cab g-' + aba, 'aria-hidden': 'true' }, COLUNAS[aba].map(c => h('span', { class: 'cel' }, c)));
@@ -2145,7 +2197,7 @@ function renderLateral() {
 function renderItens() {
   const aba = ui.aba, termo = norm(ui.filtro[aba]);
   const lista = $('#itens');
-  if (Store.modo === 'carregando' || aba === 'modelosMinuta') { lista.replaceChildren(); atualizarTitulo(); return; }
+  if (Store.modo === 'carregando' || aba === 'modelosMinuta' || aba === 'empresa') { lista.replaceChildren(); atualizarTitulo(); return; }
   const marca = ui.marca || (ui.marca = {});
   const abrirItem = (col, id) => () => { marca[col] = id; ui.sel[col] = id; ui.criando = false; ui.edReg = null; if (col === 'pessoas') ui.abaPe = 'cadastro'; mostrarDetalhe(true); renderItens(); renderDetalhe(); rolarTopo(); };
   // janela aberta pelo Adicionar (do protocolo ou da Propriedade de uma pessoa): dois cliques (ou Enter) adicionam
@@ -2240,6 +2292,7 @@ function renderDetalhe() {
   const aba = ui.aba;
   if (aba === 'tabelas') renderTabela(TABELAS[ui.tabela] ? ui.tabela : 'estadoCivil');
   else if (aba === 'modelosMinuta') renderModelosMinuta();
+  else if (aba === 'empresa') renderEmpresa();
   else if (aba === 'pessoas' || aba === 'imoveis') {
     const r = registroSel(aba);
     if (!r) return semRegistro();
@@ -4566,6 +4619,174 @@ function renderTabela(id) {
     h('section', { class: 'bloco', style: 'max-width:760px' }, lista, form, h('div', null, restaurar)));
 }
 
+/* ---------- Empresa (menu Empresa): dados da empresa e despesas; só sócios administradores ---------- */
+function abrirEmpresa(abaEmp) {
+  if (!podeEmpresa()) { toast('Só os sócios administradores acessam a Empresa.'); return; }
+  // uma janela só: se já estiver aberta, vem para a frente na aba escolhida
+  const j = janelas.find(x => x.ui.aba === 'empresa');
+  if (!j) { abrirJanela({ aba: 'empresa', abaEmp }); return; }
+  j.ui.abaEmp = abaEmp;
+  ativar(j); focarJanela(j); redesenhar(j);
+}
+function renderEmpresa() {
+  const d = $('#detalhe');
+  if (!podeEmpresa()) { d.replaceChildren(h('p', { class: 'dica' }, 'Só os sócios administradores acessam a Empresa.')); return; }
+  const ABAS_EMP = [['dados', 'Dados da Empresa'], ['despesas', 'Despesas']];
+  if (!ABAS_EMP.some(([k]) => k === ui.abaEmp)) ui.abaEmp = 'dados';
+  const barra = h('div', { class: 'pr-abas pe-abas', role: 'tablist', 'aria-label': 'Empresa' },
+    ABAS_EMP.map(([k, rot]) => h('button', {
+      type: 'button', class: 'pr-aba', role: 'tab', id: 'emp-aba-' + k, 'aria-controls': 'emp-painel', 'aria-selected': String(ui.abaEmp === k),
+      onclick: () => { ui.abaEmp = k; renderDetalhe(); }
+    }, rot)));
+  const painel = h('div', { id: 'emp-painel', role: 'tabpanel', 'aria-labelledby': 'emp-aba-' + ui.abaEmp });
+  if (ui.abaEmp === 'despesas') { painel.append(blocoDespesasEmpresa()); d.replaceChildren(barra, painel); return; }
+
+  // Dados da Empresa: travados até o Editar; o Editar trabalha numa cópia gravada só no Salvar
+  const salva = D().empresa[EMPRESA_ID];
+  if (!salva && !ui.edEmp) ui.edEmp = normalizarEmpresa({});
+  const editando = !!ui.edEmp, fe = ui.edEmp || salva;
+  const c = (k, rot, span, tipo = 'text', opts = {}) => campoReg(fe, 'emp', k, rot, tipo, Object.assign({ span }, opts));
+  const ce = (k, rot, span, tipo = 'text', opts = {}) => campoReg(fe.endereco, 'emp-end', k, rot, tipo, Object.assign({ span }, opts));
+  const bCep = Store.emArtifact ? null : btn('Buscar endereço pelo CEP', { icone: 'lupa', soIcone: true,
+    onclick: () => buscarCep(fe.endereco, 'emp-end', $('#emp-end-cep').value, () => renderDetalhe()) });
+  const socios = h('div', { class: 'emp-socios' },
+    fe.socios.map((so, k) => h('div', { class: 'emp-socio' },
+      campoReg(so, 'emp-socio-' + so.id, 'nome', 'Sócio ' + (k + 1), 'text'),
+      campoReg(so, 'emp-socio-' + so.id, 'cpf', 'CPF', 'text', { mascara: 'cpf', validar: validarCpf }),
+      campoReg(so, 'emp-socio-' + so.id, 'participacao', 'Participação (%)', 'text', { inputmode: 'decimal' }),
+      btn('Remover sócio', { icone: 'x', soIcone: true, onclick: () => { fe.socios = fe.socios.filter(x => x !== so); renderDetalhe(); } }))),
+    fe.socios.length ? null : h('p', { class: 'dica' }, 'Nenhum sócio informado.'),
+    editando ? h('div', null, btn('Adicionar sócio', { icone: 'mais', sm: true, onclick: () => {
+      fe.socios.push({ id: uid('so'), nome: '', cpf: '', participacao: '' }); renderDetalhe();
+      const id = '#emp-socio-' + fe.socios[fe.socios.length - 1].id + '-nome', j = J;
+      requestAnimationFrame(() => { usar(j); const f = $(id); if (f) f.focus(); });
+    } })) : null);
+  const blocos = h('div', { class: 'reg-pilha compacta' },
+    h('fieldset', { class: 'ident grade12' }, h('legend', null, 'Identificação'),
+      c('razaoSocial', 'Razão social', 6), c('nomeFantasia', 'Nome fantasia', 6),
+      c('cnpj', 'CNPJ', 3, 'text', { mascara: 'cnpj', validar: validarCnpj }), c('inscricaoEstadual', 'Inscrição estadual', 3), c('inscricaoMunicipal', 'Inscrição municipal', 3), c('dataAbertura', 'Data de abertura', 3, 'date'),
+      c('regime', 'Regime tributário', 4, 'select', { opcoes: REGIMES_TRIB }), c('atividade', 'Atividade principal (CNAE)', 8)),
+    h('fieldset', { class: 'ident grade12' }, h('legend', null, 'Contato e endereço'),
+      c('telefone', 'Telefone', 4, 'text', { mascara: 'cel' }), c('email', 'E-mail', 8, 'text', { inputmode: 'email' }),
+      ce('cep', 'CEP', 2, 'text', { mascara: 'cep', junto: bCep }), ce('tipo', 'Tipo', 2, 'select', { opcoes: TIPOS_LOGRADOURO }), ce('logradouro', 'Logradouro', 6), ce('numero', 'Número', 2),
+      ce('complemento', 'Complemento', 4), ce('bairro', 'Bairro', 4), ce('municipio', 'Município/UF', 4)),
+    h('fieldset', { class: 'ident grade12' }, h('legend', null, 'Sócios'), socios),
+    h('fieldset', { class: 'ident grade12' }, h('legend', null, 'Observação'), c('observacoes', 'Observação', 12, 'textarea', { semRotulo: true })));
+  painel.append(blocos);
+  if (!editando) travar(painel);
+  const salvar = () => {
+    const e = ui.edEmp;
+    if (String(e.cnpj).replace(/\D/g, '').length && !cnpjValido(e.cnpj)) { toast('Confira o CNPJ: o número não é válido.'); $('#emp-cnpj').focus(); return; }
+    if (e.email.trim() && !emailValido(e.email)) { toast('Confira o e-mail.'); $('#emp-email').focus(); return; }
+    e.socios = e.socios.filter(x => x.nome.trim() || x.cpf.trim());
+    Store.put('empresa', e, 0);
+    ui.edEmp = null;
+    renderDetalhe();
+    toast('Dados da empresa salvos.');
+  };
+  d.replaceChildren(barra, painel,
+    h('div', { class: 'reg-rodape' },
+      btn('Editar', { icone: 'nota', disabled: editando, onclick: () => {
+        ui.edEmp = normalizarEmpresa(clone(salva)); renderDetalhe();
+        const j = J; requestAnimationFrame(() => { usar(j); const f = $('#emp-razaoSocial'); if (f) f.focus(); });
+      } }),
+      btn('Salvar', { icone: 'check', prim: true, disabled: !editando, onclick: salvar })));
+}
+// despesas da empresa: filtro por ano, mês e categoria; total do período e por categoria; comprovantes anexados
+function blocoDespesasEmpresa() {
+  const todas = Object.values(D().despesas).sort((a, b) => String(b.data).localeCompare(String(a.data)) || String(b.criadoEm).localeCompare(String(a.criadoEm)));
+  const f = ui.despFiltro || (ui.despFiltro = { ano: hoje().slice(0, 4), mes: '', cat: '' });
+  const anos = [...new Set([hoje().slice(0, 4), ...todas.map(x => x.data.slice(0, 4)).filter(Boolean)])].sort().reverse();
+  const cats = [...new Set([...CATEGORIAS_DESPESA, ...todas.map(x => x.categoria).filter(Boolean)])];
+  const vis = todas.filter(x => (!f.ano || x.data.startsWith(f.ano)) && (!f.mes || x.data.slice(5, 7) === f.mes) && (!f.cat || x.categoria === f.cat));
+  if (!vis.some(x => x.id === ui.despSel)) ui.despSel = null;
+  const sel = () => D().despesas[ui.despSel];
+  const filtro = (id, rot, k, opcoes) => {
+    const s = h('select', { class: 'inp', id }, opcoes.map(([v, r]) => h('option', { value: v, selected: v === f[k] }, r)));
+    s.addEventListener('change', () => { f[k] = s.value; renderDetalhe(); });
+    return h('label', { class: 'campo', for: id }, h('span', { class: 'rot' }, rot), s);
+  };
+  const filtros = h('div', { class: 'emp-filtros' },
+    filtro('desp-ano', 'Ano', 'ano', [['', 'Todos'], ...anos.map(a => [a, a])]),
+    filtro('desp-mes', 'Mês', 'mes', [['', 'Todos'], ...MESES.map((m, i) => [String(i + 1).padStart(2, '0'), m[0].toUpperCase() + m.slice(1)])]),
+    filtro('desp-cat', 'Categoria', 'cat', [['', 'Todas'], ...cats.map(c => [c, c])]));
+
+  // total do período e quanto foi em cada categoria (as maiores primeiro)
+  const total = vis.reduce((a, x) => a + centavos(x.valor), 0);
+  const porCat = {};
+  for (const x of vis) porCat[x.categoria || 'Sem categoria'] = (porCat[x.categoria || 'Sem categoria'] || 0) + centavos(x.valor);
+  const item = (rot, v) => h('span', { class: 'fin-item' }, rot + ' ', h('b', null, fmtBRL(reais(v))));
+  const resumo = h('div', { class: 'fin-resumo' },
+    h('div', { class: 'fin-linha', id: 'desp-total' }, item('Total', total), h('span', { class: 'fin-item' }, plural(vis.length, 'despesa', 'despesas'))),
+    Object.keys(porCat).length > 1 || f.cat === '' && Object.keys(porCat).length ? h('div', { class: 'fin-linha', id: 'desp-categorias' },
+      Object.entries(porCat).sort((a, b) => b[1] - a[1]).map(([k, v]) => item(k, v))) : null);
+
+  const grade = h('ul', { class: 'itens grade', id: 'desp-lista' }, cabGrade('despEmp'),
+    vis.length ? vis.map(x => h('li', null, h('button', {
+      type: 'button', class: 'item linha g-despEmp', 'data-id': x.id, 'aria-current': String(x.id === ui.despSel),
+      onclick: () => { ui.despSel = x.id; for (const b of grade.querySelectorAll('.item')) b.setAttribute('aria-current', String(b.dataset.id === x.id)); atualizarBts(); },
+      ondblclick: () => editar(x), onkeydown: ev => { if (ev.key === 'Enter') { ev.preventDefault(); editar(x); } }
+    }, cel('Data', fmtData(x.data)), cel('Descrição', x.descricao), cel('Categoria', x.categoria), cel('Fornecedor', x.fornecedor), cel('Pagamento', x.forma),
+      cel('Valor', fmtBRL(x.valor), 'num'), cel('Anexos', x.arquivos.length ? String(x.arquivos.length) : '')))) : [h('li', { class: 'lat-vazio' }, todas.length ? 'Nenhuma despesa neste filtro.' : 'Nenhuma despesa lançada.')]);
+
+  // lançamento e edição num formulário à frente da janela
+  const editar = x => {
+    const inp = (id, attrs = {}) => h('input', Object.assign({ class: 'inp', id, autocomplete: 'off' }, attrs));
+    const cData = inp('desp-data', { type: 'date', value: x ? x.data : hoje() });
+    const cDesc = inp('desp-desc', { value: x ? x.descricao : '', maxlength: '200' });
+    const cCat = inp('desp-categoria', { value: x ? x.categoria : '', list: 'desp-cats' });
+    const cForn = inp('desp-fornecedor', { value: x ? x.fornecedor : '' });
+    const cForma = h('select', { class: 'inp', id: 'desp-forma' }, h('option', { value: '' }), FORMAS_DESPESA.map(v => h('option', { value: v, selected: x && x.forma === v }, v)));
+    const cValor = inp('desp-valor', { inputmode: 'decimal', value: x ? BRL.format(x.valor).replace(/^R\$\s?/, '') : '' });
+    const cObs = h('textarea', { class: 'inp', id: 'desp-obs', rows: '2', value: x ? x.observacao : '' });
+    const campo = (id, rot, el) => h('label', { class: 'campo', for: id }, h('span', { class: 'rot' }, rot), el);
+    const form = h('form', { class: 'fin-dlg' },
+      h('datalist', { id: 'desp-cats' }, cats.map(c => h('option', { value: c }))),
+      campo('desp-data', 'Data', cData), campo('desp-desc', 'Descrição', cDesc), campo('desp-categoria', 'Categoria', cCat),
+      campo('desp-fornecedor', 'Fornecedor', cForn), campo('desp-forma', 'Pagamento', cForma), campo('desp-valor', 'Valor (R$)', cValor), campo('desp-obs', 'Observação', cObs),
+      h('div', { class: 'fin-dlg-bts' }, h('button', { type: 'submit', class: 'btn' }, ico('salvar'), 'Salvar'), btn('Cancelar', { onclick: () => fecharDialogo() })));
+    form.addEventListener('submit', ev => {
+      ev.preventDefault();
+      if (!cDesc.value.trim()) { toast('Informe a descrição da despesa.'); cDesc.focus(); return; }
+      const v = lerValor(cValor.value);
+      if (isNaN(v) || !(v > 0)) { toast('Informe um valor maior que zero. Use, por exemplo, 1.234,56'); cValor.focus(); return; }
+      const alvo = x ? D().despesas[x.id] || x : normalizarDespesa({});
+      Object.assign(alvo, { data: cData.value || hoje(), descricao: cDesc.value.trim(), categoria: cCat.value.trim(), fornecedor: cForn.value.trim(), forma: cForma.value, valor: v, observacao: cObs.value.trim() });
+      Store.put('despesas', alvo, 0);
+      ui.despSel = alvo.id;
+      fecharDialogo();
+      toast(x ? 'Despesa alterada.' : 'Despesa lançada.');
+    });
+    abrirDialogo({ titulo: x ? 'Editar despesa' : 'Nova despesa', conteudo: form, largura: '460px', aoFechar: renderDetalhe });
+    (x ? cDesc : cData).focus();
+  };
+  const comprovantes = x => {
+    const b = blocoArquivos(x, { rotulo: 'Comprovantes da despesa', registrar: () => {}, salvar: () => Store.put('despesas', x, 0) });
+    abrirDialogo({ titulo: 'Comprovantes · ' + (x.descricao || 'Despesa'), conteudo: b.el, aoFechar: () => { b.limpar(); renderDetalhe(); }, atualizar: b.desenhar, cls: 'arq' });
+  };
+  const csv = () => {
+    const q = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+    const linhas = [['Data', 'Descrição', 'Categoria', 'Fornecedor', 'Pagamento', 'Valor', 'Observação'].map(q).join(';'),
+      ...vis.map(x => [fmtData(x.data), x.descricao, x.categoria, x.fornecedor, x.forma, String(x.valor.toFixed(2)).replace('.', ','), x.observacao].map(q).join(';'))];
+    const periodo = [f.ano, f.mes].filter(Boolean).join('-') || 'todas';
+    baixar(`despesas-empresa-${periodo}.csv`, new Blob(['\ufeff' + linhas.join('\r\n')], { type: 'text/csv' }));
+  };
+  const daSel = (rot, icone, acao) => { const b = btn(rot, { icone, onclick: ev => { const x = sel(); if (x) acao(x, ev.currentTarget); } }); b.dataset.quando = 'sel'; return b; };
+  const bts = h('div', { class: 'fin-bts' },
+    btn('Nova despesa', { icone: 'mais', id: 'desp-nova', onclick: () => editar(null) }),
+    daSel('Editar', 'nota', editar),
+    daSel('Comprovantes', 'anexo', comprovantes),
+    daSel('Excluir', 'lixo', (x, b) => armar(b, () => {
+      for (const a of x.arquivos) Arquivos.apagar(a).catch(() => {});
+      Store.remover('despesas', x.id); ui.despSel = null; renderDetalhe(); toast('Despesa excluída.');
+    })),
+    h('span', { class: 'fin-sep' }),
+    btn('Exportar planilha (CSV)', { icone: 'salvar', disabled: !vis.length, onclick: csv }));
+  function atualizarBts() { for (const b of bts.querySelectorAll('[data-quando]')) if (!b.dataset.armado) b.disabled = !sel(); }
+  atualizarBts();
+  return h('section', { class: 'fin emp-desp' }, filtros, resumo, h('div', null, grade, bts));
+}
+
 /* ---------- Indicador Pessoal e Indicador Real: telas ---------- */
 function imoveisDaPessoa(id) {
   const r = [];
@@ -5395,16 +5616,20 @@ function imprimir(a) {
   setTimeout(() => w.print(), 300);
 }
 function exportarBackup() {
-  const dados = { formato: 'checklist-backup', versao: 1, exportadoEm: agora(), tabelas: Object.values(D().tabelas), modelosMinuta: Object.values(D().modelosMinuta), protocolos: Object.values(D().protocolos), pessoas: Object.values(D().pessoas), imoveis: Object.values(D().imoveis), modelos: Object.values(D().modelos), analises: Object.values(D().analises) };
+  const dados = { formato: 'checklist-backup', versao: 1, exportadoEm: agora(), tabelas: Object.values(D().tabelas), modelosMinuta: Object.values(D().modelosMinuta), empresa: Object.values(D().empresa), despesas: Object.values(D().despesas), protocolos: Object.values(D().protocolos), pessoas: Object.values(D().pessoas), imoveis: Object.values(D().imoveis), modelos: Object.values(D().modelos), analises: Object.values(D().analises) };
   baixar(`checklist-reurb-backup-${hoje()}.json`, JSON.stringify(dados, null, 2));
 }
 async function importarArquivo(arq) {
   let obj;
   try { obj = JSON.parse(await arq.text()); } catch (e) { toast('O arquivo não é um JSON válido.'); return; }
-  let nm = 0, na = 0, np = 0, npe = 0, nim = 0, ultimo = null;
+  let nm = 0, na = 0, np = 0, npe = 0, nim = 0, nde = 0, ultimo = null;
   if (obj && obj.formato === 'checklist-backup') {
     for (const x of obj.tabelas || []) Store.put('tabelas', normalizarTabela(x), 200);
     for (const x of obj.modelosMinuta || []) Store.put('modelosMinuta', normalizarModeloMinuta(x), 200);
+    if (podeEmpresa()) {
+      for (const x of obj.empresa || []) Store.put('empresa', normalizarEmpresa(x), 200);
+      for (const x of obj.despesas || []) { Store.put('despesas', normalizarDespesa(x), 200 + nde * 50); nde++; }
+    }
     for (const x of obj.pessoas || []) { Store.put('pessoas', normalizarPessoa(x), 200 + npe * 50); npe++; }
     for (const x of obj.imoveis || []) { Store.put('imoveis', normalizarImovel(x), 200 + nim * 50); nim++; }
     for (const p of obj.protocolos || []) { const x = normalizarProtocolo(p); Store.put('protocolos', x, 200 + np * 50); np++; }
@@ -5416,7 +5641,7 @@ async function importarArquivo(arq) {
   else { toast('Arquivo não reconhecido: use um modelo ou backup exportado por este checklist.'); return; }
   atualizarJanelas();
   if (ultimo) irPara('modelos', ultimo.id);
-  toast('Importado: ' + [np && plural(np, 'protocolo', 'protocolos'), npe && plural(npe, 'pessoa', 'pessoas'), nim && plural(nim, 'imóvel', 'imóveis'), plural(nm, 'modelo', 'modelos'), na && plural(na, 'análise', 'análises')].filter(Boolean).join(', ') + '.');
+  toast('Importado: ' + [np && plural(np, 'protocolo', 'protocolos'), npe && plural(npe, 'pessoa', 'pessoas'), nim && plural(nim, 'imóvel', 'imóveis'), plural(nm, 'modelo', 'modelos'), na && plural(na, 'análise', 'análises'), nde && plural(nde, 'despesa da empresa', 'despesas da empresa')].filter(Boolean).join(', ') + '.');
 }
 
 /* ---------- Sistema: usuários, senha e saída (só com o servidor) ---------- */
@@ -5451,7 +5676,7 @@ const dlgSenha = foraDasJanelas(() => {
   const d = dialogoSistema('Alterar senha', form, '380px');
   atual.focus();
 });
-const PERFIS = { usuario: 'Usuário', admin: 'Administrador' };
+const PERFIS = { usuario: 'Usuário', admin: 'Sócio administrador' };
 const fmtDataHora = iso => { const t = new Date(iso); return isNaN(t) ? '' : t.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }); };
 const dlgUsuarios = foraDasJanelas(() => {
   let lista = [], sel = null;
@@ -5542,7 +5767,7 @@ const janelas = [];
 let seqJanela = 0, zTopo = 1;
 function usar(j) { J = j; ui = j ? j.ui : null; }
 const compacta = () => area.clientWidth < 720;
-const TAMANHOS = { protocolos: [1120, 720], pessoas: [1120, 760], imoveis: [1060, 720], analises: [1200, 780], modelos: [1100, 760], tabelas: [720, 560], modelosMinuta: [1240, 800] };
+const TAMANHOS = { protocolos: [1120, 720], pessoas: [1120, 760], imoveis: [1060, 720], analises: [1200, 780], modelos: [1100, 760], tabelas: [720, 560], modelosMinuta: [1240, 800], empresa: [1100, 740] };
 const MIN_L = 340, MIN_A = 220;
 // op: { aba, sel, criando, tabela, modeloNovo, protocoloNovo }
 function abrirJanela(op) {
@@ -5595,9 +5820,10 @@ function abrirJanela(op) {
   area.append(el);
   if (op.sel) ui.sel[op.aba] = op.sel;
   if (op.tabela) ui.tabela = op.tabela;
+  if (op.abaEmp) ui.abaEmp = op.abaEmp;
   if (op.selecionar) ui.selecionar = op.selecionar;
   if (op.criando) { ui.criando = true; ui.modeloNovo = op.modeloNovo || null; ui.protocoloNovo = op.protocoloNovo || null; }
-  j.direto = !!(op.sel || op.tabela || op.criando || op.aba === 'modelosMinuta');
+  j.direto = !!(op.sel || op.tabela || op.criando || op.aba === 'modelosMinuta' || op.aba === 'empresa');
   mostrarDetalhe(j.direto);
   renderTudo();
   ativar(j);
@@ -5757,6 +5983,7 @@ function tituloJanela() {
     return m ? 'Item Checklist' : 'Itens Checklist';
   }
   if (aba === 'modelosMinuta') return 'Modelos de Minuta';
+  if (aba === 'empresa') return 'Empresa';
   return det && TABELAS[ui.tabela] ? TABELAS[ui.tabela].nome : 'Tabelas de indicadores';
 }
 function atualizarTitulo() {
@@ -5769,7 +5996,7 @@ function atualizarTitulo() {
 const DEPENDE = {
   protocolos: ['protocolos', 'imoveis', 'pessoas', 'analises'], pessoas: ['pessoas', 'imoveis', 'protocolos', 'tabelas'],
   imoveis: ['imoveis', 'pessoas', 'protocolos'], analises: ['analises', 'protocolos', 'modelos'],
-  modelos: ['modelos', 'analises'], tabelas: ['tabelas', 'pessoas'], modelosMinuta: ['modelosMinuta']
+  modelos: ['modelos', 'analises'], tabelas: ['tabelas', 'pessoas'], modelosMinuta: ['modelosMinuta'], empresa: ['empresa', 'despesas']
 };
 const mudados = new Set();
 let tAtualizar = null;
@@ -5879,6 +6106,7 @@ for (const b of document.querySelectorAll('[data-aba]')) b.addEventListener('cli
   if (acao === 'fisica' || acao === 'juridica') { novoRegistro('pessoas', { tipo: acao }); return; }
   if (TIPOS_IMOVEL[acao]) { novoRegistro('imoveis', { tipo: acao }); return; }
   if (acao && acao.startsWith('tabela:')) { abrirTabela(acao.slice(7)); return; }
+  if (b.dataset.aba === 'empresa') { abrirEmpresa(acao.slice(8)); return; }
   // Modelos de Minuta: uma janela só (dois editores do mesmo modelo se atrapalhariam)
   const jm = b.dataset.aba === 'modelosMinuta' && janelas.find(x => x.ui.aba === 'modelosMinuta');
   if (jm) { ativar(jm); focarJanela(jm); return; }
