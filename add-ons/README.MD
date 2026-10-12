@@ -4,3 +4,4 @@ Killer Projectiles: https://github.com/FabioZumbi12/RedProtect/tree/master/Addon
 BuyRent Regions: https://github.com/FabioZumbi12/RedProtect/tree/master/Addons/BuyRentRegion  
 RegionChat: https://github.com/FabioZumbi12/RedProtect/tree/master/Addons/RegionChat  
 RedBackups Regions: https://github.com/FabioZumbi12/RedProtect/tree/master/Addons/RedBackups
+Tesouro (/tesouro, leva ao mundo dos tesouros): Addons/Tesouro  

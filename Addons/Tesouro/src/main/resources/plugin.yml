@@ -1,0 +1,18 @@
+name: Tesouro
+version: 1.0.0
+main: io.github.zlsplacker.tesouro.Tesouro
+api-version: 1.13
+description: /tesouro leva os jogadores ao mundo dos tesouros
+softdepend: [Multiverse-Core]
+commands:
+  tesouro:
+    description: Vai para o mundo dos tesouros
+    usage: /tesouro
+    aliases: [tesouros]
+permissions:
+  tesouro.usar:
+    description: Usar /tesouro
+    default: true
+  tesouro.admin:
+    description: /tesouro definir, /tesouro recarregar e /tesouro <jogador>
+    default: op
